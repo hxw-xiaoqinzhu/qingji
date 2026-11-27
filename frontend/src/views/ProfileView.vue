@@ -330,62 +330,145 @@
       </div>
     </van-popup>
 
-    <!-- Sheet: Packages CRUD -->
-    <van-popup v-model:show="showPackagesSheet" position="bottom" teleport="body" round :style="{ minHeight: '56dvh', maxHeight: '85dvh' }">
-      <div class="p-5 pb-safe-sheet flex flex-col min-h-[56dvh] max-h-[85dvh]">
+    <!-- Sheet: Complete Packages CRUD (Filter + Edit + Description + Duration + Copy Quote + Quick Book) -->
+    <van-popup v-model:show="showPackagesSheet" position="bottom" teleport="body" round :style="{ minHeight: '62dvh', maxHeight: '88dvh' }">
+      <div class="p-5 pb-safe-sheet flex flex-col min-h-[62dvh] max-h-[88dvh]">
         <div class="sheet-grabber shrink-0" />
-        <div class="flex items-center justify-between mb-4 shrink-0">
-          <h3 class="text-[17px] font-semibold text-ink">报价套餐库</h3>
-          <button type="button" class="icon-btn-white" @click="showPackagesSheet = false">
-            <X class="w-4 h-4" />
+        <div class="flex items-center justify-between mb-3 shrink-0">
+          <div>
+            <h3 class="text-[17px] font-semibold text-ink">报价套餐库 ({{ packages.length }})</h3>
+            <p class="text-[11px] text-ink-muted mt-0.5">排单时可一键从套餐库/增项库选取带入</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button
+              v-if="packages.length > 0"
+              type="button"
+              class="inline-flex items-center gap-1 px-3 h-8 rounded-full bg-[#FAF0F3] text-[#A46B7D] text-[12px] font-medium pressable"
+              @click="copyFullPriceList"
+            >
+              <Copy class="w-3.5 h-3.5" />
+              <span>复制报价单</span>
+            </button>
+            <button type="button" class="icon-btn-white" @click="showPackagesSheet = false">
+              <X class="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
+        <!-- Category Filter Pills -->
+        <div v-if="packages.length > 0" class="flex gap-1.5 mb-3 shrink-0">
+          <button
+            v-for="tab in packageFilterTabs"
+            :key="tab.value"
+            type="button"
+            class="px-3 py-1 rounded-full text-[11.5px] font-medium transition-colors"
+            :class="pkgFilter === tab.value ? 'bg-brand text-white' : 'bg-[#FAF2F5] text-ink-secondary'"
+            @click="pkgFilter = tab.value"
+          >
+            {{ tab.label }}
           </button>
         </div>
-        <div class="flex-1 overflow-y-auto no-scrollbar space-y-4">
+
+        <div class="flex-1 overflow-y-auto no-scrollbar space-y-4 pb-1">
           <div class="relative min-h-[180px]">
             <Transition name="skeleton-dissolve">
               <div v-if="loadingPackages" class="absolute inset-0 z-10 bg-white space-y-2.5 pointer-events-none">
-                <div v-for="i in 3" :key="i" class="skeleton-box h-[68px] w-full rounded-2xl" />
+                <div v-for="i in 3" :key="i" class="skeleton-box h-[84px] w-full rounded-2xl" />
               </div>
             </Transition>
-            <div v-if="packages.length > 0" class="space-y-2.5">
-              <div v-for="pkg in packages" :key="pkg.id" class="bg-canvas rounded-2xl p-3.5 flex items-center justify-between">
-                <div>
-                  <div class="text-[14px] font-semibold text-ink">
-                    {{ pkg.name }}
-                    <span class="text-[11px] px-2 py-0.5 rounded-full bg-white text-brand-deep ml-1 font-medium">
-                      {{ pkg.category === 'MAIN' ? '主套餐' : '增项' }}
-                    </span>
+            <div v-if="filteredPackages.length > 0" class="space-y-2.5">
+              <div v-for="pkg in filteredPackages" :key="pkg.id" class="bg-canvas rounded-2xl p-3.5 space-y-2">
+                <div class="flex items-start justify-between gap-2">
+                  <div class="min-w-0 flex-1">
+                    <div class="flex items-center flex-wrap gap-1.5">
+                      <span class="text-[14.5px] font-semibold text-ink">{{ pkg.name }}</span>
+                      <span
+                        class="text-[10.5px] px-2 py-0.5 rounded-full font-medium"
+                        :class="pkg.category === 'MAIN' ? 'bg-[#FAF0F3] text-[#AD7485]' : 'bg-white text-ink-secondary'"
+                      >
+                        {{ pkg.category === 'MAIN' ? '主套餐' : '增项' }}
+                      </span>
+                      <span
+                        v-if="pkg.defaultDurationMin > 0"
+                        class="text-[10.5px] px-2 py-0.5 rounded-full bg-white text-ink-muted tabular-nums"
+                      >
+                        约 {{ formatDurationLabel(pkg.defaultDurationMin) }}
+                      </span>
+                    </div>
+                    <div class="text-[15px] text-brand-deep font-semibold tabular-nums mt-1">¥{{ pkg.price }}</div>
+                    <p v-if="pkg.description" class="text-[11.5px] text-ink-secondary mt-1 leading-relaxed">
+                      {{ pkg.description }}
+                    </p>
                   </div>
-                  <div class="text-[13px] text-brand-deep font-semibold tabular-nums mt-0.5">¥{{ pkg.price }}</div>
+
+                  <div class="flex items-center gap-1.5 shrink-0">
+                    <button
+                      type="button"
+                      class="w-7 h-7 rounded-full bg-white text-ink-secondary flex items-center justify-center pressable"
+                      aria-label="编辑套餐"
+                      @click="startEditPackage(pkg)"
+                    >
+                      <Pencil class="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      class="w-7 h-7 rounded-full bg-white text-status-danger-text flex items-center justify-center pressable"
+                      aria-label="删除套餐"
+                      @click="deletePackage(pkg.id)"
+                    >
+                      <Trash2 class="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
-                <button type="button" class="icon-btn-white text-status-danger-text" @click="deletePackage(pkg.id)">
-                  <Trash2 class="w-4 h-4" />
-                </button>
+
+                <div v-if="pkg.category === 'MAIN'" class="pt-1 border-t border-[#EFE3E8]/80 flex justify-end">
+                  <button
+                    type="button"
+                    class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-white text-[11.5px] font-medium text-[#A46B7D] pressable"
+                    @click="bookWithPackage(pkg)"
+                  >
+                    <span>用此套餐排单</span>
+                    <ChevronRight class="w-3 h-3" />
+                  </button>
+                </div>
               </div>
             </div>
             <CuteEmptyState
               v-else-if="!loadingPackages"
               variant="packages"
               title="还没有保存的报价套餐"
-              description="在下方添加常用妆造套餐或增项，随时翻阅管理"
+              description="在下方添加常用妆造套餐或增项，排单时可直接点选带入"
               compact
             />
           </div>
 
+          <!-- Add / Edit Package Card -->
           <div class="bg-[#FAF2F5]/80 border border-[#EFE2E6] rounded-2xl p-3.5 space-y-2.5">
-            <div class="text-[12px] font-semibold text-brand-deep">新增套餐 / 增项</div>
+            <div class="flex items-center justify-between">
+              <div class="text-[12.5px] font-semibold text-brand-deep">
+                {{ editingPkgId ? '编辑套餐 / 增项' : '新增套餐 / 增项' }}
+              </div>
+              <button
+                v-if="editingPkgId"
+                type="button"
+                class="text-[11.5px] text-ink-muted"
+                @click="resetPkgForm"
+              >
+                取消编辑
+              </button>
+            </div>
             <div class="grid grid-cols-2 gap-2.5">
-              <input v-model.trim="newPkg.name" type="text" placeholder="套餐名称" class="w-full input-silk !bg-white px-3.5 h-[40px]" />
+              <input v-model.trim="newPkg.name" type="text" placeholder="套餐名称 *" class="w-full input-silk !bg-white px-3.5 h-[40px]" />
               <div class="input-affix-wrap !bg-white !h-[40px]">
                 <span class="input-affix-unit mr-1">¥</span>
                 <input v-model.number="newPkg.price" type="number" inputmode="decimal" placeholder="价格" class="tabular-nums font-medium" />
               </div>
             </div>
-            <div class="flex items-center justify-between">
-              <div class="flex gap-2">
+            <div class="grid grid-cols-2 gap-2.5">
+              <div class="flex gap-1.5 items-center">
                 <button
                   type="button"
-                  class="px-3 h-8 rounded-full text-[12px] font-medium"
+                  class="flex-1 h-[38px] rounded-xl text-[12px] font-medium transition-colors"
                   :class="newPkg.category === 'MAIN' ? 'bg-brand text-white' : 'bg-white text-ink-secondary'"
                   @click="newPkg.category = 'MAIN'"
                 >
@@ -393,17 +476,40 @@
                 </button>
                 <button
                   type="button"
-                  class="px-3 h-8 rounded-full text-[12px] font-medium"
+                  class="flex-1 h-[38px] rounded-xl text-[12px] font-medium transition-colors"
                   :class="newPkg.category === 'EXTRA' ? 'bg-brand text-white' : 'bg-white text-ink-secondary'"
                   @click="newPkg.category = 'EXTRA'"
                 >
                   增项
                 </button>
               </div>
-              <button type="button" class="icon-btn-white" aria-label="添加套餐" @click="addPackage">
-                <IconPlusAction :size="18" />
-              </button>
+              <div class="input-affix-wrap !bg-white !h-[38px]">
+                <input
+                  v-model.number="newPkg.durationHours"
+                  type="number"
+                  step="0.5"
+                  min="0"
+                  inputmode="decimal"
+                  placeholder="预计时长"
+                  class="tabular-nums"
+                />
+                <span class="input-affix-unit ml-1">小时</span>
+              </div>
             </div>
+            <input
+              v-model.trim="newPkg.description"
+              type="text"
+              placeholder="服务包含内容说明（选填，如：含早妆+仪式+敬酒3套造型）"
+              class="w-full input-silk !bg-white px-3.5 h-[40px]"
+            />
+            <button
+              type="button"
+              class="btn-unified w-full btn-rose text-white !h-[40px] !text-[13px]"
+              :disabled="savingPkg"
+              @click="savePackage"
+            >
+              {{ savingPkg ? '保存中...' : editingPkgId ? '保存套餐修改' : '添加到报价套餐库' }}
+            </button>
           </div>
         </div>
       </div>
@@ -838,7 +944,6 @@ import {
   IconCosmeticCase,
   IconLipstick,
   IconLoveNote,
-  IconPlusAction,
   IconPosterCard,
   IconSettingsGear,
   IconSilkLink,
@@ -937,8 +1042,79 @@ async function saveProfileCard() {
 // Packages
 const showPackagesSheet = ref(false);
 const loadingPackages = ref(false);
+const savingPkg = ref(false);
 const packages = ref<PackageTemplate[]>([]);
-const newPkg = reactive({ name: '', price: 0, category: 'MAIN' as 'MAIN' | 'EXTRA' });
+const pkgFilter = ref<'ALL' | 'MAIN' | 'EXTRA'>('ALL');
+const editingPkgId = ref<string | null>(null);
+const newPkg = reactive({
+  name: '',
+  price: 0,
+  category: 'MAIN' as 'MAIN' | 'EXTRA',
+  durationHours: 6,
+  description: '',
+});
+
+const packageFilterTabs = [
+  { value: 'ALL' as const, label: '全部报价' },
+  { value: 'MAIN' as const, label: '主套餐' },
+  { value: 'EXTRA' as const, label: '增项服务' },
+];
+
+const filteredPackages = computed(() => {
+  if (pkgFilter.value === 'ALL') return packages.value;
+  return packages.value.filter((p) => p.category === pkgFilter.value);
+});
+
+function formatDurationLabel(mins: number) {
+  if (!mins || mins <= 0) return '';
+  const h = mins / 60;
+  return Number.isInteger(h) ? `${h} 小时` : `${h.toFixed(1)} 小时`;
+}
+
+function resetPkgForm() {
+  editingPkgId.value = null;
+  newPkg.name = '';
+  newPkg.price = 0;
+  newPkg.category = 'MAIN';
+  newPkg.durationHours = 6;
+  newPkg.description = '';
+}
+
+function startEditPackage(pkg: PackageTemplate) {
+  editingPkgId.value = pkg.id;
+  newPkg.name = pkg.name;
+  newPkg.price = pkg.price;
+  newPkg.category = pkg.category;
+  newPkg.durationHours = pkg.defaultDurationMin ? Number((pkg.defaultDurationMin / 60).toFixed(1)) : 0;
+  newPkg.description = pkg.description || '';
+}
+
+function bookWithPackage(pkg: PackageTemplate) {
+  showPackagesSheet.value = false;
+  router.push({ path: '/orders/new', query: { packageId: pkg.id } });
+}
+
+async function copyFullPriceList() {
+  const studio = auth.user?.studioName || '嘻嘻化妆室';
+  const mains = packages.value.filter((p) => p.category === 'MAIN');
+  const extras = packages.value.filter((p) => p.category === 'EXTRA');
+  const lines: string[] = [`✨ 【${studio} · 妆造报价单】`];
+  if (mains.length) {
+    lines.push('', '🌸 主推妆造套餐');
+    for (const p of mains) {
+      const dur = p.defaultDurationMin ? `（约${formatDurationLabel(p.defaultDurationMin)}）` : '';
+      lines.push(`· ${p.name}${dur}：¥${p.price}`);
+      if (p.description) lines.push(`  ${p.description}`);
+    }
+  }
+  if (extras.length) {
+    lines.push('', '🌷 常用增项服务');
+    for (const p of extras) {
+      lines.push(`· ${p.name}：¥${p.price}${p.description ? `（${p.description}）` : ''}`);
+    }
+  }
+  await copyText(lines.join('\n'), '已复制格式化报价单，可直接粘贴发微信');
+}
 
 // Clients
 const showClientsSheet = ref(false);
@@ -1077,18 +1253,37 @@ async function openPackages() {
   }
 }
 
-async function addPackage() {
+async function savePackage() {
   if (!newPkg.name) return showToast('请填写套餐名称');
-  const { data } = await http.post('/packages', newPkg);
-  packages.value.push(data.package);
-  newPkg.name = '';
-  newPkg.price = 0;
-  showToast('套餐已添加');
+  savingPkg.value = true;
+  try {
+    const payload = {
+      name: newPkg.name,
+      price: Number(newPkg.price) || 0,
+      category: newPkg.category,
+      defaultDurationMin: Math.max(0, Math.round((Number(newPkg.durationHours) || 0) * 60)),
+      description: newPkg.description || '',
+    };
+    if (editingPkgId.value) {
+      const { data } = await http.put(`/packages/${editingPkgId.value}`, payload);
+      const idx = packages.value.findIndex((p) => p.id === editingPkgId.value);
+      if (idx !== -1) packages.value[idx] = data.package;
+      showToast('套餐已更新');
+    } else {
+      const { data } = await http.post('/packages', payload);
+      packages.value.push(data.package);
+      showToast('套餐已添加');
+    }
+    resetPkgForm();
+  } finally {
+    savingPkg.value = false;
+  }
 }
 
 async function deletePackage(id: string) {
   await http.delete(`/packages/${id}`);
   packages.value = packages.value.filter((p) => p.id !== id);
+  if (editingPkgId.value === id) resetPkgForm();
   showToast('已删除');
 }
 

@@ -218,9 +218,19 @@
           </div>
         </div>
 
-        <!-- Manual Makeup Style Input (Package quick-pick removed, keeping manual input + smart WeChat parser) -->
+        <!-- Manual Makeup Style Input + Optional Clean Picker from Package Library -->
         <div>
-          <label class="block text-[12px] text-ink-secondary mb-1.5 font-medium">妆型名称</label>
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="text-[12px] text-ink-secondary font-medium">妆型名称</label>
+            <button
+              v-if="mainPackages.length > 0"
+              type="button"
+              class="text-[11.5px] font-medium text-[#A46B7D] pressable"
+              @click="showPackagePicker = true"
+            >
+              从报价套餐库选 &rsaquo;
+            </button>
+          </div>
           <input
             v-model.trim="form.serviceType"
             type="text"
@@ -445,6 +455,42 @@
         {{ saving ? '正在保存...' : isEdit ? '保存行程修改' : '确认锁定档期' }}
       </button>
     </div>
+
+    <!-- Clean Bottom Picker Sheet for Saved Main Packages -->
+    <van-popup v-model:show="showPackagePicker" position="bottom" teleport="body" round :style="{ maxHeight: '72dvh' }">
+      <div class="p-5 pb-safe-sheet flex flex-col max-h-[72dvh]">
+        <div class="sheet-grabber shrink-0" />
+        <div class="flex items-center justify-between mb-3 shrink-0">
+          <div>
+            <h3 class="text-[17px] font-semibold text-ink">从报价套餐库选择</h3>
+            <p class="text-[11px] text-ink-muted mt-0.5">点选后自动带入妆型名称、基础价与参考时长</p>
+          </div>
+          <button type="button" class="icon-btn-white" @click="showPackagePicker = false">
+            <X class="w-4 h-4" />
+          </button>
+        </div>
+        <div class="flex-1 overflow-y-auto no-scrollbar space-y-2.5">
+          <button
+            v-for="pkg in mainPackages"
+            :key="pkg.id"
+            type="button"
+            class="w-full text-left bg-canvas rounded-2xl p-3.5 flex items-center justify-between gap-3 pressable"
+            @click="applyPackageFromLibrary(pkg)"
+          >
+            <div class="min-w-0 flex-1">
+              <div class="text-[14.5px] font-semibold text-ink truncate">{{ pkg.name }}</div>
+              <p v-if="pkg.description" class="text-[11.5px] text-ink-muted mt-0.5 line-clamp-2">{{ pkg.description }}</p>
+            </div>
+            <div class="text-right shrink-0 tabular-nums">
+              <div class="text-[15px] font-semibold text-brand-deep">¥{{ pkg.price }}</div>
+              <div v-if="pkg.defaultDurationMin > 0" class="text-[10.5px] text-ink-muted mt-0.5">
+                约 {{ Number.isInteger(pkg.defaultDurationMin / 60) ? pkg.defaultDurationMin / 60 : (pkg.defaultDurationMin / 60).toFixed(1) }}h
+              </div>
+            </div>
+          </button>
+        </div>
+      </div>
+    </van-popup>
   </div>
 </template>
 
@@ -468,6 +514,7 @@ const { onPaneScroll, headerStyle } = useScrollHeader(44);
 const isEdit = computed(() => Boolean(route.params.id));
 const loadingOrder = ref(Boolean(route.params.id));
 const showWechatParser = ref(false);
+const showPackagePicker = ref(false);
 const showAdvanced = ref(false);
 const wechatText = ref('');
 const saving = ref(false);
@@ -502,7 +549,20 @@ function formatDisplayDate(d: string) {
   return dayjs(d).format('YYYY.MM.DD');
 }
 
+const mainPackages = computed(() => packages.value.filter((p) => p.category === 'MAIN'));
 const extraPackages = computed(() => packages.value.filter((p) => p.category === 'EXTRA'));
+
+function applyPackageFromLibrary(pkg: PackageTemplate) {
+  form.serviceType = pkg.name;
+  form.basePrice = pkg.price;
+  if (pkg.defaultDurationMin > 0 && form.startTime) {
+    const [h, m] = form.startTime.split(':').map(Number);
+    const totalMin = Math.min(23 * 60 + 59, (h || 0) * 60 + (m || 0) + pkg.defaultDurationMin);
+    form.endTime = `${String(Math.floor(totalMin / 60)).padStart(2, '0')}:${String(totalMin % 60).padStart(2, '0')}`;
+  }
+  showPackagePicker.value = false;
+  showToast(`已带入「${pkg.name}」`);
+}
 
 const extraTotal = computed(() =>
   form.extraItems.reduce((sum, i) => sum + (Number(i.unitPrice) || 0) * (Number(i.quantity) || 1), 0)
@@ -516,6 +576,11 @@ onMounted(async () => {
   try {
     const { data } = await http.get('/packages');
     packages.value = data.packages || [];
+    const presetPkgId = route.query.packageId as string | undefined;
+    if (!isEdit.value && presetPkgId) {
+      const target = packages.value.find((p) => p.id === presetPkgId);
+      if (target) applyPackageFromLibrary(target);
+    }
   } catch {
     // ignore
   }
