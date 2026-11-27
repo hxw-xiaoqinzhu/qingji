@@ -48,7 +48,7 @@
     <div class="scroll-pane no-scrollbar px-4 pt-2 pb-6" @scroll.passive="onPaneScroll">
       <!-- Shadowless Flat Mode Switch Capsule -->
       <div class="flex items-center justify-between mb-3">
-        <span class="text-[12px] text-ink-secondary">营收核算口径</span>
+        <span class="text-[14px] font-semibold text-ink">营收核算口径</span>
         <div class="inline-flex bg-white/85 p-0.5 rounded-full text-[11px] font-medium">
           <button
             type="button"
@@ -81,18 +81,18 @@
               <div class="mt-2.5 h-[34px] flex items-center">
                 <div class="skeleton-box h-8 w-40 rounded-xl" />
               </div>
-              <div class="grid grid-cols-3 gap-2 mt-5 p-3.5 rounded-2xl bg-[#FAF2F5]/85 h-[66px] items-center">
-                <div class="space-y-1.5">
+              <div class="grid grid-cols-3 mt-5 py-3.5 px-2 rounded-2xl bg-[#FAF2F5]/85 h-[68px] items-center divide-x divide-[#EAD8DE]/70">
+                <div class="flex flex-col items-center justify-center space-y-1.5">
                   <div class="skeleton-box h-2.5 w-10 rounded-full" />
-                  <div class="skeleton-box h-4 w-16 rounded-lg" />
+                  <div class="skeleton-box h-4 w-14 rounded-lg" />
                 </div>
-                <div class="space-y-1.5">
+                <div class="flex flex-col items-center justify-center space-y-1.5">
                   <div class="skeleton-box h-2.5 w-12 rounded-full" />
-                  <div class="skeleton-box h-4 w-16 rounded-lg" />
+                  <div class="skeleton-box h-4 w-14 rounded-lg" />
                 </div>
-                <div class="space-y-1.5">
+                <div class="flex flex-col items-center justify-center space-y-1.5">
                   <div class="skeleton-box h-2.5 w-10 rounded-full" />
-                  <div class="skeleton-box h-4 w-16 rounded-lg" />
+                  <div class="skeleton-box h-4 w-14 rounded-lg" />
                 </div>
               </div>
             </div>
@@ -142,29 +142,29 @@
               </span>
             </div>
 
-            <div class="grid grid-cols-3 gap-2 mt-5 p-3.5 rounded-2xl bg-[#FAF2F5]/85 tabular-nums">
-              <div>
+            <div class="grid grid-cols-3 mt-5 py-3.5 px-2 rounded-2xl bg-[#FAF2F5]/85 tabular-nums divide-x divide-[#EAD8DE]/70">
+              <div class="flex flex-col items-center justify-center text-center px-1 min-w-0">
                 <div class="text-[11px] text-ink-muted">已实收</div>
-                <div class="text-[15px] font-semibold text-ink mt-0.5">
+                <div class="text-[15px] font-semibold text-ink mt-1 truncate max-w-full">
                   {{ ui.formatMoney(stats.summary.receivedAmount) }}
                 </div>
               </div>
               <button
                 type="button"
-                class="text-left pressable"
+                class="flex flex-col items-center justify-center text-center px-1 min-w-0 pressable"
                 @click="router.push('/orders?status=PENDING_BALANCE')"
               >
-                <div class="text-[11px] text-ink-muted flex items-center gap-0.5">
+                <div class="text-[11px] text-ink-muted inline-flex items-center justify-center gap-0.5">
                   <span>待收尾款</span>
                   <ChevronRight class="w-3 h-3" />
                 </div>
-                <div class="text-[15px] font-semibold text-brand-deep mt-0.5">
+                <div class="text-[15px] font-semibold text-brand-deep mt-1 truncate max-w-full">
                   {{ ui.formatMoney(stats.summary.pendingBalance) }}
                 </div>
               </button>
-              <div>
+              <div class="flex flex-col items-center justify-center text-center px-1 min-w-0">
                 <div class="text-[11px] text-ink-muted">净收益</div>
-                <div class="text-[15px] font-semibold text-ink mt-0.5">
+                <div class="text-[15px] font-semibold text-ink mt-1 truncate max-w-full">
                   {{ ui.formatMoney(stats.summary.netProfit) }}
                 </div>
               </div>
