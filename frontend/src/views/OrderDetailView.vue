@@ -133,7 +133,7 @@
                   <IconLipstick :size="14" />
                 </span>
                 <div class="text-[15px] font-semibold text-brand-deep tabular-nums">{{ order.startTime }}</div>
-                <div class="text-[11px] text-ink-muted">准时开妆</div>
+                <div class="text-[11px] text-ink-muted">准时到场</div>
               </div>
             </div>
           </div>

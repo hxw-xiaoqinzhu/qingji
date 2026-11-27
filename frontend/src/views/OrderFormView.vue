@@ -171,7 +171,7 @@
         <!-- iOS-Safe Custom Time Overlay Inputs -->
         <div class="grid grid-cols-2 gap-3">
           <div class="min-w-0">
-            <label class="block text-[12px] text-ink-secondary mb-1.5 font-medium">开妆时间</label>
+            <label class="block text-[12px] text-ink-secondary mb-1.5 font-medium">开始时间</label>
             <label class="relative flex items-center justify-between input-silk px-3.5 h-[42px] cursor-pointer">
               <span class="text-[14.5px] font-semibold text-ink tabular-nums">{{ form.startTime }}</span>
               <ChevronDown class="w-3.5 h-3.5 text-ink-muted shrink-0" />

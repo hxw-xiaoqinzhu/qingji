@@ -7,6 +7,19 @@ cd /app/backend
 echo "📦 Syncing SQLite schema to ${DATABASE_URL}..."
 npx prisma db push --skip-generate
 
+echo "🧹 Migrating legacy package descriptions..."
+node -e '
+const { PrismaClient } = require("@prisma/client");
+const prisma = new PrismaClient();
+(async () => {
+  await prisma.packageTemplate.updateMany({
+    where: { description: { contains: "开妆" } },
+    data: { description: "早上 6:00 每提前一小时加 100" },
+  });
+  await prisma.$disconnect();
+})();
+' || true
+
 echo "🌱 Checking initial seed..."
 node -e '
 const { PrismaClient } = require("@prisma/client");

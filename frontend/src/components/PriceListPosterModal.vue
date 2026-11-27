@@ -12,7 +12,7 @@
       <div class="flex items-center justify-between mb-3 shrink-0">
         <div>
           <h3 class="text-[17px] font-semibold text-ink">专属可爱报价海报</h3>
-          <p class="text-[11.5px] text-ink-muted mt-0.5">长按下方海报图片即可保存到手机相册</p>
+          <p class="text-[11.5px] text-ink-muted mt-0.5">高清价目海报已为你生成</p>
         </div>
         <button type="button" class="icon-btn-white" @click="emit('update:show', false)">
           <X class="w-4 h-4" />
@@ -25,12 +25,9 @@
           <img
             :src="posterDataUrl"
             alt="报价单海报"
-            class="w-full max-w-[346px] rounded-[26px] shadow-[0_18px_42px_-14px_rgba(186,118,140,0.34)] select-auto"
-            style="-webkit-touch-callout: default"
+            class="w-full max-w-[346px] rounded-[26px] shadow-[0_18px_42px_-14px_rgba(186,118,140,0.34)] select-none pointer-events-none"
+            style="-webkit-touch-callout: none"
           />
-          <div class="mt-3 inline-flex items-center justify-center h-8 px-4 rounded-full bg-[#FAF0F3] text-[#A46B7D] text-[12px] font-medium">
-            长按上方海报图片即可保存到相册
-          </div>
         </div>
 
         <div v-else class="flex flex-col items-center py-2">

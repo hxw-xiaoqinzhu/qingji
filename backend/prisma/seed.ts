@@ -33,7 +33,7 @@ async function main() {
       { userId: user.id, name: '领证/轻婚纱跟妆', category: 'MAIN', price: 980, defaultDurationMin: 180, description: '清透伪素颜白开水妆面+韩系低盘发' },
       { userId: user.id, name: '商业广告/艺人妆造', category: 'MAIN', price: 2400, defaultDurationMin: 480, description: '棚拍/外景全天跟妆补妆' },
       { userId: user.id, name: '妈妈妆 / 伴娘妆', category: 'EXTRA', price: 280, defaultDurationMin: 60, description: '清透服帖底妆+气质盘发' },
-      { userId: user.id, name: '早起费（6点前）', category: 'EXTRA', price: 200, defaultDurationMin: 0, description: '凌晨6:00前开妆交通补贴' },
+      { userId: user.id, name: '早起费（6点前）', category: 'EXTRA', price: 200, defaultDurationMin: 0, description: '早上 6:00 每提前一小时加 100' },
       { userId: user.id, name: '外地出差补贴/天', category: 'EXTRA', price: 600, defaultDurationMin: 0, description: '跨城交通住宿外另计' },
     ],
   });

@@ -161,20 +161,9 @@ function goCreateOrder() {
   position: relative;
   flex-shrink: 0;
   background: #FFFCFD;
-  padding-bottom: max(10px, env(safe-area-inset-bottom, 0px));
+  padding-bottom: max(6px, calc(env(safe-area-inset-bottom, 0px) - 16px));
   z-index: 30;
   box-shadow: 0 -8px 24px -10px rgba(176, 132, 146, 0.12);
-}
-
-.tabbar-monolith::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 100%;
-  height: 80px;
-  background: #FFFCFD;
-  pointer-events: none;
 }
 
 .center-create-orb {

@@ -51,7 +51,7 @@
               </span>
             </div>
             <div class="flex justify-between">
-              <span class="text-ink-muted">开妆时间</span>
+              <span class="text-ink-muted">服务时间</span>
               <span class="font-medium text-ink tabular-nums">{{ order.startTime }} - {{ order.endTime }}</span>
             </div>
             <div class="flex justify-between">
@@ -97,14 +97,23 @@
         <img :src="generatedUrl" alt="确认函" class="w-44 mx-auto rounded-2xl shadow-card" />
       </div>
 
-      <button
-        type="button"
-        :disabled="rendering"
-        class="btn-unified mt-5 w-full btn-rose text-white disabled:opacity-60"
-        @click="generateImage"
-      >
-        {{ rendering ? '绘制确认函中...' : '保存高清确认函长图' }}
-      </button>
+      <div class="mt-5 grid grid-cols-2 gap-3">
+        <button
+          type="button"
+          class="btn-unified btn-glass"
+          @click="copyConfirmText"
+        >
+          复制文案
+        </button>
+        <button
+          type="button"
+          :disabled="rendering"
+          class="btn-unified btn-rose text-white disabled:opacity-60"
+          @click="generateImage"
+        >
+          {{ rendering ? '绘制中...' : '保存图片' }}
+        </button>
+      </div>
     </div>
   </van-popup>
 </template>
@@ -127,6 +136,30 @@ const emit = defineEmits<{ (e: 'update:show', val: boolean): void }>();
 const cardRef = ref<HTMLElement | null>(null);
 const rendering = ref(false);
 const generatedUrl = ref('');
+
+async function copyConfirmText() {
+  if (!props.order) return;
+  const o = props.order;
+  const lines = [
+    `✨ 【${props.studioName} · 新娘档期锁定确认函】`,
+    '',
+    `亲爱的 ${o.clientName}，您的妆造档期已为您专属锁定：`,
+    `· 服务日期：${o.serviceDate}${o.endDate && o.endDate !== o.serviceDate ? ` 至 ${o.endDate}` : ''}`,
+    `· 服务时间：${o.startTime} - ${o.endTime}`,
+    `· 妆造项目：${o.serviceType}`,
+    `· 服务地点：${o.location || '待进一步确认'}`,
+    `· 订单总额：¥${o.totalAmount}（已付定金 ¥${o.depositPaid}，待付尾款 ¥${o.balanceDue}）`,
+  ];
+  if (props.noticeTemplate?.trim()) {
+    lines.push('', '🌷 妆前护肤与准备贴士：', props.noticeTemplate.trim());
+  }
+  try {
+    await navigator.clipboard.writeText(lines.join('\n'));
+    showToast('已复制确认函文案，可直接粘贴发给新娘');
+  } catch {
+    showToast('复制失败，请手动复制');
+  }
+}
 
 async function generateImage() {
   if (!cardRef.value || !props.order) return;

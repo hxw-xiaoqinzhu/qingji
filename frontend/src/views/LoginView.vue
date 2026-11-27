@@ -295,7 +295,7 @@ async function handleSubmit() {
     0 1px 2px rgba(176, 108, 130, 0.18);
 }
 
-/* Dreamy Floating Translucent Pastel Bubbles Across Full Screen */
+/* Dreamy Floating Translucent Pastel Bubbles (Pure translate3d, zero box-shadow -> silky smooth forever) */
 .sky-bubble {
   position: absolute;
   border-radius: 9999px;
@@ -306,8 +306,8 @@ async function handleSubmit() {
     rgba(255, 240, 246, 0.08) 100%
   );
   border: 1px solid rgba(255, 255, 255, 0.6);
-  box-shadow: inset 0 2px 6px rgba(255, 255, 255, 0.68);
-  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 .sky-bubble.b1 {
@@ -373,19 +373,19 @@ async function handleSubmit() {
 
 @keyframes bubbleDriftA {
   0% {
-    transform: translate3d(0, 0, 0) scale(1);
+    transform: translate3d(0, 0, 0);
   }
   100% {
-    transform: translate3d(10px, -16px, 0) scale(1.06);
+    transform: translate3d(10px, -16px, 0);
   }
 }
 
 @keyframes bubbleDriftB {
   0% {
-    transform: translate3d(0, 0, 0) scale(0.96);
+    transform: translate3d(0, 0, 0);
   }
   100% {
-    transform: translate3d(-10px, -14px, 0) scale(1.04);
+    transform: translate3d(-10px, -14px, 0);
   }
 }
 

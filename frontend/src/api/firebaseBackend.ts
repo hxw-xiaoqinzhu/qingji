@@ -151,7 +151,7 @@ async function seedDefaultPackages(uid: string) {
     { name: '领证/轻婚纱跟妆', category: 'MAIN', price: 980, defaultDurationMin: 120, description: '清透纯欲伪素颜妆造' },
     { name: '商业广告/艺人妆造', category: 'MAIN', price: 2400, defaultDurationMin: 360, description: '商业TVC/平面高定妆发' },
     { name: '妈妈妆 / 伴娘妆', category: 'EXTRA', price: 280, defaultDurationMin: 60, description: '精致清透妆面+盘发' },
-    { name: '早起费（6点前）', category: 'EXTRA', price: 200, defaultDurationMin: 0, description: '凌晨6点前开妆补贴' },
+    { name: '早起费（6点前）', category: 'EXTRA', price: 200, defaultDurationMin: 0, description: '早上 6:00 每提前一小时加 100' },
   ];
   await Promise.all(
     defaults.map((pkg) => {

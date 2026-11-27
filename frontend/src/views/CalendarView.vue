@@ -148,40 +148,34 @@
                 class="h-[60px] flex items-center justify-center"
               >
                 <div
-                  class="relative flex-1 h-full flex flex-col items-center justify-center cursor-pointer active:opacity-75"
+                  class="relative flex-1 h-full flex flex-col items-center justify-center cursor-pointer active:opacity-75 transition-all"
                   :class="[
                     cell.shapeClass,
                     cell.tagLabel
-                      ? cell.tileClass
+                      ? [cell.tileClass, cell.date === selectedDate ? 'ring-2 ring-[#C77D92] ring-offset-1' : '']
                       : cell.date === selectedDate
-                        ? 'btn-rose text-white'
+                        ? 'bg-[#FAF0F3] text-brand-deep border border-[#DC99AA]'
                         : cell.isToday
-                          ? 'bg-brand-soft/85 text-brand-deep border border-brand/35'
+                          ? 'bg-[#FCF2F5] text-brand-deep border border-[#F2DCE3]'
                           : cell.inCurrentMonth
                             ? 'text-ink'
                             : 'text-ink-muted/35',
                   ]"
                   @click="selectDate(cell.date)"
                 >
-                  <!-- Active Selection Inner Pill when tapping inside a booked / connected multi-day bar -->
-                  <span
-                    v-if="cell.tagLabel && cell.date === selectedDate"
-                    class="pointer-events-none absolute inset-[2px] rounded-[13px] btn-rose z-0"
-                  />
-
                   <!-- Harmoniously Centered Stack: Day + Lunar + Crisp Tag -->
                   <div class="relative z-10 flex flex-col items-center justify-center text-center leading-none">
                     <span
                       class="text-[15px] font-semibold tabular-nums leading-none"
-                      :class="cell.date === selectedDate ? 'text-white' : ''"
+                      :class="cell.tagLabel && cell.inCurrentMonth ? 'text-white' : ''"
                     >
                       {{ cell.day }}
                     </span>
                     <span
                       class="text-[9.5px] leading-none mt-[4px]"
                       :class="
-                        cell.date === selectedDate
-                          ? 'text-white/80'
+                        cell.tagLabel && cell.inCurrentMonth
+                          ? 'text-white/85'
                           : cell.inCurrentMonth
                             ? 'text-ink-muted'
                             : 'text-ink-muted/35'
@@ -192,7 +186,7 @@
                     <span
                       v-if="cell.tagLabel"
                       class="text-[9.5px] font-semibold leading-none mt-[4px] whitespace-nowrap tabular-nums"
-                      :class="cell.date === selectedDate ? 'text-white' : cell.tagTextClass"
+                      :class="cell.tagTextClass"
                     >
                       {{ cell.tagLabel }}
                     </span>
@@ -201,8 +195,7 @@
                   <!-- Floating Bottom Bar ONLY on Free Auspicious Days -->
                   <span
                     v-if="!cell.tagLabel && cell.isGoodWedding && cell.inCurrentMonth"
-                    class="pointer-events-none absolute bottom-[5px] left-1/2 -translate-x-1/2 w-3 h-[2.5px] rounded-full"
-                    :class="cell.date === selectedDate ? 'bg-white/65' : 'bg-brand/35'"
+                    class="pointer-events-none absolute bottom-[5px] left-1/2 -translate-x-1/2 w-3 h-[2.5px] rounded-full bg-brand/40"
                   />
                 </div>
               </div>
@@ -210,13 +203,16 @@
           </div>
         </div>
 
-        <!-- Minimal Legend (No border line, no extra spacing, no swipe hint text) -->
+        <!-- Minimal Legend -->
         <div class="px-1.5 pt-0.5 flex items-center gap-3.5 text-[11px] text-ink-muted">
           <span class="flex items-center gap-1.5">
             <i class="w-3 h-[2.5px] rounded-full bg-brand/40 inline-block" />好日子
           </span>
           <span class="flex items-center gap-1.5">
-            <i class="w-2.5 h-2.5 rounded-[4px] bg-[#FCF2F5] border border-[#F2DCE3] inline-block" />有行程
+            <i class="w-2.5 h-2.5 rounded-[4px] btn-rose inline-block" />有行程
+          </span>
+          <span class="flex items-center gap-1.5">
+            <i class="w-2.5 h-2.5 rounded-[4px] bg-[#FCF2F5] border border-[#F2DCE3] inline-block" />今日
           </span>
         </div>
       </section>
@@ -233,70 +229,93 @@
         <span v-else class="text-[12px] text-ink-muted">当日空闲</span>
       </div>
 
-      <!-- Selected Day Itinerary Cards -->
+      <!-- Selected Day Itinerary Cards (With Universal Swipe-Left Edit & Delete) -->
       <div class="space-y-2.5">
         <template v-if="selectedDayOrders.length > 0">
-          <article
+          <van-swipe-cell
             v-for="order in selectedDayOrders"
             :key="order.id"
-            class="card-soft p-4 pl-5 relative overflow-hidden pressable cursor-pointer"
-            @click="router.push(`/orders/${order.id}`)"
+            class="rounded-[22px] overflow-hidden"
           >
-            <span
-              class="absolute left-0 top-3 bottom-3 w-1 rounded-r-full"
-              :class="statusMeta(order.status, order.balanceDue).ribbonClass"
-            />
-
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-2">
-                <span class="px-2.5 py-0.5 rounded-full bg-brand-soft text-brand-deep text-[12px] font-semibold tabular-nums">
-                  {{ order.startTime }} - {{ order.endTime }}
-                </span>
-                <span
-                  v-if="order.endDate && order.endDate !== order.serviceDate"
-                  class="text-[11px] text-champagne font-medium"
-                >
-                  跨天连档
-                </span>
-              </div>
+            <article
+              class="card-soft p-4 pl-5 relative overflow-hidden pressable cursor-pointer"
+              @click="router.push(`/orders/${order.id}`)"
+            >
               <span
-                class="px-2.5 py-0.5 rounded-full text-[11px] font-medium"
-                :class="[statusMeta(order.status, order.balanceDue).bgClass, statusMeta(order.status, order.balanceDue).textClass]"
-              >
-                {{ statusMeta(order.status, order.balanceDue).label }}
-              </span>
-            </div>
+                class="absolute left-0 top-3 bottom-3 w-1 rounded-r-full"
+                :class="statusMeta(order.status, order.balanceDue).ribbonClass"
+              />
 
-            <div class="flex items-center justify-between mt-3">
-              <div class="flex items-center gap-3 min-w-0 pr-3">
-                <div
-                  class="w-10 h-10 rounded-2xl bg-gradient-to-br flex items-center justify-center text-[15px] font-semibold shrink-0"
-                  :class="serviceCategoryVisual(order.serviceType).avatarBg"
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <span class="px-2.5 py-0.5 rounded-full bg-brand-soft text-brand-deep text-[12px] font-semibold tabular-nums">
+                    {{ order.startTime }} - {{ order.endTime }}
+                  </span>
+                  <span
+                    v-if="order.endDate && order.endDate !== order.serviceDate"
+                    class="text-[11px] text-champagne font-medium"
+                  >
+                    跨天连档
+                  </span>
+                </div>
+                <span
+                  class="px-2.5 py-0.5 rounded-full text-[11px] font-medium"
+                  :class="[statusMeta(order.status, order.balanceDue).bgClass, statusMeta(order.status, order.balanceDue).textClass]"
                 >
-                  {{ order.clientName.slice(0, 1) }}
-                </div>
-                <div class="min-w-0">
-                  <h3 class="text-[15px] font-semibold text-ink truncate">
-                    {{ order.clientName }}
-                    <span class="text-[13px] font-normal text-ink-secondary">· {{ order.serviceType }}</span>
-                  </h3>
-                  <p class="text-[12px] text-ink-muted mt-0.5 truncate flex items-center gap-1">
-                    <IconPearlPin :size="13" class="text-brand shrink-0" />
-                    <span class="truncate">{{ order.location || '待确认出妆地点' }}</span>
-                  </p>
-                </div>
+                  {{ statusMeta(order.status, order.balanceDue).label }}
+                </span>
               </div>
 
-              <div class="text-right shrink-0 tabular-nums">
-                <div class="text-[17px] font-semibold text-ink">
-                  <span class="text-[12px] font-normal mr-0.5">¥</span>{{ ui.formatMoney(order.totalAmount, '') }}
+              <div class="flex items-center justify-between mt-3">
+                <div class="flex items-center gap-3 min-w-0 pr-3">
+                  <div
+                    class="w-10 h-10 rounded-2xl bg-gradient-to-br flex items-center justify-center text-[15px] font-semibold shrink-0"
+                    :class="serviceCategoryVisual(order.serviceType).avatarBg"
+                  >
+                    {{ order.clientName.slice(0, 1) }}
+                  </div>
+                  <div class="min-w-0">
+                    <h3 class="text-[15px] font-semibold text-ink truncate">
+                      {{ order.clientName }}
+                      <span class="text-[13px] font-normal text-ink-secondary">· {{ order.serviceType }}</span>
+                    </h3>
+                    <p class="text-[12px] text-ink-muted mt-0.5 truncate flex items-center gap-1">
+                      <IconPearlPin :size="13" class="text-brand shrink-0" />
+                      <span class="truncate">{{ order.location || '待确认出妆地点' }}</span>
+                    </p>
+                  </div>
                 </div>
-                <div v-if="order.balanceDue > 0" class="text-[11px] text-status-danger-text mt-0.5">
-                  尾款 {{ ui.formatMoney(order.balanceDue) }}
+
+                <div class="text-right shrink-0 tabular-nums">
+                  <div class="text-[17px] font-semibold text-ink">
+                    <span class="text-[12px] font-normal mr-0.5">¥</span>{{ ui.formatMoney(order.totalAmount, '') }}
+                  </div>
+                  <div v-if="order.balanceDue > 0" class="text-[11px] text-status-danger-text mt-0.5">
+                    尾款 {{ ui.formatMoney(order.balanceDue) }}
+                  </div>
                 </div>
               </div>
-            </div>
-          </article>
+            </article>
+
+            <template #right>
+              <div class="flex h-full pl-2 gap-1.5">
+                <button
+                  type="button"
+                  class="h-full px-4 rounded-[18px] bg-brand-soft text-brand-deep text-[13px] font-medium"
+                  @click.stop="router.push(`/orders/${order.id}/edit`)"
+                >
+                  编辑
+                </button>
+                <button
+                  type="button"
+                  class="h-full px-4 rounded-[18px] bg-status-danger-bg text-status-danger-text text-[13px] font-medium"
+                  @click.stop="deleteCalendarOrder(order)"
+                >
+                  删除
+                </button>
+              </div>
+            </template>
+          </van-swipe-cell>
         </template>
 
         <div v-else class="card-soft">
@@ -311,6 +330,103 @@
         </div>
       </div>
     </div>
+
+    <!-- Day Schedule Popup (Opens when tapping a date with booked tasks) -->
+    <van-popup
+      v-model:show="showDayScheduleSheet"
+      position="bottom"
+      teleport="body"
+      round
+      :style="{ maxHeight: 'calc(var(--app-height, 100vh) * 0.78)', backgroundColor: '#FDF8FA' }"
+    >
+      <div class="p-5 pb-safe-sheet flex flex-col" style="max-height: calc(var(--app-height, 100vh) * 0.78)">
+        <div class="sheet-grabber shrink-0" />
+        <div class="flex items-center justify-between mb-3.5 shrink-0">
+          <div>
+            <h3 class="text-[17px] font-semibold text-ink tabular-nums">{{ selectedDateHeading }} · 行程安排</h3>
+            <p class="text-[11.5px] text-ink-muted mt-0.5">共 {{ selectedDayOrders.length }} 场预约 · 左滑可快速编辑或删除</p>
+          </div>
+          <button type="button" class="icon-btn-white" @click="showDayScheduleSheet = false">
+            <X class="w-4 h-4" />
+          </button>
+        </div>
+
+        <div class="flex-1 overflow-y-auto no-scrollbar space-y-2.5 pb-1">
+          <van-swipe-cell
+            v-for="order in selectedDayOrders"
+            :key="'pop-' + order.id"
+            class="rounded-[20px] overflow-hidden"
+          >
+            <article
+              class="bg-white border border-[#F2E3E8] rounded-[20px] p-4 pl-5 relative overflow-hidden pressable cursor-pointer"
+              @click="openOrderDetailFromSheet(order.id)"
+            >
+              <span
+                class="absolute left-0 top-3 bottom-3 w-1 rounded-r-full"
+                :class="statusMeta(order.status, order.balanceDue).ribbonClass"
+              />
+              <div class="flex items-center justify-between">
+                <span class="px-2.5 py-0.5 rounded-full bg-brand-soft text-brand-deep text-[12px] font-semibold tabular-nums">
+                  {{ order.startTime }} - {{ order.endTime }}
+                </span>
+                <span
+                  class="px-2.5 py-0.5 rounded-full text-[11px] font-medium"
+                  :class="[statusMeta(order.status, order.balanceDue).bgClass, statusMeta(order.status, order.balanceDue).textClass]"
+                >
+                  {{ statusMeta(order.status, order.balanceDue).label }}
+                </span>
+              </div>
+              <div class="flex items-center justify-between mt-3">
+                <div class="min-w-0 pr-3">
+                  <div class="text-[15px] font-semibold text-ink truncate">
+                    {{ order.clientName }}
+                    <span class="text-[13px] font-normal text-ink-secondary">· {{ order.serviceType }}</span>
+                  </div>
+                  <p class="text-[12px] text-ink-muted mt-1 truncate flex items-center gap-1">
+                    <IconPearlPin :size="13" class="text-brand shrink-0" />
+                    <span class="truncate">{{ order.location || '待确认地点' }}</span>
+                  </p>
+                </div>
+                <div class="text-right shrink-0 tabular-nums">
+                  <div class="text-[16px] font-semibold text-ink">
+                    <span class="text-[11px] font-normal mr-0.5">¥</span>{{ ui.formatMoney(order.totalAmount, '') }}
+                  </div>
+                  <div v-if="order.balanceDue > 0" class="text-[11px] text-status-danger-text mt-0.5">
+                    尾款 {{ ui.formatMoney(order.balanceDue) }}
+                  </div>
+                </div>
+              </div>
+            </article>
+            <template #right>
+              <div class="flex h-full pl-2 gap-1.5">
+                <button
+                  type="button"
+                  class="h-full px-4 rounded-[18px] bg-brand-soft text-brand-deep text-[13px] font-medium"
+                  @click.stop="editOrderFromSheet(order.id)"
+                >
+                  编辑
+                </button>
+                <button
+                  type="button"
+                  class="h-full px-4 rounded-[18px] bg-status-danger-bg text-status-danger-text text-[13px] font-medium"
+                  @click.stop="deleteCalendarOrder(order)"
+                >
+                  删除
+                </button>
+              </div>
+            </template>
+          </van-swipe-cell>
+        </div>
+
+        <button
+          type="button"
+          class="btn-unified w-full btn-rose text-white mt-3.5 shrink-0"
+          @click="createOrderOnSelectedDate"
+        >
+          在这天新增一场预约
+        </button>
+      </div>
+    </van-popup>
 
     <!-- Schedule Poster Modal -->
     <SchedulePosterModal
@@ -329,6 +445,8 @@ import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import dayjs from 'dayjs';
 import { Solar } from 'lunar-javascript';
+import { showConfirmDialog, showToast } from 'vant';
+import { X } from 'lucide-vue-next';
 import http from '@/api/http';
 import { useUiStore } from '@/stores/ui';
 import { useAuthStore } from '@/stores/auth';
@@ -402,6 +520,7 @@ const selectedDate = ref(todayStr);
 
 const ordersCache = reactive<Record<string, Order[]>>({});
 const showPoster = ref(false);
+const showDayScheduleSheet = ref(false);
 const initialLoading = ref(true);
 
 const ymKey = (y: number, m: number) => `${y}-${String(m).padStart(2, '0')}`;
@@ -491,9 +610,9 @@ function buildCellsForMonth(y: number, m: number): CalendarCell[] {
     if (dayOrders.length > 0) {
       tagLabel = dayOrders.length >= 2 ? `${dayOrders.length}场` : shortServiceTag(dayOrders[0].serviceType);
       tileClass = inMonth
-        ? `bg-[#FCF2F5] ${borderClass} border-[#F2DCE3] text-ink`
-        : `bg-[#FCF2F5]/45 ${borderClass} border-[#F2DCE3]/45 text-ink-muted/45`;
-      tagTextClass = inMonth ? 'text-[#AE7384]' : 'text-[#AE7384]/45';
+        ? `btn-rose text-white`
+        : `bg-[#E7B0BD]/40 ${borderClass} border-[#E7B0BD]/30 text-white/80`;
+      tagTextClass = inMonth ? 'text-white/95' : 'text-white/75';
     }
 
     const { lunarLabel, isGoodWedding } = getCachedLunar(dateStr);
@@ -650,6 +769,50 @@ function selectDate(dateStr: string) {
     currentMonth.value = d.month() + 1;
   }
   selectedDate.value = dateStr;
+
+  const key = ymKey(d.year(), d.month() + 1);
+  const list = ordersCache[key] || [];
+  const hasTasks = list.some((o) => {
+    const end = o.endDate || o.serviceDate;
+    return dateStr >= o.serviceDate && dateStr <= end;
+  });
+  if (hasTasks) {
+    showDayScheduleSheet.value = true;
+  }
+}
+
+function openOrderDetailFromSheet(id: string) {
+  showDayScheduleSheet.value = false;
+  router.push(`/orders/${id}`);
+}
+
+function editOrderFromSheet(id: string) {
+  showDayScheduleSheet.value = false;
+  router.push(`/orders/${id}/edit`);
+}
+
+function createOrderOnSelectedDate() {
+  showDayScheduleSheet.value = false;
+  router.push({ path: '/orders/new', query: { date: selectedDate.value } });
+}
+
+async function deleteCalendarOrder(order: Order) {
+  try {
+    await showConfirmDialog({
+      title: '移入回收站',
+      message: `确认删除「${order.clientName} · ${order.serviceType}」吗？（可在回收站保留 30 天）`,
+      confirmButtonColor: '#C67A89',
+    });
+    await http.delete(`/orders/${order.id}`);
+    const key = ymKey(currentYear.value, currentMonth.value);
+    ordersCache[key] = (ordersCache[key] || []).filter((o) => o.id !== order.id);
+    if (selectedDayOrders.value.length === 0) {
+      showDayScheduleSheet.value = false;
+    }
+    showToast('已移入 30 天回收站');
+  } catch {
+    // cancelled
+  }
 }
 
 function jumpToToday() {

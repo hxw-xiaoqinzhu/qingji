@@ -66,83 +66,129 @@
         </Transition>
 
         <div v-if="filteredPackages.length > 0" class="space-y-5">
-          <!-- Main Packages Section (Individual Cards) -->
+          <!-- Main Packages Section (Individual Swipeable Cards) -->
           <section v-if="visibleMains.length > 0" class="space-y-3">
             <div class="px-1 flex items-center justify-between">
               <span class="text-[12.5px] font-semibold text-ink-secondary">主推套餐</span>
               <span class="text-[11px] text-ink-muted tabular-nums">{{ visibleMains.length }} 项</span>
             </div>
 
-            <article
+            <van-swipe-cell
               v-for="pkg in visibleMains"
               :key="pkg.id"
-              class="card-soft p-4 pressable cursor-pointer"
-              @click="openEditSheet(pkg)"
+              class="rounded-[22px] overflow-hidden"
             >
-              <div class="flex items-center justify-between gap-3">
-                <div class="flex items-center gap-2 min-w-0">
-                  <h3 class="text-[15.5px] font-semibold text-ink truncate leading-none">{{ pkg.name }}</h3>
-                  <span
-                    v-if="pkg.defaultDurationMin > 0"
-                    class="inline-flex items-center justify-center h-[22px] px-2.5 rounded-full bg-[#FAF2F5] text-[11px] font-medium text-[#9B7280] shrink-0 tabular-nums leading-none"
-                  >
-                    约 {{ formatDuration(pkg.defaultDurationMin) }}
+              <article
+                class="card-soft p-4 pressable cursor-pointer"
+                @click="openEditSheet(pkg)"
+              >
+                <div class="flex items-center justify-between gap-3">
+                  <div class="flex items-center gap-2 min-w-0">
+                    <h3 class="text-[15.5px] font-semibold text-ink truncate leading-none">{{ pkg.name }}</h3>
+                    <span
+                      v-if="pkg.defaultDurationMin > 0"
+                      class="inline-flex items-center justify-center h-[22px] px-2.5 rounded-full bg-[#FAF2F5] text-[11px] font-medium text-[#9B7280] shrink-0 tabular-nums leading-none"
+                    >
+                      约 {{ formatDuration(pkg.defaultDurationMin) }}
+                    </span>
+                  </div>
+                  <span class="text-[17px] font-semibold text-brand-deep tabular-nums shrink-0 leading-none">
+                    ¥{{ pkg.price }}
                   </span>
                 </div>
-                <span class="text-[17px] font-semibold text-brand-deep tabular-nums shrink-0 leading-none">
-                  ¥{{ pkg.price }}
-                </span>
-              </div>
 
-              <p v-if="pkg.description" class="text-[12.5px] text-ink-muted mt-2 leading-relaxed line-clamp-2">
-                {{ pkg.description }}
-              </p>
+                <p v-if="pkg.description" class="text-[12.5px] text-ink-muted mt-2 leading-relaxed line-clamp-2">
+                  {{ pkg.description }}
+                </p>
 
-              <div class="mt-3 pt-2.5 border-t border-[#F4E8EC] flex items-center justify-between text-[11.5px]">
-                <span class="text-[#B79BA4]">轻点卡片编辑</span>
-                <button
-                  type="button"
-                  class="inline-flex items-center gap-0.5 px-2.5 py-1 rounded-full bg-[#FAF0F3] text-[#A46B7D] font-medium pressable"
-                  @click.stop="bookWithPackage(pkg)"
-                >
-                  <span>用此套餐排单</span>
-                  <ChevronRight class="w-3.5 h-3.5" />
-                </button>
-              </div>
-            </article>
+                <div class="mt-3 pt-2.5 border-t border-[#F4E8EC] flex items-center justify-between text-[11.5px]">
+                  <span class="text-[#B79BA4]">左滑编辑或删除</span>
+                  <button
+                    type="button"
+                    class="inline-flex items-center gap-0.5 px-2.5 py-1 rounded-full bg-[#FAF0F3] text-[#A46B7D] font-medium pressable"
+                    @click.stop="bookWithPackage(pkg)"
+                  >
+                    <span>用此套餐排单</span>
+                    <ChevronRight class="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </article>
+
+              <template #right>
+                <div class="flex h-full pl-2 gap-1.5">
+                  <button
+                    type="button"
+                    class="h-full px-4 rounded-[18px] bg-brand-soft text-brand-deep text-[13px] font-medium"
+                    @click.stop="openEditSheet(pkg)"
+                  >
+                    编辑
+                  </button>
+                  <button
+                    type="button"
+                    class="h-full px-4 rounded-[18px] bg-status-danger-bg text-status-danger-text text-[13px] font-medium"
+                    @click.stop="deletePackageCard(pkg)"
+                  >
+                    删除
+                  </button>
+                </div>
+              </template>
+            </van-swipe-cell>
           </section>
 
-          <!-- Extra Add-ons Section (Individual Cards) -->
+          <!-- Extra Add-ons Section (Individual Swipeable Cards) -->
           <section v-if="visibleExtras.length > 0" class="space-y-3">
             <div class="px-1 flex items-center justify-between">
               <span class="text-[12.5px] font-semibold text-ink-secondary">增项服务</span>
               <span class="text-[11px] text-ink-muted tabular-nums">{{ visibleExtras.length }} 项</span>
             </div>
 
-            <article
+            <van-swipe-cell
               v-for="pkg in visibleExtras"
               :key="pkg.id"
-              class="card-soft p-4 pressable cursor-pointer"
-              @click="openEditSheet(pkg)"
+              class="rounded-[22px] overflow-hidden"
             >
-              <div class="flex items-center justify-between gap-3">
-                <div class="flex items-center gap-2 min-w-0">
-                  <h3 class="text-[15px] font-semibold text-ink truncate leading-none">{{ pkg.name }}</h3>
-                  <span
-                    v-if="pkg.defaultDurationMin > 0"
-                    class="inline-flex items-center justify-center h-[20px] px-2 rounded-full bg-[#FAF2F5] text-[10.5px] font-medium text-[#9B7280] shrink-0 tabular-nums leading-none"
-                  >
-                    约 {{ formatDuration(pkg.defaultDurationMin) }}
+              <article
+                class="card-soft p-4 pressable cursor-pointer"
+                @click="openEditSheet(pkg)"
+              >
+                <div class="flex items-center justify-between gap-3">
+                  <div class="flex items-center gap-2 min-w-0">
+                    <h3 class="text-[15px] font-semibold text-ink truncate leading-none">{{ pkg.name }}</h3>
+                    <span
+                      v-if="pkg.defaultDurationMin > 0"
+                      class="inline-flex items-center justify-center h-[20px] px-2 rounded-full bg-[#FAF2F5] text-[10.5px] font-medium text-[#9B7280] shrink-0 tabular-nums leading-none"
+                    >
+                      约 {{ formatDuration(pkg.defaultDurationMin) }}
+                    </span>
+                  </div>
+                  <span class="text-[16.5px] font-semibold text-brand-deep tabular-nums shrink-0 leading-none">
+                    ¥{{ pkg.price }}
                   </span>
                 </div>
-                <span class="text-[16.5px] font-semibold text-brand-deep tabular-nums shrink-0 leading-none">
-                  ¥{{ pkg.price }}
-                </span>
-              </div>
-              <p v-if="pkg.description" class="text-[12px] text-ink-muted mt-2 leading-relaxed line-clamp-2">
-                {{ pkg.description }}
-              </p>
-            </article>
+                <p v-if="pkg.description" class="text-[12px] text-ink-muted mt-2 leading-relaxed line-clamp-2">
+                  {{ pkg.description }}
+                </p>
+              </article>
+
+              <template #right>
+                <div class="flex h-full pl-2 gap-1.5">
+                  <button
+                    type="button"
+                    class="h-full px-4 rounded-[18px] bg-brand-soft text-brand-deep text-[13px] font-medium"
+                    @click.stop="openEditSheet(pkg)"
+                  >
+                    编辑
+                  </button>
+                  <button
+                    type="button"
+                    class="h-full px-4 rounded-[18px] bg-status-danger-bg text-status-danger-text text-[13px] font-medium"
+                    @click.stop="deletePackageCard(pkg)"
+                  >
+                    删除
+                  </button>
+                </div>
+              </template>
+            </van-swipe-cell>
           </section>
         </div>
 
@@ -366,6 +412,22 @@ async function savePackage() {
     showEditorSheet.value = false;
   } finally {
     saving.value = false;
+  }
+}
+
+async function deletePackageCard(pkg: PackageTemplate) {
+  try {
+    await showConfirmDialog({
+      title: '删除套餐',
+      message: `确认删除「${pkg.name}」吗？`,
+      confirmButtonText: '确认删除',
+      confirmButtonColor: '#C67A89',
+    });
+    await http.delete(`/packages/${pkg.id}`);
+    packages.value = packages.value.filter((p) => p.id !== pkg.id);
+    showToast('已删除');
+  } catch {
+    // cancelled
   }
 }
 

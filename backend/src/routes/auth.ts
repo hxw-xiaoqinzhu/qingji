@@ -116,7 +116,7 @@ router.post('/register', async (req: Request, res: Response) => {
         { userId: user.id, name: '新娘全天跟妆', category: 'MAIN', price: 2880, defaultDurationMin: 600, description: '含早妆+仪式+敬酒共3套造型，免费试妆一次' },
         { userId: user.id, name: '新娘早妆（半天）', category: 'MAIN', price: 1580, defaultDurationMin: 240, description: '含晨袍+出门秀禾/主纱造型' },
         { userId: user.id, name: '妈妈妆 / 伴娘妆', category: 'EXTRA', price: 280, defaultDurationMin: 60, description: '精致清透妆面+简约盘发' },
-        { userId: user.id, name: '早起费（6点前）', category: 'EXTRA', price: 200, defaultDurationMin: 0, description: '凌晨6:00前开妆补贴' },
+        { userId: user.id, name: '早起费（6点前）', category: 'EXTRA', price: 200, defaultDurationMin: 0, description: '早上 6:00 每提前一小时加 100' },
       ],
     });
 

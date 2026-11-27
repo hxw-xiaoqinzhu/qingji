@@ -1,27 +1,38 @@
 <template>
-  <div class="ambient-silk-stage" aria-hidden="true">
-    <!-- Layer 1: Sweeping Elliptical Pastel Aurora Ribbons (360° orbital + rotational flow) -->
-    <span class="silk-ribbon ribbon-rose" />
-    <span class="silk-ribbon ribbon-apricot" />
-    <span class="silk-ribbon ribbon-lilac" />
-    <span class="silk-ribbon ribbon-mintpearl" />
-    <span class="silk-ribbon ribbon-sunbeam" />
+  <div class="ambient-silk-stage" :class="{ 'is-paused': paused }" aria-hidden="true">
+    <!-- Static Multi-Layered Pastel Aurora Base (Zero per-frame GPU cost) -->
+    <div class="silk-static-base" />
 
-    <!-- Layer 2: Gently Morphing & Drifting Liquid Glass Light Rings -->
-    <span class="liquid-ring ring-top" />
-    <span class="liquid-ring ring-mid" />
-    <span class="liquid-ring ring-bottom" />
+    <!-- Only 2 Lightweight Pure-Translate3d Pastel Clouds (No rotate/scale -> zero re-rasterization!) -->
+    <span class="silk-cloud cloud-rose" />
+    <span class="silk-cloud cloud-apricot" />
 
-    <!-- Layer 3: Floating Sunlit Pearl Bokeh Bubbles ("晴记" Morning Light Motes) -->
-    <span class="bokeh-orb bokeh-1" />
-    <span class="bokeh-orb bokeh-2" />
-    <span class="bokeh-orb bokeh-3" />
-    <span class="bokeh-orb bokeh-4" />
-    <span class="bokeh-orb bokeh-5" />
-    <span class="bokeh-orb bokeh-6" />
-    <span class="bokeh-orb bokeh-7" />
+    <!-- 4 Crisp Lightweight Glass Bubbles (Pure translate3d, zero box-shadow -> silky 60/120fps forever) -->
+    <span class="silk-bubble b1" />
+    <span class="silk-bubble b2" />
+    <span class="silk-bubble b3" />
+    <span class="silk-bubble b4" />
   </div>
 </template>
+
+<script setup lang="ts">
+import { onBeforeUnmount, onMounted, ref } from 'vue';
+
+const paused = ref(false);
+
+function onVisibilityChange() {
+  paused.value = document.visibilityState === 'hidden';
+}
+
+onMounted(() => {
+  paused.value = document.visibilityState === 'hidden';
+  document.addEventListener('visibilitychange', onVisibilityChange);
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener('visibilitychange', onVisibilityChange);
+});
+</script>
 
 <style scoped>
 .ambient-silk-stage {
@@ -30,393 +41,150 @@
   z-index: 0;
   overflow: hidden;
   pointer-events: none;
-  background: linear-gradient(165deg, #FDF5F8 0%, #FCF8FA 48%, #FDF7F3 100%);
   contain: strict;
+  isolation: isolate;
+  transform: translateZ(0);
 }
 
-/* =========================================================================
-   Layer 1: Elongated Elliptical Silk Ribbons (High-visibility smooth flow)
-   ========================================================================= */
-.silk-ribbon {
+.ambient-silk-stage.is-paused * {
+  animation-play-state: paused !important;
+}
+
+/* Rich Multi-Stop Static Pastel Base (Replaces 3 heavy animated ribbons with zero GPU overhead) */
+.silk-static-base {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 45% at 15% 10%, rgba(244, 194, 212, 0.42) 0%, rgba(244, 194, 212, 0) 70%),
+    radial-gradient(ellipse 75% 42% at 88% 24%, rgba(250, 212, 188, 0.36) 0%, rgba(250, 212, 188, 0) 70%),
+    radial-gradient(ellipse 70% 45% at 20% 72%, rgba(224, 206, 244, 0.28) 0%, rgba(224, 206, 244, 0) 70%),
+    radial-gradient(ellipse 80% 46% at 82% 88%, rgba(245, 200, 216, 0.34) 0%, rgba(245, 200, 216, 0) 70%),
+    linear-gradient(165deg, #FDF5F8 0%, #FCF8FA 48%, #FDF7F3 100%);
+}
+
+/* Compact Pure-Translate3d Ambient Clouds (No rotate/scale -> stays 100% cached in GPU VRAM) */
+.silk-cloud {
   position: absolute;
   border-radius: 50%;
-  will-change: transform;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
 }
 
-/* Soft Peony Rose Ribbon */
-.ribbon-rose {
-  width: 480px;
-  height: 250px;
-  top: -60px;
-  left: -140px;
+.cloud-rose {
+  width: 300px;
+  height: 220px;
+  top: -40px;
+  left: -60px;
   background: radial-gradient(
     ellipse at center,
-    rgba(242, 182, 203, 0.68) 0%,
-    rgba(246, 204, 219, 0.36) 45%,
-    rgba(246, 204, 219, 0) 74%
+    rgba(244, 188, 208, 0.44) 0%,
+    rgba(248, 212, 224, 0.18) 48%,
+    rgba(248, 212, 224, 0) 74%
   );
-  animation: sweepRose 20s cubic-bezier(0.42, 0, 0.58, 1) infinite;
+  animation: cloudDriftA 22s ease-in-out infinite alternate;
 }
 
-/* Warm Sunlit Champagne-Apricot Ribbon */
-.ribbon-apricot {
-  width: 460px;
-  height: 230px;
-  top: 12%;
-  right: -150px;
+.cloud-apricot {
+  width: 280px;
+  height: 210px;
+  bottom: 6%;
+  right: -60px;
   background: radial-gradient(
     ellipse at center,
-    rgba(250, 206, 176, 0.66) 0%,
-    rgba(252, 224, 203, 0.34) 46%,
-    rgba(252, 224, 203, 0) 74%
+    rgba(250, 210, 186, 0.40) 0%,
+    rgba(252, 226, 208, 0.16) 48%,
+    rgba(252, 226, 208, 0) 74%
   );
-  animation: sweepApricot 24s cubic-bezier(0.42, 0, 0.58, 1) infinite;
+  animation: cloudDriftB 26s ease-in-out infinite alternate;
 }
 
-/* Misty Lavender-Iris Ribbon */
-.ribbon-lilac {
-  width: 450px;
-  height: 240px;
-  top: 44%;
-  left: -140px;
-  background: radial-gradient(
-    ellipse at center,
-    rgba(217, 196, 240, 0.60) 0%,
-    rgba(231, 216, 246, 0.30) 46%,
-    rgba(231, 216, 246, 0) 74%
-  );
-  animation: sweepLilac 22s cubic-bezier(0.42, 0, 0.58, 1) infinite;
-}
-
-/* Bottom Rosewater-Peach Cloud */
-.ribbon-mintpearl {
-  width: 470px;
-  height: 250px;
-  bottom: -65px;
-  right: -120px;
-  background: radial-gradient(
-    ellipse at center,
-    rgba(244, 190, 210, 0.62) 0%,
-    rgba(250, 218, 228, 0.30) 46%,
-    rgba(250, 218, 228, 0) 74%
-  );
-  animation: sweepBottom 21s cubic-bezier(0.42, 0, 0.58, 1) infinite;
-}
-
-/* Bright Pure-White Sunbeam Shaft cutting across the pastels */
-.ribbon-sunbeam {
-  width: 560px;
-  height: 150px;
-  top: 24%;
-  left: -90px;
-  background: radial-gradient(
-    ellipse at center,
-    rgba(255, 255, 255, 0.92) 0%,
-    rgba(255, 255, 255, 0.48) 45%,
-    rgba(255, 255, 255, 0) 75%
-  );
-  animation: sweepSunbeam 17s ease-in-out infinite alternate;
-}
-
-/* =========================================================================
-   Layer 2: Translucent Liquid Glass Halo Rings (Visible organic movement)
-   ========================================================================= */
-.liquid-ring {
-  position: absolute;
-  border-radius: 50%;
-  border: 1.5px solid rgba(255, 255, 255, 0.68);
-  background: radial-gradient(
-    circle at 32% 30%,
-    rgba(255, 255, 255, 0.46) 0%,
-    rgba(252, 232, 239, 0.14) 55%,
-    rgba(255, 255, 255, 0) 100%
-  );
-  box-shadow: inset 0 1px 8px rgba(255, 255, 255, 0.65);
-  will-change: transform, opacity;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-}
-
-.ring-top {
-  width: 230px;
-  height: 230px;
-  top: 5%;
-  right: -45px;
-  animation: floatRingA 18s ease-in-out infinite alternate;
-}
-
-.ring-mid {
-  width: 185px;
-  height: 185px;
-  top: 48%;
-  left: -50px;
-  animation: floatRingB 21s ease-in-out infinite alternate;
-}
-
-.ring-bottom {
-  width: 250px;
-  height: 250px;
-  bottom: 4%;
-  right: 8%;
-  animation: floatRingC 23s ease-in-out infinite alternate;
-}
-
-/* =========================================================================
-   Layer 3: Floating Dewy Pearl Bokeh Bubbles (Immediate visual motion cues)
-   ========================================================================= */
-.bokeh-orb {
+/* Ultra-Light Glass Bubbles (Zero box-shadow, pure translate3d) */
+.silk-bubble {
   position: absolute;
   border-radius: 9999px;
-  border: 1px solid rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.72);
   background: radial-gradient(
-    circle at 32% 32%,
-    rgba(255, 255, 255, 0.92) 0%,
-    rgba(252, 226, 235, 0.48) 54%,
-    rgba(244, 202, 218, 0.12) 100%
+    circle at 32% 30%,
+    rgba(255, 255, 255, 0.86) 0%,
+    rgba(252, 228, 236, 0.36) 58%,
+    rgba(244, 206, 220, 0.08) 100%
   );
-  box-shadow: 0 4px 16px rgba(214, 152, 172, 0.10);
-  will-change: transform, opacity;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
 }
 
-.bokeh-1 {
-  width: 58px;
-  height: 58px;
-  top: 14%;
-  left: 12%;
-  animation: bokehGlide1 15s ease-in-out infinite alternate;
+.silk-bubble.b1 {
+  width: 56px;
+  height: 56px;
+  top: 13%;
+  left: 10%;
+  animation: bubbleFloatA 16s ease-in-out infinite alternate;
 }
 
-.bokeh-2 {
-  width: 38px;
-  height: 38px;
+.silk-bubble.b2 {
+  width: 36px;
+  height: 36px;
   top: 22%;
-  right: 16%;
-  background: radial-gradient(
-    circle at 32% 32%,
-    rgba(255, 255, 255, 0.94) 0%,
-    rgba(253, 228, 210, 0.52) 56%,
-    rgba(250, 212, 186, 0.12) 100%
-  );
-  animation: bokehGlide2 13.5s ease-in-out infinite alternate;
+  right: 14%;
+  animation: bubbleFloatB 14s ease-in-out infinite alternate;
 }
 
-.bokeh-3 {
-  width: 72px;
-  height: 72px;
-  top: 36%;
-  right: 8%;
-  background: radial-gradient(
-    circle at 32% 32%,
-    rgba(255, 255, 255, 0.88) 0%,
-    rgba(235, 220, 246, 0.46) 56%,
-    rgba(222, 204, 240, 0.10) 100%
-  );
-  animation: bokehGlide3 17s ease-in-out infinite alternate;
-}
-
-.bokeh-4 {
-  width: 44px;
-  height: 44px;
-  top: 64%;
-  left: 14%;
-  animation: bokehGlide2 14.5s ease-in-out -4s infinite alternate;
-}
-
-.bokeh-5 {
+.silk-bubble.b3 {
   width: 64px;
   height: 64px;
-  bottom: 16%;
-  left: 56%;
-  background: radial-gradient(
-    circle at 32% 32%,
-    rgba(255, 255, 255, 0.90) 0%,
-    rgba(252, 228, 214, 0.48) 56%,
-    rgba(248, 212, 194, 0.10) 100%
-  );
-  animation: bokehGlide1 16.5s ease-in-out -6s infinite alternate;
+  top: 46%;
+  right: 8%;
+  animation: bubbleFloatA 19s ease-in-out -5s infinite alternate;
 }
 
-.bokeh-6 {
-  width: 30px;
-  height: 30px;
-  top: 8%;
-  left: 58%;
-  animation: bokehGlide3 12.5s ease-in-out -3s infinite alternate;
+.silk-bubble.b4 {
+  width: 44px;
+  height: 44px;
+  bottom: 18%;
+  left: 14%;
+  animation: bubbleFloatB 17s ease-in-out -3s infinite alternate;
 }
 
-.bokeh-7 {
-  width: 48px;
-  height: 48px;
-  bottom: 24%;
-  right: 18%;
-  animation: bokehGlide1 15.5s ease-in-out -8s infinite alternate;
-}
-
-/* =========================================================================
-   GPU-Composited Keyframes (Pure translate3d + rotate + scale + opacity)
-   ========================================================================= */
-@keyframes sweepRose {
+@keyframes cloudDriftA {
   0% {
-    transform: translate3d(0, 0, 0) rotate(-18deg) scale(1);
-  }
-  33% {
-    transform: translate3d(165px, 95px, 0) rotate(22deg) scale(1.16);
-  }
-  66% {
-    transform: translate3d(75px, 210px, 0) rotate(-8deg) scale(0.95);
+    transform: translate3d(0, 0, 0);
   }
   100% {
-    transform: translate3d(0, 0, 0) rotate(-18deg) scale(1);
+    transform: translate3d(90px, 65px, 0);
   }
 }
 
-@keyframes sweepApricot {
+@keyframes cloudDriftB {
   0% {
-    transform: translate3d(0, 0, 0) rotate(24deg) scale(1.05);
-  }
-  35% {
-    transform: translate3d(-180px, 115px, 0) rotate(-22deg) scale(1.18);
-  }
-  70% {
-    transform: translate3d(-90px, 240px, 0) rotate(12deg) scale(0.96);
+    transform: translate3d(0, 0, 0);
   }
   100% {
-    transform: translate3d(0, 0, 0) rotate(24deg) scale(1.05);
+    transform: translate3d(-85px, -70px, 0);
   }
 }
 
-@keyframes sweepLilac {
+@keyframes bubbleFloatA {
   0% {
-    transform: translate3d(0, 0, 0) rotate(15deg) scale(1);
-  }
-  40% {
-    transform: translate3d(190px, -110px, 0) rotate(-28deg) scale(1.18);
-  }
-  75% {
-    transform: translate3d(120px, 95px, 0) rotate(8deg) scale(1.04);
+    transform: translate3d(0, 0, 0);
   }
   100% {
-    transform: translate3d(0, 0, 0) rotate(15deg) scale(1);
+    transform: translate3d(24px, -32px, 0);
   }
 }
 
-@keyframes sweepBottom {
+@keyframes bubbleFloatB {
   0% {
-    transform: translate3d(0, 0, 0) rotate(-20deg) scale(1);
-  }
-  45% {
-    transform: translate3d(-175px, -135px, 0) rotate(24deg) scale(1.16);
-  }
-  80% {
-    transform: translate3d(-65px, -210px, 0) rotate(-6deg) scale(0.98);
+    transform: translate3d(0, 0, 0);
   }
   100% {
-    transform: translate3d(0, 0, 0) rotate(-20deg) scale(1);
-  }
-}
-
-@keyframes sweepSunbeam {
-  0% {
-    transform: translate3d(-60px, -70px, 0) rotate(-28deg) scaleY(0.9);
-    opacity: 0.65;
-  }
-  50% {
-    transform: translate3d(85px, 95px, 0) rotate(-14deg) scaleY(1.25);
-    opacity: 0.95;
-  }
-  100% {
-    transform: translate3d(-20px, 230px, 0) rotate(-32deg) scaleY(1);
-    opacity: 0.72;
-  }
-}
-
-@keyframes floatRingA {
-  0% {
-    transform: translate3d(0, 0, 0) scale(0.92) rotate(0deg);
-    opacity: 0.55;
-  }
-  100% {
-    transform: translate3d(-95px, 85px, 0) scale(1.16) rotate(25deg);
-    opacity: 0.88;
-  }
-}
-
-@keyframes floatRingB {
-  0% {
-    transform: translate3d(0, 0, 0) scale(0.95) rotate(0deg);
-    opacity: 0.50;
-  }
-  100% {
-    transform: translate3d(110px, -75px, 0) scale(1.18) rotate(-28deg);
-    opacity: 0.85;
-  }
-}
-
-@keyframes floatRingC {
-  0% {
-    transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
-    opacity: 0.48;
-  }
-  100% {
-    transform: translate3d(-85px, -95px, 0) scale(1.15) rotate(22deg);
-    opacity: 0.82;
-  }
-}
-
-@keyframes bokehGlide1 {
-  0% {
-    transform: translate3d(0, 0, 0) scale(0.92);
-    opacity: 0.52;
-  }
-  50% {
-    transform: translate3d(42px, -38px, 0) scale(1.08);
-    opacity: 0.90;
-  }
-  100% {
-    transform: translate3d(-26px, -76px, 0) scale(0.96);
-    opacity: 0.64;
-  }
-}
-
-@keyframes bokehGlide2 {
-  0% {
-    transform: translate3d(0, 0, 0) scale(0.94);
-    opacity: 0.56;
-  }
-  50% {
-    transform: translate3d(-46px, 36px, 0) scale(1.12);
-    opacity: 0.92;
-  }
-  100% {
-    transform: translate3d(28px, 74px, 0) scale(0.98);
-    opacity: 0.62;
-  }
-}
-
-@keyframes bokehGlide3 {
-  0% {
-    transform: translate3d(0, 0, 0) scale(0.90);
-    opacity: 0.48;
-  }
-  50% {
-    transform: translate3d(-54px, -44px, 0) scale(1.10);
-    opacity: 0.88;
-  }
-  100% {
-    transform: translate3d(-18px, 52px, 0) scale(0.95);
-    opacity: 0.58;
+    transform: translate3d(-22px, 28px, 0);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .silk-ribbon,
-  .liquid-ring,
-  .bokeh-orb {
-    animation: none !important;
+  .silk-cloud,
+  .silk-bubble {
+    animation: none;
   }
 }
 </style>

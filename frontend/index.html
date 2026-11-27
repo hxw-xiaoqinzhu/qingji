@@ -16,9 +16,14 @@
     <title>晴记</title>
     <script>
       (function () {
-        var h = window.innerHeight;
-        if (h > 200) {
-          document.documentElement.style.setProperty('--app-height', h + 'px');
+        var standalone =
+          (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
+          window.navigator.standalone === true;
+        if (!standalone) {
+          var h = window.innerHeight;
+          if (h > 200) {
+            document.documentElement.style.setProperty('--app-height', h + 'px');
+          }
         }
       })();
     </script>
