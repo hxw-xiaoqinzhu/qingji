@@ -39,13 +39,13 @@
 
         <div class="relative z-10">
           <div class="flex items-center gap-3.5">
-            <!-- Double-Ring Couture Avatar Frame -->
+            <!-- Double-Ring Circular Couture Avatar Frame -->
             <div class="relative shrink-0">
               <div class="avatar-ring">
-                <StudioAvatar :src="auth.user?.avatarUrl" :size="60" rounded-class="rounded-[19px]" />
+                <StudioAvatar :src="auth.user?.avatarUrl" :size="62" rounded-class="rounded-full" />
               </div>
               <span
-                class="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-white/95 border border-[#F0DCE3] shadow-[0_2px_8px_rgba(173,116,133,0.18)] flex items-center justify-center text-[#AD7485]"
+                class="absolute -bottom-0.5 -right-0.5 w-6 h-6 rounded-full bg-white/95 border border-[#F0DCE3] shadow-[0_2px_8px_rgba(173,116,133,0.18)] flex items-center justify-center text-[#AD7485]"
               >
                 <Camera class="w-3 h-3" />
               </span>
@@ -223,7 +223,7 @@
           <div class="bg-[#FAF2F5]/75 border border-[#F2E4E9] rounded-2xl p-4 space-y-3.5">
             <div class="flex items-center gap-4">
               <div class="avatar-ring shrink-0">
-                <StudioAvatar :src="profileForm.avatarUrl" :size="62" rounded-class="rounded-[19px]" />
+                <StudioAvatar :src="profileForm.avatarUrl" :size="64" rounded-class="rounded-full" />
               </div>
               <div class="flex-1 min-w-0 space-y-2">
                 <div class="text-[13px] font-semibold text-ink">专属头像</div>
@@ -242,10 +242,10 @@
                     />
                   </label>
                   <button
-                    v-if="profileForm.avatarUrl"
+                    v-if="profileForm.avatarUrl && profileForm.avatarUrl !== 'preset:ribbon'"
                     type="button"
                     class="px-3 h-8 rounded-full bg-white/80 text-[11.5px] text-ink-muted"
-                    @click="profileForm.avatarUrl = null"
+                    @click="profileForm.avatarUrl = 'preset:ribbon'"
                   >
                     恢复默认
                   </button>
@@ -260,15 +260,15 @@
                   v-for="preset in avatarPresets"
                   :key="preset.id"
                   type="button"
-                  class="flex flex-col items-center gap-1 p-2 rounded-2xl border transition-all pressable"
+                  class="flex flex-col items-center gap-1.5 p-2 rounded-2xl border transition-all pressable"
                   :class="
-                    profileForm.avatarUrl === preset.id
+                    (profileForm.avatarUrl || 'preset:ribbon') === preset.id
                       ? 'bg-white border-[#D99AAF] shadow-[0_4px_12px_rgba(201,134,154,0.18)]'
                       : 'bg-white/60 border-transparent'
                   "
                   @click="profileForm.avatarUrl = preset.id"
                 >
-                  <StudioAvatar :src="preset.id" :size="40" rounded-class="rounded-[14px]" />
+                  <StudioAvatar :src="preset.id" :size="42" rounded-class="rounded-full" />
                   <span class="text-[10.5px] text-ink-secondary font-medium">{{ preset.label }}</span>
                 </button>
               </div>
@@ -1453,7 +1453,7 @@ async function emptyRecycleBin() {
 }
 .avatar-ring {
   padding: 3px;
-  border-radius: 22px;
+  border-radius: 9999px;
   background: linear-gradient(135deg, #F3D1DC 0%, #FFFFFF 52%, #ECD1C5 100%);
   box-shadow: 0 8px 18px -8px rgba(188, 126, 146, 0.42);
 }

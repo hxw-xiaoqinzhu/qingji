@@ -7,12 +7,38 @@
     />
 
     <div class="relative z-10 w-full max-w-[344px] mx-auto -mt-6">
-      <!-- Poised Minimalist Brand Wordmark (No icon box, no slogans) -->
-      <div class="text-center mb-8 select-none">
-        <h1 class="text-[33px] font-semibold tracking-[0.22em] indent-[0.22em] text-[#3A2D32] leading-none">
+      <!-- Sculpted Circular Liquid-Glass Avatar Medallion + Poised Brand Wordmark -->
+      <div class="flex flex-col items-center text-center mb-7 select-none">
+        <div class="relative mb-4">
+          <div class="login-avatar-aura" aria-hidden="true" />
+          <div class="login-avatar-shell">
+            <div class="login-avatar-ring">
+              <StudioAvatar :src="savedAvatar" :size="72" rounded-class="rounded-full" />
+            </div>
+          </div>
+          <!-- Delicate Floating Couture Sparkles -->
+          <svg
+            class="pointer-events-none absolute -right-2.5 top-1 w-4 h-4 login-sparkle-1"
+            viewBox="0 0 20 20"
+            fill="none"
+            aria-hidden="true"
+          >
+            <path d="M10 1L11.8 7.2L18 9L11.8 10.8L10 17L8.2 10.8L2 9L8.2 7.2L10 1Z" fill="#DF9FB2" />
+          </svg>
+          <svg
+            class="pointer-events-none absolute -left-2 bottom-2.5 w-3 h-3 login-sparkle-2"
+            viewBox="0 0 20 20"
+            fill="none"
+            aria-hidden="true"
+          >
+            <path d="M10 2L11.5 7.5L17 9L11.5 10.5L10 16L8.5 10.5L3 9L8.5 7.5L10 2Z" fill="#E8C6AE" />
+          </svg>
+        </div>
+
+        <h1 class="text-[31px] font-semibold tracking-[0.22em] indent-[0.22em] text-[#3A2D32] leading-none">
           晴记
         </h1>
-        <span class="block w-6 h-[2.5px] rounded-full mx-auto mt-3.5 wordmark-accent" />
+        <span class="block w-6 h-[2.5px] rounded-full mx-auto mt-3 wordmark-accent" />
       </div>
 
       <!-- Concentric iOS 27 Liquid Glass Pavilion (R_outer=30px, p=14px -> R_inner=16px) -->
@@ -122,10 +148,13 @@ import { reactive, ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import { IconLashEyeClosed, IconLashEyeOpen } from '@/components/icons/BeautyIcons';
+import StudioAvatar from '@/components/StudioAvatar.vue';
 
 const router = useRouter();
 const route = useRoute();
 const auth = useAuthStore();
+
+const savedAvatar = ref<string>(localStorage.getItem('ms_last_avatar') || 'preset:ribbon');
 
 const mode = ref<'login' | 'register'>('login');
 const loading = ref(false);
@@ -194,6 +223,58 @@ async function handleSubmit() {
 
 .wordmark-accent {
   background: linear-gradient(90deg, #E8B9C6 0%, #E7C9BA 100%);
+}
+
+.login-avatar-aura {
+  position: absolute;
+  inset: -12px;
+  border-radius: 9999px;
+  background: radial-gradient(
+    circle,
+    rgba(243, 200, 214, 0.42) 0%,
+    rgba(246, 224, 206, 0.22) 52%,
+    rgba(255, 255, 255, 0) 74%
+  );
+  filter: blur(8px);
+  pointer-events: none;
+}
+
+.login-avatar-shell {
+  position: relative;
+  padding: 6px;
+  border-radius: 9999px;
+  background: linear-gradient(155deg, rgba(255, 255, 255, 0.82) 0%, rgba(255, 247, 250, 0.56) 100%);
+  backdrop-filter: blur(18px) saturate(170%);
+  -webkit-backdrop-filter: blur(18px) saturate(170%);
+  border: 1px solid rgba(255, 255, 255, 0.94);
+  box-shadow:
+    0 16px 34px -12px rgba(186, 126, 146, 0.28),
+    inset 0 1px 1px rgba(255, 255, 255, 0.96);
+}
+
+.login-avatar-ring {
+  padding: 2.5px;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #F3D1DC 0%, #FFFFFF 50%, #ECD2C6 100%);
+}
+
+.login-sparkle-1 {
+  animation: sparkleFloat 5.5s ease-in-out infinite alternate;
+}
+
+.login-sparkle-2 {
+  animation: sparkleFloat 6.8s ease-in-out 1.2s infinite alternate;
+}
+
+@keyframes sparkleFloat {
+  0% {
+    transform: translateY(0) scale(0.92);
+    opacity: 0.65;
+  }
+  100% {
+    transform: translateY(-3px) scale(1.08);
+    opacity: 1;
+  }
 }
 
 .login-glass-shell {

@@ -18,9 +18,9 @@
     <div class="scroll-pane no-scrollbar px-4 pt-2 pb-safe-sheet space-y-4" @scroll.passive="onPaneScroll">
       <!-- Card 1: Basic Studio Identity -->
       <section class="card-soft p-5 space-y-4 stagger-item">
-        <div class="flex items-center gap-3 pb-1">
-          <div class="w-11 h-11 rounded-[16px] btn-rose text-white flex items-center justify-center shrink-0">
-            <IconTabStudio :size="22" />
+        <div class="flex items-center gap-3.5 pb-1">
+          <div class="p-[2.5px] rounded-full shrink-0" style="background: linear-gradient(135deg, #F3D1DC 0%, #FFFFFF 52%, #ECD1C5 100%); box-shadow: 0 6px 14px -6px rgba(188, 126, 146, 0.4)">
+            <StudioAvatar :src="auth.user?.avatarUrl" :size="48" rounded-class="rounded-full" />
           </div>
           <div>
             <h2 class="text-[15px] font-semibold text-ink">化妆室资料</h2>
@@ -117,7 +117,7 @@ import { ChevronLeft } from 'lucide-vue-next';
 import http from '@/api/http';
 import { useAuthStore } from '@/stores/auth';
 import { useScrollHeader } from '@/composables/useScrollHeader';
-import { IconTabStudio } from '@/components/icons/BeautyIcons';
+import StudioAvatar from '@/components/StudioAvatar.vue';
 
 const router = useRouter();
 const auth = useAuthStore();

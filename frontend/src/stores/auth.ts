@@ -29,6 +29,14 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.removeItem('ms_refresh_token');
   }
 
+  function syncCachedAvatar(avatarUrl?: string | null) {
+    if (avatarUrl) {
+      localStorage.setItem('ms_last_avatar', avatarUrl);
+    } else {
+      localStorage.setItem('ms_last_avatar', 'preset:ribbon');
+    }
+  }
+
   async function fetchMe() {
     if (!accessToken.value) {
       initialized.value = true;
@@ -37,6 +45,7 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const { data } = await http.get('/auth/me');
       user.value = data.user;
+      syncCachedAvatar(data.user?.avatarUrl);
       currentSessionId.value = data.currentSessionId;
     } catch {
       clearAuth();
@@ -48,6 +57,7 @@ export const useAuthStore = defineStore('auth', () => {
   async function login(username: string, password: string) {
     const { data } = await http.post('/auth/login', { username, password });
     user.value = data.user;
+    syncCachedAvatar(data.user?.avatarUrl);
     setTokens(data.accessToken, data.refreshToken, data.sessionId);
     initialized.value = true;
     return data;
@@ -56,6 +66,7 @@ export const useAuthStore = defineStore('auth', () => {
   async function register(payload: { username: string; password: string; studioName?: string; phone?: string }) {
     const { data } = await http.post('/auth/register', payload);
     user.value = data.user;
+    syncCachedAvatar(data.user?.avatarUrl);
     setTokens(data.accessToken, data.refreshToken, data.sessionId);
     initialized.value = true;
     return data;
@@ -64,6 +75,7 @@ export const useAuthStore = defineStore('auth', () => {
   async function updateProfile(payload: Partial<UserProfile>) {
     const { data } = await http.put('/auth/me', payload);
     user.value = data.user;
+    syncCachedAvatar(data.user?.avatarUrl);
     return data.user;
   }
 

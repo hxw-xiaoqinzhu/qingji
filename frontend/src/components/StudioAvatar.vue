@@ -12,8 +12,8 @@
       class="w-full h-full object-cover"
     />
 
-    <!-- Preset 1: Pastel Ribbon Bow -->
-    <svg v-else-if="src === 'preset:ribbon'" viewBox="0 0 64 64" class="w-[74%] h-[74%]" fill="none">
+    <!-- Preset 1 (Default): Pastel Ribbon Bow -->
+    <svg v-else-if="!src || src === 'preset:ribbon'" viewBox="0 0 64 64" class="w-[76%] h-[76%]" fill="none">
       <circle cx="32" cy="32" r="26" fill="#FFF7F9" />
       <path d="M32 31C26 23 14 20 13 29C12 37 23 38 32 33Z" fill="#F2B8C6" stroke="#C9869A" stroke-width="2" stroke-linejoin="round" />
       <path d="M32 31C38 23 50 20 51 29C52 37 41 38 32 33Z" fill="#F6C8D3" stroke="#C9869A" stroke-width="2" stroke-linejoin="round" />
@@ -57,14 +57,20 @@
       <path d="M33 25C35 21 37 20 38 20" stroke="#B6809A" stroke-width="1.5" stroke-linecap="round" />
     </svg>
 
-    <!-- Default Studio Emblem -->
-    <IconTabStudio v-else :size="Math.round(size * 0.44)" class="text-white" />
+    <!-- Fallback: Pastel Ribbon Bow -->
+    <svg v-else viewBox="0 0 64 64" class="w-[76%] h-[76%]" fill="none">
+      <circle cx="32" cy="32" r="26" fill="#FFF7F9" />
+      <path d="M32 31C26 23 14 20 13 29C12 37 23 38 32 33Z" fill="#F2B8C6" stroke="#C9869A" stroke-width="2" stroke-linejoin="round" />
+      <path d="M32 31C38 23 50 20 51 29C52 37 41 38 32 33Z" fill="#F6C8D3" stroke="#C9869A" stroke-width="2" stroke-linejoin="round" />
+      <path d="M29 34L22 47L28 44L31 48L32 35" fill="#F7D7DF" stroke="#C9869A" stroke-width="1.8" stroke-linejoin="round" />
+      <path d="M35 34L42 47L36 44L33 48L32 35" fill="#F2C0CD" stroke="#C9869A" stroke-width="1.8" stroke-linejoin="round" />
+      <circle cx="32" cy="32" r="4.5" fill="#FFFDFD" stroke="#C9869A" stroke-width="2" />
+    </svg>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { IconTabStudio } from '@/components/icons/BeautyIcons';
 
 const props = withDefaults(
   defineProps<{
@@ -73,9 +79,9 @@ const props = withDefaults(
     roundedClass?: string;
   }>(),
   {
-    src: null,
+    src: 'preset:ribbon',
     size: 60,
-    roundedClass: 'rounded-[20px]',
+    roundedClass: 'rounded-full',
   }
 );
 
@@ -86,10 +92,9 @@ const isImageUrl = computed(() => {
 
 const bgStyle = computed(() => {
   if (isImageUrl.value) return '#FAF0F3';
-  if (props.src === 'preset:ribbon') return 'linear-gradient(145deg, #FCEBF0 0%, #F7DCE5 100%)';
   if (props.src === 'preset:crown') return 'linear-gradient(145deg, #FCF3EA 0%, #F6E3D7 100%)';
   if (props.src === 'preset:tulip') return 'linear-gradient(145deg, #FBF0F4 0%, #F3E5EC 100%)';
   if (props.src === 'preset:butterfly') return 'linear-gradient(145deg, #F6EFFA 0%, #EFE2F2 100%)';
-  return 'linear-gradient(145deg, #E2AAB9 0%, #CC8C9F 100%)';
+  return 'linear-gradient(145deg, #FCEBF0 0%, #F7DCE5 100%)';
 });
 </script>
