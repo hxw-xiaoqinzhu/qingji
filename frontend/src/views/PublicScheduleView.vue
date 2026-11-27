@@ -89,8 +89,11 @@
       </div>
     </div>
 
-    <!-- Bottom Copy Public Schedule Link CTA -->
-    <div class="dock-glass-bar px-4 pt-2.5">
+    <!-- Bottom Copy Public Schedule Link CTA (Transparent, no white background bar) -->
+    <div
+      class="px-4 pt-2 shrink-0"
+      style="padding-bottom: max(14px, calc(env(safe-area-inset-bottom, 0px) * 0.65))"
+    >
       <div class="max-w-[440px] mx-auto">
         <button
           type="button"

@@ -49,7 +49,7 @@
     <div class="scroll-pane no-scrollbar px-4 pt-2 pb-6" @scroll.passive="onPaneScroll">
       <!-- Shadowless Flat Mode Switch Capsule -->
       <div class="flex items-center justify-between mb-3">
-        <span class="text-[14px] font-semibold text-ink">账本统计</span>
+        <span class="text-[14px] font-semibold text-ink">{{ mode === 'all' ? '年账本统计' : '月账本统计' }}</span>
         <div class="inline-flex bg-white/85 p-0.5 rounded-full text-[11px] font-medium">
           <button
             type="button"
@@ -324,10 +324,20 @@
           </button>
         </div>
 
+        <div v-if="expenseForm.category === '其他'">
+          <label class="block text-[12px] text-ink-secondary mb-1.5 font-medium">支出标题</label>
+          <input
+            v-model.trim="expenseForm.customTitle"
+            type="text"
+            placeholder="请输入支出标题，如：房租水电、化妆灯具..."
+            class="w-full input-silk px-3.5 h-[48px]"
+          />
+        </div>
+
         <div class="grid grid-cols-2 gap-3">
           <div class="min-w-0">
             <label class="block text-[12px] text-ink-secondary mb-1.5 font-medium">支出金额</label>
-            <div class="input-affix-wrap">
+            <div class="input-affix-wrap !h-[46px]">
               <span class="input-affix-unit mr-1.5">¥</span>
               <input
                 v-model.number="expenseForm.amount"
@@ -340,7 +350,7 @@
           </div>
           <div class="min-w-0">
             <label class="block text-[12px] text-ink-secondary mb-1.5 font-medium">发生日期</label>
-            <label class="relative flex items-center justify-between input-silk px-3.5 h-[42px] cursor-pointer">
+            <label class="relative flex items-center justify-between input-silk px-3.5 h-[46px] cursor-pointer">
               <span class="text-[14px] font-medium text-ink tabular-nums">
                 {{ dayjs(expenseForm.incurredAt).format('YYYY.MM.DD') }}
               </span>
@@ -356,11 +366,11 @@
 
         <div>
           <label class="block text-[12px] text-ink-secondary mb-1.5 font-medium">备注说明</label>
-          <input
+          <textarea
             v-model.trim="expenseForm.note"
-            type="text"
+            rows="3"
             placeholder="如：CPB隔离补货、假睫毛、早妆专车费"
-            class="w-full input-silk px-3.5 h-[42px]"
+            class="w-full input-silk px-3.5 py-3 min-h-[84px] leading-relaxed"
           />
         </div>
 
@@ -432,6 +442,7 @@ const showExpenseModal = ref(false);
 const expenseCategories = ['耗材采购', '交通打车', '助理费用', '推广返点', '工作室杂费', '其他'];
 const expenseForm = reactive({
   category: '耗材采购',
+  customTitle: '',
   amount: 0,
   incurredAt: dayjs().format('YYYY-MM-DD'),
   note: '',
@@ -604,9 +615,19 @@ async function saveExpense() {
     showToast('请输入有效金额');
     return;
   }
+  const finalCategory =
+    expenseForm.category === '其他' && expenseForm.customTitle.trim()
+      ? expenseForm.customTitle.trim()
+      : expenseForm.category;
   try {
-    await http.post('/expenses', expenseForm);
+    await http.post('/expenses', {
+      category: finalCategory,
+      amount: expenseForm.amount,
+      incurredAt: expenseForm.incurredAt,
+      note: expenseForm.note,
+    });
     showExpenseModal.value = false;
+    expenseForm.customTitle = '';
     expenseForm.amount = 0;
     expenseForm.note = '';
     showToast('支出已入账');

@@ -1794,6 +1794,7 @@ async function copyIcsLink() {
 }
 
 async function openSessions() {
+  sessions.value = [];
   showSessionsSheet.value = true;
   loadingSessions.value = true;
   try {
