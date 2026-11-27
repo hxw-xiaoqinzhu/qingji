@@ -4,7 +4,7 @@
     <header class="nav-adaptive px-4 pb-3 space-y-2.5" :style="headerStyle">
       <div class="flex items-baseline gap-2.5">
         <h1 class="text-[22px] font-semibold tracking-tight text-ink leading-none">妆造行程</h1>
-        <span class="text-[12px] text-ink-muted tabular-nums leading-none">
+        <span class="text-[12.5px] font-semibold text-[#66555C] tabular-nums leading-none">
           共 {{ orders.length }} 场预约
         </span>
       </div>
