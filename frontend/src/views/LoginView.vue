@@ -62,27 +62,37 @@
 
       <!-- Seamless Translucent Frosted-Glass Curved Folder-Tab Card -->
       <div class="login-glass-card relative z-10 overflow-hidden rounded-[26px]">
-        <!-- Single Unified Full-Card SVG Backdrop (Zero seam between curved active tab & translucent glass body!) -->
+        <!-- Single Unified Full-Card SVG Backdrop (Non-overlapping complementary paths -> 100% identical color from active tab to card bottom!) -->
         <svg
           class="pointer-events-none absolute inset-0 w-full h-full z-0"
           viewBox="0 0 360 400"
           preserveAspectRatio="none"
           aria-hidden="true"
         >
-          <!-- Subtle Frosted Inactive Top Strip -->
-          <rect x="0" y="0" width="360" height="55" fill="rgba(255, 240, 245, 0.34)" />
-
-          <!-- Active Translucent White-Glass Tab + Seamless Card Body -->
-          <path
-            v-if="mode === 'login'"
-            d="M0,400 L0,26 Q0,0 26,0 L160,0 C186,0 190,54 222,54 L360,54 L360,400 Z"
-            fill="rgba(255, 255, 255, 0.72)"
-          />
-          <path
-            v-else
-            d="M0,400 L0,54 L138,54 C170,54 174,0 200,0 L334,0 Q360,0 360,26 L360,400 Z"
-            fill="rgba(255, 255, 255, 0.72)"
-          />
+          <template v-if="mode === 'login'">
+            <!-- Non-overlapping Inactive Right Tab -->
+            <path
+              d="M160,0 L360,0 L360,54 L222,54 C190,54 186,0 160,0 Z"
+              fill="rgba(255, 236, 243, 0.34)"
+            />
+            <!-- Active Left Tab + Full Card Body (Single uniform translucent glass fill) -->
+            <path
+              d="M0,400 L0,26 Q0,0 26,0 L160,0 C186,0 190,54 222,54 L360,54 L360,400 Z"
+              fill="rgba(255, 255, 255, 0.78)"
+            />
+          </template>
+          <template v-else>
+            <!-- Non-overlapping Inactive Left Tab -->
+            <path
+              d="M0,0 L200,0 C174,0 170,54 138,54 L0,54 Z"
+              fill="rgba(255, 236, 243, 0.34)"
+            />
+            <!-- Active Right Tab + Full Card Body (Single uniform translucent glass fill) -->
+            <path
+              d="M0,400 L0,54 L138,54 C170,54 174,0 200,0 L334,0 Q360,0 360,26 L360,400 Z"
+              fill="rgba(255, 255, 255, 0.78)"
+            />
+          </template>
         </svg>
 
         <!-- Folder Tab Buttons -->
