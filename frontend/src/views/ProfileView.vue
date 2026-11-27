@@ -1,16 +1,10 @@
 <template>
   <div class="h-full flex flex-col overflow-hidden">
-    <!-- Adaptive Top Header: Transparent at rest -> Smoothly fades to UI Pink on scroll -->
-    <header class="nav-adaptive px-4 pb-3 flex items-center justify-between" :style="headerStyle">
-      <!-- Decorative Editorial Atelier Pill (No plain page title, no settings gear) -->
-      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/75 backdrop-blur-md border border-white/90 shadow-[0_4px_14px_-8px_rgba(182,126,144,0.3)] select-none">
-        <span class="w-2 h-2 rounded-full bg-[#DF9BB0] shadow-[0_0_8px_rgba(223,155,176,0.85)]" />
-        <span class="text-[12px] font-medium text-[#7D5E69] tracking-[0.04em]">晴记 · 温柔营业中</span>
-      </div>
-    </header>
-
-    <!-- Scrollable Studio Workbench -->
-    <div class="scroll-pane no-scrollbar px-4 pt-2 pb-8 space-y-4" @scroll.passive="onPaneScroll">
+    <!-- Scrollable Studio Workbench (Adaptive safe-area top spacing, no top header bar) -->
+    <div
+      class="scroll-pane no-scrollbar px-4 pb-8 space-y-4"
+      style="padding-top: calc(var(--safe-top) + 14px)"
+    >
       <!-- Editorial Couture Studio Hero Card (Tap to customize avatar, nickname & playful quote) -->
       <section
         class="hero-studio-card relative overflow-hidden stagger-item pressable cursor-pointer"
@@ -1033,7 +1027,6 @@ import { isFirebaseMode } from '@/lib/firebase';
 import { buildAllOrdersIcs } from '@/api/firebaseBackend';
 import { useAuthStore } from '@/stores/auth';
 import { useUiStore } from '@/stores/ui';
-import { useScrollHeader } from '@/composables/useScrollHeader';
 import { statusMeta } from '@/utils/format';
 import {
   IconCalendarSync,
@@ -1052,7 +1045,6 @@ import type { ClientItem, Order, PackageTemplate, UserSession } from '@/types';
 const router = useRouter();
 const auth = useAuthStore();
 const ui = useUiStore();
-const { onPaneScroll, headerStyle } = useScrollHeader(44);
 
 // Time-aware playful greeting for hero card
 const timeGreeting = computed(() => {
