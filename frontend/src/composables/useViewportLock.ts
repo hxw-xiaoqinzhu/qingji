@@ -12,24 +12,31 @@ function isTextInput(el: Element | null): el is HTMLElement {
 }
 
 /**
- * At rest (no keyboard): `#app` uses `position: fixed; top: 0; bottom: 0; height: auto;`
- * so it reaches the EXACT 0.00px physical bottom edge on iOS Standalone PWA, Safari, WeChat & Android
- * (avoiding iOS PWA's `window.innerHeight` 34px gap AND `100lvh`'s 44px overflow!).
- * We measure `#app.offsetHeight` at rest, and ONLY lock `#app` to that pixel height while the soft
- * keyboard is open (`html.kb-open`) so the keyboard never shrinks or pushes up the page!
+ * Keyboard-immune full-screen viewport lock:
+ * - In iOS Standalone Home-Screen PWA (`display-mode: standalone`): uses `100vh` (exact physical
+ *   screen height, never 34px short like `window.innerHeight` / `fixed bottom:0` on `html`, and
+ *   never 44px too tall like `100lvh`, AND naturally immune to soft-keyboard shrink!).
+ * - In Safari / WeChat / Android browsers: locks `--app-height` to pre-keyboard `window.innerHeight`
+ *   in pixels so `#app` never shrinks or exposes a gap when the virtual keyboard opens.
  */
 export function useViewportLock() {
   let lockedHeight = 0;
   let lastWidth = 0;
   let settleTimer: ReturnType<typeof setTimeout> | null = null;
 
-  function measureRestHeight(): number {
-    const appEl = document.getElementById('app');
-    const renderedH = appEl && !document.documentElement.classList.contains('kb-open') ? appEl.offsetHeight : 0;
-    return Math.max(renderedH, window.innerHeight);
+  function isStandalone(): boolean {
+    return (
+      (typeof window.matchMedia === 'function' && window.matchMedia('(display-mode: standalone)').matches) ||
+      (window.navigator as any).standalone === true
+    );
   }
 
   function applyAppHeight(h: number) {
+    if (isStandalone()) {
+      lockedHeight = Math.max(h, window.screen.height);
+      document.documentElement.style.setProperty('--app-height', '100vh');
+      return;
+    }
     if (h > 200) {
       lockedHeight = h;
       document.documentElement.style.setProperty('--app-height', `${Math.round(h)}px`);
@@ -69,21 +76,21 @@ export function useViewportLock() {
     pinWindowTop();
 
     const w = window.innerWidth;
+    const innerH = window.innerHeight;
     const vv = window.visualViewport;
-    const vvH = vv ? vv.height : window.innerHeight;
+    const vvH = vv ? vv.height : innerH;
     const inputFocused = isTextInput(document.activeElement);
 
     if (!lockedHeight || Math.abs(w - lastWidth) > 24) {
       lastWidth = w;
-      applyAppHeight(measureRestHeight());
-    } else if (!inputFocused && vvH >= window.innerHeight - 60) {
-      document.documentElement.classList.remove('kb-open');
-      applyAppHeight(measureRestHeight());
+      applyAppHeight(innerH);
+    } else if (!inputFocused && innerH >= lockedHeight - 80) {
+      applyAppHeight(innerH);
     }
 
-    const baseCompare = Math.min(lockedHeight, window.innerHeight);
+    const baseCompare = isStandalone() ? window.screen.height : lockedHeight;
     const rawKb = Math.max(0, Math.round(baseCompare - vvH - (vv ? vv.offsetTop : 0)));
-    const kbOpen = inputFocused && rawKb > 90;
+    const kbOpen = inputFocused && rawKb > 100;
     const kbPx = kbOpen ? rawKb : 0;
 
     document.documentElement.style.setProperty('--kb-height', `${kbPx}px`);
@@ -96,9 +103,6 @@ export function useViewportLock() {
 
   function onFocusIn(e: FocusEvent) {
     if (!isTextInput(e.target as Element)) return;
-    if (!document.documentElement.classList.contains('kb-open')) {
-      applyAppHeight(measureRestHeight());
-    }
     pinWindowTop();
     setTimeout(syncViewport, 80);
     setTimeout(syncViewport, 280);
@@ -108,22 +112,14 @@ export function useViewportLock() {
     if (settleTimer) clearTimeout(settleTimer);
     settleTimer = setTimeout(() => {
       pinWindowTop();
-      if (!isTextInput(document.activeElement)) {
-        document.documentElement.classList.remove('kb-open');
-        document.documentElement.style.setProperty('--kb-height', '0px');
-        applyAppHeight(measureRestHeight());
-      } else {
-        syncViewport();
-      }
+      syncViewport();
     }, 100);
   }
 
   onMounted(() => {
     lastWidth = window.innerWidth;
-    requestAnimationFrame(() => {
-      applyAppHeight(measureRestHeight());
-      syncViewport();
-    });
+    applyAppHeight(window.innerHeight);
+    syncViewport();
 
     window.addEventListener('resize', syncViewport, { passive: true });
     window.addEventListener('scroll', pinWindowTop, { passive: true });

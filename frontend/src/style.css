@@ -36,6 +36,12 @@
   --van-toast-radius: 999px;
 }
 
+@media all and (display-mode: standalone) {
+  :root {
+    --app-height: 100vh;
+  }
+}
+
 @layer base {
   * {
     box-sizing: border-box;
@@ -44,15 +50,10 @@
 
   html,
   body {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
     margin: 0;
     padding: 0;
     width: 100%;
-    height: auto;
+    height: var(--app-height, 100vh);
     overflow: hidden;
     background-color: #FFFCFD;
     color: #2B1E23;
@@ -62,14 +63,13 @@
     font-family: var(--app-font);
   }
 
-  /* Fullscreen edge-to-edge lock: top:0 + bottom:0 hits true 0.00px physical bottom in Safari, WeChat & PWA! */
+  /* Fullscreen edge-to-edge lock: 100vh in iOS Standalone PWA hits exact physical bottom (0px gap, 0px overflow) */
   #app {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
-    bottom: 0;
-    height: auto;
+    height: var(--app-height, 100vh);
     width: 100%;
     max-width: 480px;
     margin: 0 auto;
@@ -78,14 +78,6 @@
     overflow: hidden;
     background-color: #FCF5F7;
     box-shadow: 0 0 60px rgba(160, 90, 112, 0.12);
-  }
-
-  /* ONLY while soft keyboard is open, lock height to pre-keyboard pixel height so #app never shrinks */
-  html.kb-open,
-  html.kb-open body,
-  html.kb-open #app {
-    bottom: auto;
-    height: var(--app-height, 100vh);
   }
 
   input,
@@ -258,7 +250,7 @@ html.kb-open .van-popup--bottom {
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
   border-top: 1px solid rgba(212, 104, 132, 0.09);
-  padding-bottom: max(10px, calc(env(safe-area-inset-bottom, 0px) * 0.42));
+  padding-bottom: max(10px, calc(env(safe-area-inset-bottom, 0px) * 0.55));
   z-index: 30;
 }
 

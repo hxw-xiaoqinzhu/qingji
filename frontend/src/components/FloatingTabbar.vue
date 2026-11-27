@@ -161,7 +161,7 @@ function goCreateOrder() {
   position: relative;
   flex-shrink: 0;
   background: #FFFCFD;
-  padding-bottom: max(8px, calc(env(safe-area-inset-bottom, 0px) * 0.36));
+  padding-bottom: max(8px, calc(env(safe-area-inset-bottom, 0px) * 0.55));
   z-index: 30;
   box-shadow: 0 -8px 24px -10px rgba(176, 132, 146, 0.12);
 }
