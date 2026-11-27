@@ -164,7 +164,7 @@
         @click="showPricePoster = true"
       >
         <Sparkles class="w-4 h-4" />
-        <span>确认生成可爱报价海报</span>
+        <span>确认生成报价</span>
       </button>
     </div>
 

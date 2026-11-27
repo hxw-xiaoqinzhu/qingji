@@ -86,7 +86,7 @@
             </span>
             <div class="text-left">
               <div class="font-medium text-ink">报价套餐与增项库</div>
-              <div class="text-[11px] text-ink-muted">管理价目并一键生成可爱报价海报</div>
+              <div class="text-[11px] text-ink-muted">管理价目并一键生成报价海报</div>
             </div>
           </div>
           <ChevronRight class="w-4 h-4 text-ink-muted" />
