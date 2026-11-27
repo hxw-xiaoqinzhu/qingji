@@ -1,20 +1,10 @@
 <template>
   <div class="h-full flex flex-col overflow-hidden">
-    <!-- Fixed Top Header: Transparent at rest -> Smoothly fades to UI Pink on scroll -->
-    <header class="nav-adaptive px-4 pb-3 space-y-2.5" :style="headerStyle">
-      <!-- Decorative Editorial Whisper Ribbon (No plain page title) -->
-      <div class="flex items-center justify-between">
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/75 backdrop-blur-md border border-white/90 shadow-[0_4px_14px_-8px_rgba(182,126,144,0.3)]">
-          <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-            <path d="M10 1.5L11.7 7.3L17.5 9L11.7 10.7L10 16.5L8.3 10.7L2.5 9L8.3 7.3L10 1.5Z" fill="#D995A8" />
-          </svg>
-          <span class="text-[12px] font-medium text-[#7D5E69] tracking-[0.03em]">把每一次相遇，认真排进时光里</span>
-        </div>
-        <span class="px-2.5 py-1 rounded-full bg-white/80 border border-white/90 text-[12px] font-semibold text-[#66555C] tabular-nums leading-none">
-          共 {{ orders.length }} 场预约
-        </span>
-      </div>
-
+    <!-- Minimalist Fixed Top Header: Search + Filter Tabs (No crowded top quote row) -->
+    <header
+      class="nav-adaptive px-4 pb-2.5 space-y-3"
+      :style="[{ paddingTop: 'calc(var(--safe-top) + 14px)' }, headerStyle]"
+    >
       <!-- Refined Search Pill Input -->
       <div class="relative">
         <Search class="w-[15px] h-[15px] text-ink-muted absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -22,7 +12,7 @@
           v-model.trim="searchQuery"
           type="search"
           placeholder="搜索新娘姓名、电话或酒店..."
-          class="w-full input-search-pill pl-9 pr-9 h-[38px]"
+          class="w-full input-search-pill pl-9 pr-9 h-[40px]"
         />
         <button
           v-if="searchQuery"
@@ -65,39 +55,50 @@
     </header>
 
     <!-- Independently Scrollable Card Region -->
-    <div class="scroll-pane no-scrollbar px-4 pt-3 pb-6" @scroll.passive="onPaneScroll">
+    <div class="scroll-pane no-scrollbar px-4 pt-2 pb-6" @scroll.passive="onPaneScroll">
       <div class="relative min-h-[360px]">
         <!-- 1:1 Pixel-Matched Overlay Skeleton (Dissolves smoothly on top with zero blank flash) -->
         <Transition name="skeleton-dissolve">
-          <div v-if="loading && !orders.length" class="absolute inset-0 z-20 space-y-5 pointer-events-none">
-            <div v-for="g in 2" :key="'og-' + g">
-              <div class="flex items-center justify-between px-1 mb-2.5 h-[20px]">
-                <div class="flex items-center gap-2">
-                  <span class="w-2 h-2 rounded-full bg-[#EFE0E5]" />
-                  <div class="skeleton-box h-3.5 w-24 rounded-full" />
-                  <div class="skeleton-box h-4 w-14 rounded-full" />
-                </div>
-                <div class="skeleton-box h-3 w-8 rounded-full" />
-              </div>
-              <div class="space-y-2.5 pl-3 border-l border-brand/15 ml-1">
-                <div v-for="i in 2" :key="'oc-' + g + '-' + i" class="card-soft p-4 pl-5 h-[112px] flex flex-col justify-between">
-                  <div class="flex items-center justify-between">
-                    <div class="skeleton-box h-5 w-28 rounded-full" />
-                    <div class="skeleton-box h-5 w-14 rounded-full" />
+          <div v-if="loading && !orders.length" class="absolute inset-0 z-20 pointer-events-none">
+            <div class="skeleton-box h-3.5 w-20 rounded-full mb-3.5 ml-1" />
+            <div class="space-y-5">
+              <div v-for="g in 2" :key="'og-' + g">
+                <div class="flex items-center justify-between px-1 mb-2.5 h-[20px]">
+                  <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-[#EFE0E5]" />
+                    <div class="skeleton-box h-3.5 w-24 rounded-full" />
+                    <div class="skeleton-box h-4 w-14 rounded-full" />
                   </div>
-                  <div class="flex items-center gap-3">
-                    <div class="skeleton-box w-10 h-10 rounded-2xl shrink-0" />
-                    <div class="flex-1 space-y-1.5">
-                      <div class="skeleton-box h-4 w-36 rounded-lg" />
-                      <div class="skeleton-box h-3 w-28 rounded-full" />
+                  <div class="skeleton-box h-3 w-8 rounded-full" />
+                </div>
+                <div class="space-y-2.5 pl-3 border-l border-brand/15 ml-1">
+                  <div v-for="i in 2" :key="'oc-' + g + '-' + i" class="card-soft p-4 pl-5 h-[112px] flex flex-col justify-between">
+                    <div class="flex items-center justify-between">
+                      <div class="skeleton-box h-5 w-28 rounded-full" />
+                      <div class="skeleton-box h-5 w-14 rounded-full" />
                     </div>
-                    <div class="skeleton-box h-6 w-16 rounded-lg" />
+                    <div class="flex items-center gap-3">
+                      <div class="skeleton-box w-10 h-10 rounded-2xl shrink-0" />
+                      <div class="flex-1 space-y-1.5">
+                        <div class="skeleton-box h-4 w-36 rounded-lg" />
+                        <div class="skeleton-box h-3 w-28 rounded-full" />
+                      </div>
+                      <div class="skeleton-box h-6 w-16 rounded-lg" />
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </Transition>
+
+        <!-- Clean Background-Free Count Below Tabs (Hidden when 0 orders) -->
+        <div
+          v-if="orders.length > 0"
+          class="px-1 mb-3.5 text-[12.5px] font-semibold text-[#66555C] tabular-nums leading-none"
+        >
+          共 {{ orders.length }} 场预约
+        </div>
 
         <div v-if="groupedOrders.length > 0" class="space-y-5">
         <section
