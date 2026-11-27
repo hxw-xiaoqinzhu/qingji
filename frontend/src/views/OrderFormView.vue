@@ -16,29 +16,55 @@
 
     <!-- Scrollable Form Body -->
     <div class="scroll-pane no-scrollbar px-4 pt-2 pb-6" @scroll.passive="onPaneScroll">
-      <Transition name="skeleton-fade" mode="out-in">
-        <div v-if="loadingOrder" key="form-skeleton" class="space-y-4">
-          <div class="card-soft p-4 space-y-4">
-            <div class="skeleton-box h-4 w-28" />
-            <div class="grid grid-cols-2 gap-3">
-              <div class="skeleton-box h-[42px] w-full" />
-              <div class="skeleton-box h-[42px] w-full" />
+      <div class="relative">
+        <Transition name="skeleton-dissolve">
+          <div v-if="loadingOrder" class="absolute inset-0 z-20 space-y-4 pointer-events-none">
+            <div class="card-soft p-4 space-y-4">
+              <div class="skeleton-box h-4 w-28 rounded-lg" />
+              <div class="grid grid-cols-2 gap-3">
+                <div class="space-y-1.5">
+                  <div class="skeleton-box h-3 w-16 rounded-full" />
+                  <div class="skeleton-box h-[42px] w-full rounded-[11px]" />
+                </div>
+                <div class="space-y-1.5">
+                  <div class="skeleton-box h-3 w-16 rounded-full" />
+                  <div class="skeleton-box h-[42px] w-full rounded-[11px]" />
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <div class="space-y-1.5">
+                  <div class="skeleton-box h-3 w-16 rounded-full" />
+                  <div class="skeleton-box h-[42px] w-full rounded-[11px]" />
+                </div>
+                <div class="space-y-1.5">
+                  <div class="skeleton-box h-3 w-16 rounded-full" />
+                  <div class="skeleton-box h-[42px] w-full rounded-[11px]" />
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <div class="space-y-1.5">
+                  <div class="skeleton-box h-3 w-20 rounded-full" />
+                  <div class="skeleton-box h-[42px] w-full rounded-[11px]" />
+                </div>
+                <div class="space-y-1.5">
+                  <div class="skeleton-box h-3 w-16 rounded-full" />
+                  <div class="skeleton-box h-[42px] w-full rounded-[11px]" />
+                </div>
+              </div>
+              <div class="space-y-1.5">
+                <div class="skeleton-box h-3 w-16 rounded-full" />
+                <div class="skeleton-box h-[42px] w-full rounded-[11px]" />
+              </div>
+              <div class="space-y-1.5">
+                <div class="skeleton-box h-3 w-24 rounded-full" />
+                <div class="skeleton-box h-[42px] w-full rounded-[11px]" />
+              </div>
+              <div class="skeleton-box h-[68px] w-full rounded-[18px]" />
             </div>
-            <div class="grid grid-cols-2 gap-3">
-              <div class="skeleton-box h-[42px] w-full" />
-              <div class="skeleton-box h-[42px] w-full" />
-            </div>
-            <div class="grid grid-cols-2 gap-3">
-              <div class="skeleton-box h-[42px] w-full" />
-              <div class="skeleton-box h-[42px] w-full" />
-            </div>
-            <div class="skeleton-box h-[42px] w-full" />
-            <div class="skeleton-box h-[42px] w-full" />
-            <div class="skeleton-box h-16 w-full rounded-[18px]" />
           </div>
-        </div>
+        </Transition>
 
-        <div v-else key="form-content" class="space-y-4">
+        <div class="space-y-4" :class="loadingOrder ? 'opacity-0' : 'opacity-100 transition-opacity duration-200'">
       <!-- Smart WeChat Chat Snippet Parser -->
       <section
         v-if="!isEdit"
@@ -405,7 +431,7 @@
         </div>
       </section>
         </div>
-      </Transition>
+      </div>
     </div>
 
     <!-- Docked Bottom Save Bar -->

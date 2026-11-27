@@ -60,33 +60,40 @@
 
     <!-- Independently Scrollable Card Region -->
     <div class="scroll-pane no-scrollbar px-4 pt-3 pb-6" @scroll.passive="onPaneScroll">
-      <Transition name="skeleton-fade" mode="out-in">
-        <div v-if="loading && !orders.length" key="orders-skeleton" class="space-y-4">
-          <div v-for="g in 2" :key="'og-' + g" class="space-y-2.5">
-            <div class="flex items-center justify-between px-1">
-              <div class="skeleton-box h-4 w-36 rounded-full" />
-              <div class="skeleton-box h-3.5 w-10 rounded-full" />
-            </div>
-            <div class="space-y-2.5 pl-3 border-l border-brand/15 ml-1">
-              <div v-for="i in 2" :key="'oc-' + g + '-' + i" class="card-soft p-4 space-y-3">
-                <div class="flex items-center justify-between">
-                  <div class="skeleton-box h-5 w-24 rounded-full" />
-                  <div class="skeleton-box h-5 w-14 rounded-full" />
+      <div class="relative min-h-[360px]">
+        <!-- 1:1 Pixel-Matched Overlay Skeleton (Dissolves smoothly on top with zero blank flash) -->
+        <Transition name="skeleton-dissolve">
+          <div v-if="loading && !orders.length" class="absolute inset-0 z-20 space-y-5 pointer-events-none">
+            <div v-for="g in 2" :key="'og-' + g">
+              <div class="flex items-center justify-between px-1 mb-2.5 h-[20px]">
+                <div class="flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-[#EFE0E5]" />
+                  <div class="skeleton-box h-3.5 w-24 rounded-full" />
+                  <div class="skeleton-box h-4 w-14 rounded-full" />
                 </div>
-                <div class="flex items-center gap-3">
-                  <div class="skeleton-box w-10 h-10 rounded-2xl shrink-0" />
-                  <div class="flex-1 space-y-2">
-                    <div class="skeleton-box h-4 w-40" />
-                    <div class="skeleton-box h-3 w-28" />
+                <div class="skeleton-box h-3 w-8 rounded-full" />
+              </div>
+              <div class="space-y-2.5 pl-3 border-l border-brand/15 ml-1">
+                <div v-for="i in 2" :key="'oc-' + g + '-' + i" class="card-soft p-4 pl-5 h-[112px] flex flex-col justify-between">
+                  <div class="flex items-center justify-between">
+                    <div class="skeleton-box h-5 w-28 rounded-full" />
+                    <div class="skeleton-box h-5 w-14 rounded-full" />
                   </div>
-                  <div class="skeleton-box h-6 w-16" />
+                  <div class="flex items-center gap-3">
+                    <div class="skeleton-box w-10 h-10 rounded-2xl shrink-0" />
+                    <div class="flex-1 space-y-1.5">
+                      <div class="skeleton-box h-4 w-36 rounded-lg" />
+                      <div class="skeleton-box h-3 w-28 rounded-full" />
+                    </div>
+                    <div class="skeleton-box h-6 w-16 rounded-lg" />
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        </Transition>
 
-        <div v-else-if="groupedOrders.length > 0" key="orders-list" class="space-y-5">
+        <div v-if="groupedOrders.length > 0" class="space-y-5">
         <section
           v-for="(group, gIdx) in groupedOrders"
           :key="group.date"
@@ -193,14 +200,14 @@
         </section>
       </div>
 
-        <div v-else key="orders-empty" class="card-soft mt-2">
+        <div v-else-if="!loading" class="card-soft mt-2">
           <CuteEmptyState
             variant="orders"
             title="暂无匹配的妆造行程"
             description="可切换筛选状态，或轻点底部中央按钮新建行程"
           />
         </div>
-      </Transition>
+      </div>
     </div>
   </div>
 </template>

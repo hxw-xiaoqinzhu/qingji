@@ -25,33 +25,38 @@
 
     <!-- Scrollable Detail Content -->
     <div class="scroll-pane no-scrollbar px-4 pt-2 pb-6" @scroll.passive="onPaneScroll">
-      <Transition name="skeleton-fade" mode="out-in">
-        <div v-if="loading" key="detail-skeleton" class="space-y-4">
-          <div class="card-soft p-5 space-y-4">
-            <div class="flex items-center gap-3">
-              <div class="skeleton-box w-12 h-12 rounded-[18px] shrink-0" />
-              <div class="flex-1 space-y-2">
-                <div class="skeleton-box h-5 w-36" />
-                <div class="skeleton-box h-3.5 w-24" />
+      <div class="relative min-h-[480px]">
+        <!-- 1:1 Pixel-Matched Overlay Skeleton -->
+        <Transition name="skeleton-dissolve">
+          <div v-if="loading" class="absolute inset-0 z-20 space-y-4 pointer-events-none">
+            <div class="card-soft p-5 space-y-4">
+              <div class="flex items-start justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="skeleton-box w-12 h-12 rounded-[18px] shrink-0" />
+                  <div class="space-y-2">
+                    <div class="skeleton-box h-5 w-36 rounded-lg" />
+                    <div class="skeleton-box h-3.5 w-24 rounded-full" />
+                  </div>
+                </div>
+                <div class="skeleton-box h-6 w-16 rounded-full" />
               </div>
-              <div class="skeleton-box h-6 w-16 rounded-full" />
+              <div class="skeleton-box h-4 w-52 rounded-full" />
+              <div class="skeleton-box h-[108px] w-full rounded-[20px]" />
             </div>
-            <div class="skeleton-box h-4 w-52" />
-            <div class="skeleton-box h-24 w-full rounded-[20px]" />
+            <div class="card-soft p-5 space-y-3">
+              <div class="skeleton-box h-4 w-28 rounded-lg" />
+              <div class="skeleton-box h-4 w-full rounded-full" />
+              <div class="skeleton-box h-12 w-full rounded-2xl" />
+            </div>
+            <div class="card-soft p-5 space-y-2.5">
+              <div class="skeleton-box h-4 w-32 rounded-lg" />
+              <div class="skeleton-box h-11 w-full rounded-2xl" />
+              <div class="skeleton-box h-11 w-full rounded-2xl" />
+            </div>
           </div>
-          <div class="card-soft p-5 space-y-3">
-            <div class="skeleton-box h-4 w-28" />
-            <div class="skeleton-box h-4 w-full" />
-            <div class="skeleton-box h-12 w-full rounded-2xl" />
-          </div>
-          <div class="card-soft p-5 space-y-2.5">
-            <div class="skeleton-box h-4 w-32" />
-            <div class="skeleton-box h-11 w-full rounded-2xl" />
-            <div class="skeleton-box h-11 w-full rounded-2xl" />
-          </div>
-        </div>
+        </Transition>
 
-        <div v-else-if="order" key="detail-content" class="space-y-4">
+        <div v-if="order" class="space-y-4">
         <!-- Bridal Vanity Hero Card -->
         <section
           class="card-soft p-5 relative overflow-hidden stagger-item"
@@ -281,7 +286,7 @@
           </div>
         </section>
         </div>
-      </Transition>
+      </div>
     </div>
 
     <!-- Docked Bottom Action Bar (Clean White Icon Buttons + Primary CTA, no glass tray) -->

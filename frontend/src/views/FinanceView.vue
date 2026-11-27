@@ -69,36 +69,59 @@
         </div>
       </div>
 
-      <Transition name="skeleton-fade" mode="out-in" @after-enter="renderCharts">
-        <div v-if="loading && !stats" key="fin-skeleton" class="space-y-4">
-          <div class="card-velvet p-5 space-y-4">
-            <div class="flex items-center justify-between">
-              <div class="skeleton-box h-4 w-28" />
-              <div class="skeleton-box h-5 w-16 rounded-full" />
+      <div class="relative min-h-[560px]">
+        <!-- 1:1 Pixel-Matched Overlay Skeleton (Dissolves smoothly on top with zero blank flash) -->
+        <Transition name="skeleton-dissolve">
+          <div v-if="loading && !stats" class="absolute inset-0 z-20 space-y-4 pointer-events-none">
+            <div class="card-velvet p-5">
+              <div class="flex items-center justify-between h-[20px]">
+                <div class="skeleton-box h-3.5 w-28 rounded-full" />
+                <div class="skeleton-box h-5 w-16 rounded-full" />
+              </div>
+              <div class="mt-2.5 h-[34px] flex items-center">
+                <div class="skeleton-box h-8 w-40 rounded-xl" />
+              </div>
+              <div class="grid grid-cols-3 gap-2 mt-5 p-3.5 rounded-2xl bg-[#FAF2F5]/85 h-[66px] items-center">
+                <div class="space-y-1.5">
+                  <div class="skeleton-box h-2.5 w-10 rounded-full" />
+                  <div class="skeleton-box h-4 w-16 rounded-lg" />
+                </div>
+                <div class="space-y-1.5">
+                  <div class="skeleton-box h-2.5 w-12 rounded-full" />
+                  <div class="skeleton-box h-4 w-16 rounded-lg" />
+                </div>
+                <div class="space-y-1.5">
+                  <div class="skeleton-box h-2.5 w-10 rounded-full" />
+                  <div class="skeleton-box h-4 w-16 rounded-lg" />
+                </div>
+              </div>
             </div>
-            <div class="skeleton-box h-9 w-40" />
-            <div class="grid grid-cols-3 gap-2 pt-1">
-              <div class="skeleton-box h-12 rounded-2xl" />
-              <div class="skeleton-box h-12 rounded-2xl" />
-              <div class="skeleton-box h-12 rounded-2xl" />
+            <div class="card-soft p-5 space-y-2">
+              <div class="flex items-center justify-between h-[36px]">
+                <div class="space-y-1.5">
+                  <div class="skeleton-box h-4 w-28 rounded-lg" />
+                  <div class="skeleton-box h-2.5 w-36 rounded-full" />
+                </div>
+                <div class="skeleton-box h-6 w-16 rounded-full" />
+              </div>
+              <div class="skeleton-box h-44 w-full rounded-2xl" />
+            </div>
+            <div class="card-soft p-5 space-y-3">
+              <div class="skeleton-box h-4 w-24 rounded-lg" />
+              <div class="skeleton-box h-40 w-full rounded-2xl" />
+            </div>
+            <div class="card-soft p-5 space-y-2.5">
+              <div class="flex items-center justify-between">
+                <div class="skeleton-box h-4 w-24 rounded-lg" />
+                <div class="skeleton-box h-3 w-20 rounded-full" />
+              </div>
+              <div class="skeleton-box h-[58px] w-full rounded-2xl" />
+              <div class="skeleton-box h-[58px] w-full rounded-2xl" />
             </div>
           </div>
-          <div class="card-soft p-5 space-y-3">
-            <div class="skeleton-box h-4 w-28" />
-            <div class="skeleton-box h-40 w-full rounded-2xl" />
-          </div>
-          <div class="card-soft p-5 space-y-3">
-            <div class="skeleton-box h-4 w-24" />
-            <div class="skeleton-box h-32 w-32 rounded-full mx-auto" />
-          </div>
-          <div class="card-soft p-5 space-y-2.5">
-            <div class="skeleton-box h-4 w-24" />
-            <div class="skeleton-box h-14 w-full rounded-2xl" />
-            <div class="skeleton-box h-14 w-full rounded-2xl" />
-          </div>
-        </div>
+        </Transition>
 
-        <div v-else-if="stats" key="fin-content" class="space-y-4">
+        <div v-if="stats" class="space-y-4">
         <!-- Pale Silk-Blush Revenue Overview Card (Airy pastel, zero heavy dark plum) -->
         <section class="card-velvet p-5 stagger-item">
           <div class="relative z-10">
@@ -253,7 +276,7 @@
           />
         </section>
         </div>
-      </Transition>
+      </div>
     </div>
 
     <!-- Add Expense Bottom Sheet -->

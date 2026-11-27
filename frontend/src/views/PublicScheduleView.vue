@@ -47,16 +47,18 @@
             <span v-for="w in ['一', '二', '三', '四', '五', '六', '日']" :key="w">{{ w }}</span>
           </div>
 
-          <Transition name="skeleton-fade" mode="out-in">
-            <div v-if="loading" key="pub-skeleton" class="grid grid-cols-7 gap-2">
-              <div v-for="i in 35" :key="i" class="skeleton-box h-12 rounded-[14px]" />
-            </div>
+          <div class="relative min-h-[264px]">
+            <Transition name="skeleton-dissolve">
+              <div v-if="loading" class="absolute inset-0 z-20 grid grid-cols-7 gap-1.5 pointer-events-none">
+                <div v-for="i in 35" :key="i" class="skeleton-box h-12 rounded-[14px]" />
+              </div>
+            </Transition>
 
-            <div v-else-if="errorMsg" key="pub-error" class="py-4">
+            <div v-if="errorMsg && !loading" class="py-4">
               <CuteEmptyState variant="calendar" :title="errorMsg" description="请联系化妆师获取最新档期链接" compact />
             </div>
 
-            <div v-else key="pub-grid" class="grid grid-cols-7 gap-1.5">
+            <div v-else class="grid grid-cols-7 gap-1.5" :class="loading ? 'opacity-0' : 'opacity-100 transition-opacity duration-200'">
             <div v-for="n in leadingBlanks" :key="'b-' + n" class="h-12" />
             <div
               v-for="item in days"
@@ -74,7 +76,7 @@
               </span>
             </div>
             </div>
-          </Transition>
+          </div>
 
           <div class="mt-6 pt-4 flex items-center justify-between text-[12px] text-ink-muted" style="border-top: 1px dashed #F2DCE4">
             <div class="flex items-center gap-3.5">

@@ -165,11 +165,13 @@
           </button>
         </div>
         <div class="flex-1 overflow-y-auto no-scrollbar space-y-4">
-          <Transition name="skeleton-fade" mode="out-in">
-            <div v-if="loadingPackages" key="pkg-sk" class="space-y-2.5">
-              <div v-for="i in 3" :key="i" class="skeleton-box h-16 w-full rounded-2xl" />
-            </div>
-            <div v-else-if="packages.length > 0" key="pkg-list" class="space-y-2.5">
+          <div class="relative min-h-[180px]">
+            <Transition name="skeleton-dissolve">
+              <div v-if="loadingPackages" class="absolute inset-0 z-10 bg-white space-y-2.5 pointer-events-none">
+                <div v-for="i in 3" :key="i" class="skeleton-box h-[68px] w-full rounded-2xl" />
+              </div>
+            </Transition>
+            <div v-if="packages.length > 0" class="space-y-2.5">
               <div v-for="pkg in packages" :key="pkg.id" class="bg-canvas rounded-2xl p-3.5 flex items-center justify-between">
                 <div>
                   <div class="text-[14px] font-semibold text-ink">
@@ -186,14 +188,13 @@
               </div>
             </div>
             <CuteEmptyState
-              v-else
-              key="pkg-empty"
+              v-else-if="!loadingPackages"
               variant="packages"
               title="还没有保存的报价套餐"
               description="在下方添加常用妆造套餐或增项，随时翻阅管理"
               compact
             />
-          </Transition>
+          </div>
 
           <div class="bg-[#FAF2F5]/80 border border-[#EFE2E6] rounded-2xl p-3.5 space-y-2.5">
             <div class="text-[12px] font-semibold text-brand-deep">新增套餐 / 增项</div>
@@ -242,40 +243,40 @@
             <X class="w-4 h-4" />
           </button>
         </div>
-        <div class="flex-1 overflow-y-auto no-scrollbar">
-          <Transition name="skeleton-fade" mode="out-in">
-            <div v-if="loadingClients" key="cli-sk" class="space-y-3">
-              <div v-for="i in 3" :key="i" class="skeleton-box h-20 w-full rounded-2xl" />
-            </div>
-            <div v-else-if="clients.length > 0" key="cli-list" class="space-y-3">
-              <div v-for="c in clients" :key="c.id" class="bg-canvas rounded-2xl p-4">
-                <div class="flex items-center justify-between">
-                  <div class="flex items-center gap-2.5">
-                    <span class="w-8 h-8 rounded-xl bg-brand-soft text-brand-deep flex items-center justify-center text-[13px] font-semibold">
-                      {{ c.name.slice(0, 1) }}
-                    </span>
-                    <span class="text-[15px] font-semibold text-ink">{{ c.name }}</span>
-                  </div>
-                  <span class="text-[12px] text-brand-deep font-semibold tabular-nums">
-                    {{ c.orderCount }} 单 · {{ ui.formatMoney(c.totalSpent) }}
-                  </span>
-                </div>
-                <div class="text-[12px] text-ink-secondary mt-2 tabular-nums">
-                  {{ c.phone || '未留电话' }} {{ c.source ? `· 来自${c.source}` : '' }}
-                </div>
-                <div v-if="c.skinType || c.allergyNote" class="text-[11px] text-ink-muted mt-1 bg-white px-2.5 py-1.5 rounded-xl">
-                  {{ c.skinType }} {{ c.allergyNote ? `｜禁忌：${c.allergyNote}` : '' }}
-                </div>
-              </div>
-            </div>
-            <div v-else key="cli-empty" class="h-full flex items-center justify-center py-6">
-              <CuteEmptyState
-                variant="clients"
-                title="还没有新娘客户档案"
-                description="完成第一笔排单后，将自动沉淀客户的肤质与历史记录"
-              />
+        <div class="flex-1 overflow-y-auto no-scrollbar relative">
+          <Transition name="skeleton-dissolve">
+            <div v-if="loadingClients" class="absolute inset-0 z-10 bg-white space-y-3 pointer-events-none">
+              <div v-for="i in 3" :key="i" class="skeleton-box h-[96px] w-full rounded-2xl" />
             </div>
           </Transition>
+          <div v-if="clients.length > 0" class="space-y-3">
+            <div v-for="c in clients" :key="c.id" class="bg-canvas rounded-2xl p-4">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                  <span class="w-8 h-8 rounded-xl bg-brand-soft text-brand-deep flex items-center justify-center text-[13px] font-semibold">
+                    {{ c.name.slice(0, 1) }}
+                  </span>
+                  <span class="text-[15px] font-semibold text-ink">{{ c.name }}</span>
+                </div>
+                <span class="text-[12px] text-brand-deep font-semibold tabular-nums">
+                  {{ c.orderCount }} 单 · {{ ui.formatMoney(c.totalSpent) }}
+                </span>
+              </div>
+              <div class="text-[12px] text-ink-secondary mt-2 tabular-nums">
+                {{ c.phone || '未留电话' }} {{ c.source ? `· 来自${c.source}` : '' }}
+              </div>
+              <div v-if="c.skinType || c.allergyNote" class="text-[11px] text-ink-muted mt-1 bg-white px-2.5 py-1.5 rounded-xl">
+                {{ c.skinType }} {{ c.allergyNote ? `｜禁忌：${c.allergyNote}` : '' }}
+              </div>
+            </div>
+          </div>
+          <div v-else-if="!loadingClients" class="h-full flex items-center justify-center py-6">
+            <CuteEmptyState
+              variant="clients"
+              title="还没有新娘客户档案"
+              description="完成第一笔排单后，将自动沉淀客户的肤质与历史记录"
+            />
+          </div>
         </div>
       </div>
     </van-popup>
@@ -327,39 +328,39 @@
           </button>
         </div>
         <p class="text-[12px] text-ink-muted mb-3 shrink-0">移除后该设备将自动退出并需重新登录</p>
-        <div class="flex-1 overflow-y-auto no-scrollbar">
-          <Transition name="skeleton-fade" mode="out-in">
-            <div v-if="loadingSessions" key="sess-sk" class="space-y-2.5">
-              <div v-for="i in 2" :key="i" class="skeleton-box h-16 w-full rounded-2xl" />
-            </div>
-            <div v-else-if="sessions.length > 0" key="sess-list" class="space-y-2.5">
-              <div v-for="s in sessions" :key="s.id" class="bg-canvas rounded-2xl p-3.5 flex items-center justify-between">
-                <div>
-                  <div class="text-[14px] font-medium text-ink flex items-center gap-2">
-                    <span>{{ s.deviceInfo }}</span>
-                    <span v-if="s.isCurrent" class="px-2 py-0.5 rounded-full bg-brand-soft text-brand-deep text-[10px] font-semibold">
-                      本机在线
-                    </span>
-                  </div>
-                  <div class="text-[11px] text-ink-muted mt-0.5 tabular-nums">
-                    IP: {{ s.ip }} · 活跃于 {{ dayjs(s.lastActiveAt).format('MM-DD HH:mm') }}
-                  </div>
-                </div>
-                <button
-                  v-if="!s.isCurrent"
-                  type="button"
-                  class="icon-btn-white text-status-danger-text"
-                  aria-label="移除设备"
-                  @click="kickSession(s.id)"
-                >
-                  <Trash2 class="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-            <div v-else key="sess-empty" class="h-full flex items-center justify-center py-6">
-              <CuteEmptyState variant="sessions" title="暂无在线设备记录" compact />
+        <div class="flex-1 overflow-y-auto no-scrollbar relative">
+          <Transition name="skeleton-dissolve">
+            <div v-if="loadingSessions" class="absolute inset-0 z-10 bg-white space-y-2.5 pointer-events-none">
+              <div v-for="i in 2" :key="i" class="skeleton-box h-[66px] w-full rounded-2xl" />
             </div>
           </Transition>
+          <div v-if="sessions.length > 0" class="space-y-2.5">
+            <div v-for="s in sessions" :key="s.id" class="bg-canvas rounded-2xl p-3.5 flex items-center justify-between">
+              <div>
+                <div class="text-[14px] font-medium text-ink flex items-center gap-2">
+                  <span>{{ s.deviceInfo }}</span>
+                  <span v-if="s.isCurrent" class="px-2 py-0.5 rounded-full bg-brand-soft text-brand-deep text-[10px] font-semibold">
+                    本机在线
+                  </span>
+                </div>
+                <div class="text-[11px] text-ink-muted mt-0.5 tabular-nums">
+                  IP: {{ s.ip }} · 活跃于 {{ dayjs(s.lastActiveAt).format('MM-DD HH:mm') }}
+                </div>
+              </div>
+              <button
+                v-if="!s.isCurrent"
+                type="button"
+                class="icon-btn-white text-status-danger-text"
+                aria-label="移除设备"
+                @click="kickSession(s.id)"
+              >
+                <Trash2 class="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+          <div v-else-if="!loadingSessions" class="h-full flex items-center justify-center py-6">
+            <CuteEmptyState variant="sessions" title="暂无在线设备记录" compact />
+          </div>
         </div>
       </div>
     </van-popup>
@@ -374,45 +375,45 @@
             <X class="w-4 h-4" />
           </button>
         </div>
-        <div class="flex-1 overflow-y-auto no-scrollbar">
-          <Transition name="skeleton-fade" mode="out-in">
-            <div v-if="loadingRecycle" key="rec-sk" class="space-y-2.5">
-              <div v-for="i in 3" :key="i" class="skeleton-box h-16 w-full rounded-2xl" />
-            </div>
-            <div v-else-if="deletedOrders.length" key="rec-list" class="space-y-2.5">
-              <div v-for="o in deletedOrders" :key="o.id" class="bg-canvas rounded-2xl p-3.5 flex items-center justify-between">
-                <div>
-                  <div class="text-[14px] font-medium text-ink">{{ o.clientName }} · {{ o.serviceType }}</div>
-                  <div class="text-[11px] text-ink-muted tabular-nums">{{ o.serviceDate }} · ¥{{ o.totalAmount }}</div>
-                </div>
-                <div class="flex gap-2">
-                  <button
-                    type="button"
-                    class="icon-btn-white text-status-locked-text"
-                    aria-label="恢复订单"
-                    @click="restoreOrder(o.id)"
-                  >
-                    <RotateCcw class="w-4 h-4" />
-                  </button>
-                  <button
-                    type="button"
-                    class="icon-btn-white text-status-danger-text"
-                    aria-label="彻底删除"
-                    @click="permanentDelete(o.id)"
-                  >
-                    <Trash2 class="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            </div>
-            <div v-else key="rec-empty" class="h-full flex items-center justify-center py-6">
-              <CuteEmptyState
-                variant="recycle"
-                title="回收站干干净净"
-                description="误删的行程会在这里安静保留 30 天，随时可以一键恢复"
-              />
+        <div class="flex-1 overflow-y-auto no-scrollbar relative">
+          <Transition name="skeleton-dissolve">
+            <div v-if="loadingRecycle" class="absolute inset-0 z-10 bg-white space-y-2.5 pointer-events-none">
+              <div v-for="i in 3" :key="i" class="skeleton-box h-[66px] w-full rounded-2xl" />
             </div>
           </Transition>
+          <div v-if="deletedOrders.length" class="space-y-2.5">
+            <div v-for="o in deletedOrders" :key="o.id" class="bg-canvas rounded-2xl p-3.5 flex items-center justify-between">
+              <div>
+                <div class="text-[14px] font-medium text-ink">{{ o.clientName }} · {{ o.serviceType }}</div>
+                <div class="text-[11px] text-ink-muted tabular-nums">{{ o.serviceDate }} · ¥{{ o.totalAmount }}</div>
+              </div>
+              <div class="flex gap-2">
+                <button
+                  type="button"
+                  class="icon-btn-white text-status-locked-text"
+                  aria-label="恢复订单"
+                  @click="restoreOrder(o.id)"
+                >
+                  <RotateCcw class="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  class="icon-btn-white text-status-danger-text"
+                  aria-label="彻底删除"
+                  @click="permanentDelete(o.id)"
+                >
+                  <Trash2 class="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+          <div v-else-if="!loadingRecycle" class="h-full flex items-center justify-center py-6">
+            <CuteEmptyState
+              variant="recycle"
+              title="回收站干干净净"
+              description="误删的行程会在这里安静保留 30 天，随时可以一键恢复"
+            />
+          </div>
         </div>
       </div>
     </van-popup>
