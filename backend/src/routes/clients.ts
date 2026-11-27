@@ -6,20 +6,53 @@ const router = Router();
 router.use(requireAuth);
 
 router.get('/', async (req: AuthRequest, res: Response) => {
+  const userId = req.user!.userId;
   const q = String(req.query.search || '').trim();
+
+  // Auto-clean orphaned clients whose orders were permanently deleted / trash emptied
+  await prisma.client.deleteMany({
+    where: {
+      userId,
+      orders: { none: {} },
+    },
+  });
+
   const clients = await prisma.client.findMany({
     where: {
-      userId: req.user!.userId,
+      userId,
+      orders: { some: { deletedAt: null } },
       ...(q
         ? {
-            OR: [{ name: { contains: q } }, { phone: { contains: q } }, { wechat: { contains: q } }],
+            OR: [
+              { name: { contains: q } },
+              { phone: { contains: q } },
+              { wechat: { contains: q } },
+              { skinType: { contains: q } },
+              { allergyNote: { contains: q } },
+            ],
           }
         : {}),
     },
     include: {
       orders: {
         where: { deletedAt: null },
-        select: { id: true, totalAmount: true, serviceDate: true, status: true },
+        select: {
+          id: true,
+          title: true,
+          serviceType: true,
+          serviceDate: true,
+          endDate: true,
+          startTime: true,
+          endTime: true,
+          location: true,
+          status: true,
+          totalAmount: true,
+          depositPaid: true,
+          balanceDue: true,
+          notes: true,
+          skinType: true,
+          allergyNote: true,
+        },
         orderBy: { serviceDate: 'desc' },
       },
     },
@@ -27,13 +60,30 @@ router.get('/', async (req: AuthRequest, res: Response) => {
   });
 
   res.json({
-    clients: clients.map((c) => ({
-      ...c,
-      orderCount: c.orders.length,
-      totalSpent: c.orders.reduce((s, o) => s + o.totalAmount, 0),
-      lastServiceDate: c.orders[0]?.serviceDate || null,
-    })),
+    clients: clients.map((c) => {
+      const validOrders = c.orders.filter((o) => o.status !== 'CANCELLED');
+      return {
+        ...c,
+        orderCount: c.orders.length,
+        totalSpent: validOrders.reduce((s, o) => s + o.totalAmount, 0),
+        receivedAmount: validOrders.reduce((s, o) => s + o.depositPaid, 0),
+        pendingBalance: validOrders.reduce((s, o) => s + o.balanceDue, 0),
+        lastServiceDate: c.orders[0]?.serviceDate || null,
+      };
+    }),
   });
+});
+
+router.delete('/:id', async (req: AuthRequest, res: Response) => {
+  const existing = await prisma.client.findFirst({
+    where: { id: String(req.params.id), userId: req.user!.userId },
+  });
+  if (!existing) {
+    res.status(404).json({ error: '客户不存在' });
+    return;
+  }
+  await prisma.client.delete({ where: { id: existing.id } });
+  res.json({ success: true });
 });
 
 router.get('/:id/history', async (req: AuthRequest, res: Response) => {

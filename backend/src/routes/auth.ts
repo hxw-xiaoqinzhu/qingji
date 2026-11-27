@@ -39,6 +39,7 @@ function sanitizeUser(user: any) {
     phone: user.phone,
     studioName: user.studioName,
     avatarUrl: user.avatarUrl,
+    bio: user.bio,
     monthlyTarget: user.monthlyTarget,
     noticeTemplate: user.noticeTemplate,
     checklistTemplate: (() => {
@@ -228,14 +229,15 @@ router.get('/me', requireAuth, async (req: AuthRequest, res: Response) => {
 
 router.put('/me', requireAuth, async (req: AuthRequest, res: Response) => {
   try {
-    const { studioName, phone, monthlyTarget, noticeTemplate, checklistTemplate, avatarUrl } = req.body;
+    const { studioName, phone, monthlyTarget, noticeTemplate, checklistTemplate, avatarUrl, bio } = req.body;
     const data: any = {};
-    if (typeof studioName === 'string') data.studioName = studioName.trim();
+    if (typeof studioName === 'string' && studioName.trim()) data.studioName = studioName.trim();
     if (typeof phone === 'string' || phone === null) data.phone = phone || null;
     if (typeof monthlyTarget === 'number' && !Number.isNaN(monthlyTarget)) data.monthlyTarget = monthlyTarget;
     if (typeof noticeTemplate === 'string') data.noticeTemplate = noticeTemplate;
     if (Array.isArray(checklistTemplate)) data.checklistTemplate = JSON.stringify(checklistTemplate);
-    if (typeof avatarUrl === 'string') data.avatarUrl = avatarUrl;
+    if (typeof avatarUrl === 'string' || avatarUrl === null) data.avatarUrl = avatarUrl;
+    if (typeof bio === 'string') data.bio = bio.trim().slice(0, 80);
 
     const user = await prisma.user.update({
       where: { id: req.user!.userId },

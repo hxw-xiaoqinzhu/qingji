@@ -14,6 +14,7 @@ model User {
   passwordHash      String
   studioName        String            @default("嘻嘻化妆室")
   avatarUrl         String?
+  bio               String            @default("每一笔粉黛，都是双向奔赴的浪漫 ✨")
   monthlyTarget     Float             @default(20000)
   noticeTemplate    String            @default("亲爱的新娘，为了明天呈现最清透服帖的妆效，请留意：\n1. 今晚22:00前敷一片补水面膜，避免熬夜与过多饮水；\n2. 头发洗净吹干，勿用护发素或精油涂抹发根；\n3. 明天请穿前开扣/宽领口衣服，方便换装不蹭妆；\n4. 如有隐形眼镜或美瞳请提前佩戴好。期待明天见！")
   checklistTemplate String            @default("[\"粉底液/遮瑕/定妆散粉\",\"假睫毛/胶水/双眼皮贴\",\"卷发棒/玉米须夹板/定型喷雾\",\"新娘头饰/耳环/头纱\",\"补妆包/吸油纸/棉签/湿巾\",\"充电宝/小风扇/备用发卡\"]")

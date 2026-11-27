@@ -498,6 +498,37 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
   }
 });
 
+router.delete('/trash/empty', async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user!.userId;
+    const trashed = await prisma.order.findMany({
+      where: { userId, deletedAt: { not: null } },
+      select: { id: true, clientId: true },
+    });
+    const clientIds = [...new Set(trashed.map((o) => o.clientId).filter(Boolean))] as string[];
+
+    await prisma.order.deleteMany({
+      where: { userId, deletedAt: { not: null } },
+    });
+
+    // Cascade-clean orphaned clients that have 0 remaining orders
+    if (clientIds.length > 0) {
+      await prisma.client.deleteMany({
+        where: {
+          userId,
+          id: { in: clientIds },
+          orders: { none: {} },
+        },
+      });
+    }
+
+    res.json({ success: true, deletedCount: trashed.length });
+  } catch (err) {
+    console.error('Empty trash error:', err);
+    res.status(500).json({ error: '清空回收站失败' });
+  }
+});
+
 router.delete('/:id', async (req: AuthRequest, res: Response) => {
   try {
     const permanent = req.query.permanent === 'true';
@@ -511,6 +542,17 @@ router.delete('/:id', async (req: AuthRequest, res: Response) => {
 
     if (permanent) {
       await prisma.order.delete({ where: { id: existing.id } });
+      // If client has no remaining orders (active or trashed), remove orphaned client archive
+      if (existing.clientId) {
+        const remaining = await prisma.order.count({
+          where: { clientId: existing.clientId },
+        });
+        if (remaining === 0) {
+          await prisma.client.deleteMany({
+            where: { id: existing.clientId, userId: req.user!.userId },
+          });
+        }
+      }
     } else {
       await prisma.order.update({
         where: { id: existing.id },

@@ -4,6 +4,7 @@ export interface UserProfile {
   phone?: string | null;
   studioName: string;
   avatarUrl?: string | null;
+  bio?: string | null;
   monthlyTarget: number;
   noticeTemplate: string;
   checklistTemplate: string[];
@@ -108,6 +109,8 @@ export interface ClientItem {
   hairNote?: string | null;
   orderCount?: number;
   totalSpent?: number;
+  receivedAmount?: number;
+  pendingBalance?: number;
   lastServiceDate?: string | null;
   orders?: Order[];
 }
