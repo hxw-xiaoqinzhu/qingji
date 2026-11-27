@@ -30,7 +30,7 @@
             style="-webkit-touch-callout: default"
           />
           <div class="mt-3 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#FAF0F3] text-[#A46B7D] text-[12px] font-medium">
-            <span>👆 长按上方海报图片即可保存到相册</span>
+            <span>长按上方海报图片即可保存到相册</span>
           </div>
         </div>
 
@@ -61,139 +61,263 @@
       </div>
     </div>
 
-    <!-- Off-Screen High-Visual-Impact Cute Designer Poster Template (Captured at 3x Retina by html2canvas) -->
+    <!-- Off-Screen Pixel-Aligned Poster Template (Zero html2canvas baseline shift or text clipping) -->
     <div class="fixed -left-[9999px] top-0 pointer-events-none" aria-hidden="true">
       <div
         ref="posterRef"
-        class="w-[375px] p-6 relative overflow-hidden"
         style="
+          width: 375px;
+          padding: 24px;
+          position: relative;
           background: linear-gradient(160deg, #FFEBF1 0%, #FFF8FA 38%, #FFFDFB 66%, #FCEEE9 100%);
           font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', sans-serif;
+          box-sizing: border-box;
         "
       >
         <!-- Decorative Pastel Ambient Orbs -->
         <div
           style="
             position: absolute;
-            top: -54px;
-            right: -40px;
-            width: 190px;
-            height: 190px;
+            top: -50px;
+            right: -36px;
+            width: 180px;
+            height: 180px;
             border-radius: 9999px;
-            background: radial-gradient(circle, rgba(244, 189, 206, 0.55) 0%, rgba(244, 189, 206, 0) 70%);
+            background: radial-gradient(circle, rgba(244, 189, 206, 0.52) 0%, rgba(244, 189, 206, 0) 70%);
           "
         />
         <div
           style="
             position: absolute;
-            bottom: -60px;
-            left: -45px;
-            width: 210px;
-            height: 210px;
+            bottom: -56px;
+            left: -40px;
+            width: 200px;
+            height: 200px;
             border-radius: 9999px;
-            background: radial-gradient(circle, rgba(247, 214, 194, 0.5) 0%, rgba(247, 214, 194, 0) 70%);
+            background: radial-gradient(circle, rgba(247, 214, 194, 0.46) 0%, rgba(247, 214, 194, 0) 70%);
           "
         />
 
         <!-- Inner Couture Framed Card -->
         <div
-          class="relative z-10 rounded-[28px] p-5"
           style="
-            background: rgba(255, 255, 255, 0.88);
+            position: relative;
+            z-index: 10;
+            border-radius: 26px;
+            padding: 22px 18px 20px 18px;
+            background: rgba(255, 255, 255, 0.92);
             border: 1.5px solid #F6DAE4;
             box-shadow: 0 12px 32px rgba(196, 130, 152, 0.14);
           "
         >
-          <!-- Top Kawaii Ribbon & Title Header -->
-          <div class="flex flex-col items-center text-center pb-4" style="border-bottom: 1.5px dashed #F3DCE4">
-            <div
-              class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-semibold tracking-[0.18em] mb-3"
-              style="background: #FDEEF3; color: #C2748B"
-            >
-              ✦ BRIDAL MAKEUP MENU ✦
+          <!-- Top Header -->
+          <div style="text-align: center; padding-bottom: 18px; border-bottom: 1.5px dashed #F3DCE4;">
+            <div style="margin-bottom: 14px;">
+              <span
+                style="
+                  display: inline-block;
+                  padding: 4px 14px 6px 14px;
+                  border-radius: 9999px;
+                  background: #FDEEF3;
+                  color: #C2748B;
+                  font-size: 10.5px;
+                  font-weight: 600;
+                  letter-spacing: 0.16em;
+                  line-height: 1.25;
+                "
+              >
+                ✦ BRIDAL MAKEUP MENU ✦
+              </span>
             </div>
 
-            <!-- Circular Studio Avatar -->
+            <!-- Centered Circular Studio Avatar -->
             <div
-              class="p-[3.5px] rounded-full mb-2.5"
-              style="background: linear-gradient(135deg, #F3C8D6 0%, #FFFFFF 52%, #EFCEBE 100%); box-shadow: 0 8px 18px rgba(196, 130, 152, 0.25)"
+              style="
+                width: 71px;
+                height: 71px;
+                margin: 0 auto 12px auto;
+                padding: 3.5px;
+                border-radius: 9999px;
+                background: linear-gradient(135deg, #F3C8D6 0%, #FFFFFF 52%, #EFCEBE 100%);
+                box-shadow: 0 8px 18px rgba(196, 130, 152, 0.24);
+                box-sizing: border-box;
+              "
             >
               <StudioAvatar :src="avatarUrl" :size="64" rounded-class="rounded-full" />
             </div>
 
-            <h2 class="text-[22px] font-bold tracking-tight" style="color: #3B2B31">
+            <div
+              style="
+                font-size: 21px;
+                font-weight: 700;
+                color: #3B2B31;
+                line-height: 1.35;
+                letter-spacing: 0.02em;
+              "
+            >
               {{ studioName }}
-            </h2>
-            <p class="text-[11.5px] mt-1 leading-relaxed" style="color: #8B6E78">
-              {{ bio || '每一笔粉黛，都是双向奔赴的浪漫 ✨' }}
-            </p>
+            </div>
+            <div
+              style="
+                font-size: 11.5px;
+                color: #8B6E78;
+                line-height: 1.55;
+                margin-top: 5px;
+              "
+            >
+              {{ bio || '每一笔粉黛，都是双向奔赴的浪漫' }}
+            </div>
           </div>
 
           <!-- Section 1: Main Packages -->
-          <div v-if="mainPackages.length > 0" class="mt-4">
-            <div class="flex items-center justify-between mb-2.5">
+          <div v-if="mainPackages.length > 0" style="margin-top: 18px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
               <span
-                class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11.5px] font-semibold"
-                style="background: linear-gradient(90deg, #FDEAF0 0%, #FDF2EB 100%); color: #B4657D"
+                style="
+                  display: inline-block;
+                  padding: 4px 12px 6px 12px;
+                  border-radius: 9999px;
+                  background: linear-gradient(90deg, #FDEAF0 0%, #FDF2EB 100%);
+                  color: #B4657D;
+                  font-size: 11.5px;
+                  font-weight: 600;
+                  line-height: 1.25;
+                "
               >
-                🎀 主推妆造套餐
+                ✦ 主推妆造套餐
               </span>
-              <span class="text-[10px] tracking-wider" style="color: #BFA5AE">SIGNATURE</span>
+              <span style="font-size: 10px; letter-spacing: 0.12em; color: #BFA5AE; line-height: 1.2;">
+                SIGNATURE
+              </span>
             </div>
 
-            <div class="space-y-2.5">
+            <div style="display: flex; flex-direction: column; gap: 10px;">
               <div
                 v-for="pkg in mainPackages"
                 :key="pkg.id"
-                class="rounded-[18px] p-3.5"
-                style="background: linear-gradient(135deg, #FFF7FA 0%, #FFFDFB 100%); border: 1px solid #F5E2E8"
+                style="
+                  border-radius: 18px;
+                  padding: 14px 14px 13px 14px;
+                  background: linear-gradient(135deg, #FFF7FA 0%, #FFFDFB 100%);
+                  border: 1px solid #F5E2E8;
+                "
               >
-                <div class="flex items-baseline justify-between gap-2">
-                  <div class="flex items-center gap-1.5 min-w-0">
-                    <span class="text-[15px] font-bold" style="color: #3B2B31">{{ pkg.name }}</span>
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                  <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 6px; min-width: 0;">
+                    <span style="font-size: 15px; font-weight: 700; color: #3B2B31; line-height: 1.35;">
+                      {{ pkg.name }}
+                    </span>
                     <span
                       v-if="pkg.defaultDurationMin > 0"
-                      class="px-2 py-0.5 rounded-full text-[10px] font-medium shrink-0"
-                      style="background: #FFFFFF; color: #A67584; border: 1px solid #F2DFE5"
+                      style="
+                        display: inline-block;
+                        padding: 2px 8px 4px 8px;
+                        border-radius: 9999px;
+                        background: #FFFFFF;
+                        color: #A67584;
+                        border: 1px solid #F2DFE5;
+                        font-size: 10px;
+                        font-weight: 500;
+                        line-height: 1.2;
+                      "
                     >
                       约 {{ formatDuration(pkg.defaultDurationMin) }}
                     </span>
                   </div>
-                  <div class="shrink-0 font-bold tabular-nums" style="color: #C76A86; font-size: 18px">
-                    <span style="font-size: 12px; margin-right: 1px">¥</span>{{ pkg.price }}
+                  <div
+                    style="
+                      flex-shrink: 0;
+                      font-weight: 700;
+                      color: #C76A86;
+                      font-size: 18px;
+                      line-height: 1.2;
+                    "
+                  >
+                    <span style="font-size: 12px; margin-right: 1px;">¥</span>{{ pkg.price }}
                   </div>
                 </div>
-                <p v-if="pkg.description" class="text-[11.5px] mt-1.5 leading-relaxed" style="color: #7D646D">
+                <div
+                  v-if="pkg.description"
+                  style="
+                    font-size: 11.5px;
+                    color: #7D646D;
+                    line-height: 1.55;
+                    margin-top: 7px;
+                    word-break: break-word;
+                  "
+                >
                   {{ pkg.description }}
-                </p>
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- Section 2: Extra Add-ons -->
-          <div v-if="extraPackages.length > 0" class="mt-4">
-            <div class="flex items-center justify-between mb-2.5">
+          <!-- Section 2: Extra Add-ons (No overflow:hidden clipping!) -->
+          <div v-if="extraPackages.length > 0" style="margin-top: 18px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
               <span
-                class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11.5px] font-semibold"
-                style="background: #FAF2F5; color: #9E6879"
+                style="
+                  display: inline-block;
+                  padding: 4px 12px 6px 12px;
+                  border-radius: 9999px;
+                  background: #FAF2F5;
+                  color: #9E6879;
+                  font-size: 11.5px;
+                  font-weight: 600;
+                  line-height: 1.25;
+                "
               >
-                🌷 贴心增项服务
+                ✦ 贴心增项服务
               </span>
-              <span class="text-[10px] tracking-wider" style="color: #BFA5AE">ADD-ONS</span>
+              <span style="font-size: 10px; letter-spacing: 0.12em; color: #BFA5AE; line-height: 1.2;">
+                ADD-ONS
+              </span>
             </div>
 
-            <div class="grid grid-cols-2 gap-2">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
               <div
                 v-for="ep in extraPackages"
                 :key="ep.id"
-                class="rounded-[14px] px-3 py-2.5"
-                style="background: #FCF7F9; border: 1px solid #F3E4E9"
+                style="
+                  border-radius: 15px;
+                  padding: 11px 12px 12px 12px;
+                  background: #FCF7F9;
+                  border: 1px solid #F3E4E9;
+                  box-sizing: border-box;
+                "
               >
-                <div class="text-[12.5px] font-semibold truncate" style="color: #3F2F35">{{ ep.name }}</div>
-                <div class="text-[14px] font-bold tabular-nums mt-0.5" style="color: #C4718A">
+                <div
+                  style="
+                    font-size: 12.5px;
+                    font-weight: 600;
+                    color: #3F2F35;
+                    line-height: 1.45;
+                    word-break: break-word;
+                  "
+                >
+                  {{ ep.name }}
+                </div>
+                <div
+                  style="
+                    font-size: 15px;
+                    font-weight: 700;
+                    color: #C4718A;
+                    line-height: 1.35;
+                    margin-top: 4px;
+                  "
+                >
                   ¥{{ ep.price }}
                 </div>
-                <div v-if="ep.description" class="text-[10px] mt-0.5 truncate" style="color: #9A818A">
+                <div
+                  v-if="ep.description"
+                  style="
+                    font-size: 10.5px;
+                    color: #9A818A;
+                    line-height: 1.5;
+                    margin-top: 4px;
+                    word-break: break-word;
+                  "
+                >
                   {{ ep.description }}
                 </div>
               </div>
@@ -202,21 +326,39 @@
 
           <!-- Sweet Footer Stamp -->
           <div
-            class="mt-5 pt-3.5 flex items-center justify-between text-[11px]"
-            style="border-top: 1.5px dashed #F3DCE4; color: #9A7B86"
+            style="
+              margin-top: 20px;
+              padding-top: 15px;
+              border-top: 1.5px dashed #F3DCE4;
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              gap: 10px;
+            "
           >
             <div>
-              <div class="font-semibold" style="color: #B56E84">私信试妆 · 定金锁档 🌷</div>
-              <div v-if="phone" class="mt-0.5 tabular-nums" style="font-size: 10.5px; color: #A68D96">
+              <div style="font-size: 11.5px; font-weight: 600; color: #B56E84; line-height: 1.4;">
+                私信试妆 · 定金锁档
+              </div>
+              <div v-if="phone" style="font-size: 10.5px; color: #A68D96; line-height: 1.4; margin-top: 2px;">
                 预约咨询：{{ phone }}
               </div>
             </div>
-            <div
-              class="px-2.5 py-1 rounded-full text-[10px] font-semibold"
-              style="background: #FDEEF3; color: #C2748B"
+            <span
+              style="
+                display: inline-block;
+                padding: 4px 11px 6px 11px;
+                border-radius: 9999px;
+                background: #FDEEF3;
+                color: #C2748B;
+                font-size: 10.5px;
+                font-weight: 600;
+                line-height: 1.25;
+                flex-shrink: 0;
+              "
             >
               晴记 · 专属价目
-            </div>
+            </span>
           </div>
         </div>
       </div>
@@ -261,8 +403,7 @@ async function renderPoster() {
   rendering.value = true;
   posterDataUrl.value = '';
   await nextTick();
-  // Give images/fonts a brief beat to settle
-  await new Promise((r) => setTimeout(r, 120));
+  await new Promise((r) => setTimeout(r, 140));
   if (!posterRef.value) {
     rendering.value = false;
     return;

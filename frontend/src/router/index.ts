@@ -63,6 +63,11 @@ const router = createRouter({
       name: 'StudioSettings',
       component: () => import('@/views/StudioSettingsView.vue'),
     },
+    {
+      path: '/profile/packages',
+      name: 'Packages',
+      component: () => import('@/views/PackagesView.vue'),
+    },
   ],
   scrollBehavior() {
     return { top: 0 };

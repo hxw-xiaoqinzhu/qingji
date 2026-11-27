@@ -5,7 +5,7 @@
       <!-- Decorative Editorial Atelier Pill (No plain page title) -->
       <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/75 backdrop-blur-md border border-white/90 shadow-[0_4px_14px_-8px_rgba(182,126,144,0.3)] select-none">
         <span class="w-2 h-2 rounded-full bg-[#DF9BB0] shadow-[0_0_8px_rgba(223,155,176,0.85)]" />
-        <span class="text-[12px] font-medium text-[#7D5E69] tracking-[0.04em]">QingJi · 温柔营业中</span>
+        <span class="text-[12px] font-medium text-[#7D5E69] tracking-[0.04em]">晴记 · 温柔营业中</span>
       </div>
       <!-- Clean 34x34px Pure White Settings Gear Button -> Navigates to Dedicated Settings Page -->
       <button
@@ -88,14 +88,14 @@
       <!-- Group 1: Bespoke Beauty Tools (Unified Pale Blush Squircles) -->
       <section class="card-soft p-2.5 stagger-item" style="--stagger: 1">
         <div class="px-3 pt-1.5 pb-1 text-[11px] font-semibold text-ink-muted tracking-wider">美妆百宝箱</div>
-        <button type="button" class="menu-row" @click="openPackages">
+        <button type="button" class="menu-row" @click="router.push('/profile/packages')">
           <div class="flex items-center gap-3">
             <span class="icon-squircle" style="background: #FAF0F3; color: #AD7485">
               <IconLipstick :size="19" />
             </span>
             <div class="text-left">
               <div class="font-medium text-ink">报价套餐与增项库</div>
-              <div class="text-[11px] text-ink-muted">维护常用妆造报价与增项明细</div>
+              <div class="text-[11px] text-ink-muted">管理价目并一键生成可爱报价海报</div>
             </div>
           </div>
           <ChevronRight class="w-4 h-4 text-ink-muted" />
