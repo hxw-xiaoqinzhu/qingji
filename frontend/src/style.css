@@ -1,0 +1,477 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --ios-ease: cubic-bezier(0.32, 0.72, 0, 1);
+  --spring-ease: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --app-height: 100dvh;
+
+  /* Unified Font Stack */
+  --app-font: 'PingFang SC', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Hiragino Sans GB', 'Helvetica Neue', sans-serif;
+
+  /* Vant 4 Soft Pale-Blush Overrides */
+  --van-base-font: var(--app-font);
+  --van-price-font: var(--app-font);
+  --van-primary-color: #DC99AA;
+  --van-success-color: #A66E7E;
+  --van-warning-color: #AD8972;
+  --van-danger-color: #B56E80;
+  --van-text-color: #3D3236;
+  --van-text-color-2: #8A7B81;
+  --van-text-color-3: #B8AAB0;
+  --van-background: #FCF8F9;
+  --van-background-2: #FFFFFF;
+  --van-border-color: rgba(212, 104, 132, 0.08);
+  --van-cell-border-color: transparent;
+  --van-radius-md: 16px;
+  --van-radius-lg: 24px;
+  --van-popup-round-radius: 28px;
+  --van-dialog-radius: 24px;
+  --van-button-round-radius: 999px;
+  --van-toast-background: rgba(43, 30, 35, 0.88);
+  --van-toast-radius: 999px;
+}
+
+@media all and (display-mode: standalone) {
+  :root {
+    --app-height: 100lvh;
+  }
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+    font-family: var(--app-font);
+  }
+
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: var(--app-height, 100dvh);
+    overflow: hidden;
+    background-color: #FBE9EF;
+    color: #2B1E23;
+    overscroll-behavior: none;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-font-smoothing: antialiased;
+    font-family: var(--app-font);
+  }
+
+  /* Fullscreen edge-to-edge lock for iPhone Safari & Standalone Home-Screen PWA */
+  #app {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--app-height, 100dvh);
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background-color: #FCF5F7;
+    box-shadow: 0 0 60px rgba(160, 90, 112, 0.12);
+  }
+
+  input,
+  textarea,
+  select {
+    font-size: 14px;
+    font-family: var(--app-font);
+    color: #3D3236;
+    min-width: 0;
+    max-width: 100%;
+    caret-color: #DC99AA;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: #C2B3B9;
+    font-weight: 400;
+    opacity: 1;
+  }
+
+  /* Remove ugly native browser spin buttons on number inputs & cancel icons on search inputs */
+  input[type='number']::-webkit-inner-spin-button,
+  input[type='number']::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type='number'] {
+    -moz-appearance: textfield;
+  }
+  input[type='search']::-webkit-search-decoration,
+  input[type='search']::-webkit-search-cancel-button,
+  input[type='search']::-webkit-search-results-button,
+  input[type='search']::-webkit-search-results-decoration {
+    -webkit-appearance: none;
+    display: none;
+  }
+
+  /* Prevent jarring WebKit yellow/blue autofill tint */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus {
+    -webkit-text-fill-color: #3D3236 !important;
+    -webkit-box-shadow: 0 0 0 1000px #FFFFFF inset !important;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+
+  textarea {
+    resize: none;
+    line-height: 1.6;
+  }
+
+  input[type='date'],
+  input[type='time'] {
+    -webkit-appearance: none;
+    appearance: none;
+    display: block;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    min-height: 42px;
+    line-height: 1.4;
+  }
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Transparent pass-through so Global AmbientSilkBackground shines across every page */
+.silk-mesh-bg {
+  background: transparent;
+}
+
+/* Top Navigation Bar: Transparent at rest -> Smoothly fades to full UI pink on scroll */
+.nav-adaptive {
+  flex-shrink: 0;
+  padding-top: calc(var(--safe-top) + 10px);
+  z-index: 20;
+  transition: box-shadow 180ms var(--ios-ease);
+}
+
+/* Clean Standalone Circular Icon Button (Unified 34x34px matching Month Switcher buttons, pure white, no glass tray) */
+.icon-btn-white,
+.ios27-icon-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 9999px;
+  background: #FFFFFF;
+  color: #3D2B32;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1px solid rgba(212, 104, 132, 0.08);
+  box-shadow: 0 2px 6px rgba(186, 104, 128, 0.06);
+  transition:
+    transform 150ms var(--ios-ease),
+    background-color 150ms var(--ios-ease),
+    color 150ms var(--ios-ease);
+}
+.icon-btn-white:active,
+.ios27-icon-btn:active {
+  transform: scale(0.90);
+  background: #FDF0F4;
+  color: #D46884;
+}
+.icon-btn-white.is-active,
+.ios27-icon-btn.is-active {
+  color: #D46884;
+  background: #FFF6F9;
+  border-color: rgba(212, 104, 132, 0.25);
+}
+
+/* Unified Pill / Primary CTA Button (Clean solid/soft fill, no glass backdrop) */
+.btn-unified {
+  height: 40px;
+  padding-left: 16px;
+  padding-right: 16px;
+  border-radius: 9999px;
+  font-size: 13.5px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: transform 150ms var(--ios-ease), opacity 150ms var(--ios-ease);
+}
+.btn-unified:active {
+  transform: scale(0.96);
+}
+
+/* Clean White Secondary Pill Button (No glass background) */
+.btn-glass {
+  background: #FFFFFF;
+  color: #3D2B32;
+  border: 1px solid rgba(212, 104, 132, 0.10);
+  box-shadow: 0 2px 6px rgba(186, 104, 128, 0.05);
+}
+
+/* Soft Powdery-Rose Primary Fill (Low-saturation, gentle on eyes) */
+.btn-rose {
+  background: linear-gradient(135deg, #E7B0BD 0%, #DB98AA 100%);
+  color: #FFFFFF;
+}
+
+/* Scrollable Page Content Region */
+.scroll-pane {
+  flex: 1 1 0%;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+}
+
+/* Docked Bottom Navigation / Sticky Footer Bar (Flush to physical iPhone bottom) */
+.dock-glass-bar {
+  position: relative;
+  flex-shrink: 0;
+  background: rgba(255, 252, 253, 0.95);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-top: 1px solid rgba(212, 104, 132, 0.09);
+  padding-bottom: max(10px, env(safe-area-inset-bottom, 0px));
+  z-index: 30;
+}
+/* Safety skirt below bottom bar so any iOS overscroll/safe-area never shows a color seam */
+.dock-glass-bar::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  height: 80px;
+  background: rgba(255, 252, 253, 0.98);
+  pointer-events: none;
+}
+
+.pt-safe-screen {
+  padding-top: calc(var(--safe-top) + 16px) !important;
+}
+.pb-safe-sheet {
+  padding-bottom: max(18px, calc(var(--safe-bottom) + 8px)) !important;
+}
+
+/* Pearl Surface Card (Gentle translucency lets the flowing pastel silk & bokeh warm through) */
+.card-soft {
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.94);
+  border-radius: 22px;
+  box-shadow:
+    0 8px 24px -8px rgba(186, 104, 128, 0.08),
+    0 2px 6px -1px rgba(186, 104, 128, 0.03);
+}
+
+/* Note: .btn-rose is defined above with iOS 27 Liquid Glass specular rim */
+
+/* Soft Pale Silk-Blush Hero Card (Replaces heavy dark plum block on Finance) */
+.card-velvet {
+  position: relative;
+  overflow: hidden;
+  border-radius: 24px;
+  background: linear-gradient(145deg, #FBF1F4 0%, #FFFFFF 58%, #FAF5F1 100%);
+  border: 1px solid #F3E0E6;
+  color: #3D3236;
+  box-shadow: 0 8px 24px -8px rgba(180, 136, 148, 0.08);
+}
+.card-velvet::before {
+  content: '';
+  position: absolute;
+  top: -40%;
+  right: -20%;
+  width: 210px;
+  height: 210px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(244, 212, 222, 0.35) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* Refined Porcelain Input System (Replaces heavy muddy pink boxes) */
+.input-silk {
+  background: #FCFAFB;
+  border: 1px solid #EDE1E5;
+  border-radius: 11px;
+  color: #3D3236;
+  font-size: 14px;
+  box-shadow: inset 0 1px 1.5px rgba(176, 132, 146, 0.025);
+  transition:
+    border-color 200ms var(--ios-ease),
+    background-color 200ms var(--ios-ease),
+    box-shadow 200ms var(--ios-ease);
+}
+.input-silk:hover {
+  border-color: #E5D3D9;
+}
+.input-silk:focus,
+.input-silk:focus-within {
+  outline: none;
+  background: #FFFFFF;
+  border-color: #E4B8C4;
+  box-shadow:
+    0 0 0 3px rgba(220, 153, 170, 0.12),
+    0 2px 8px rgba(180, 132, 148, 0.04);
+}
+
+/* Search Pill Input in Adaptive Headers */
+.input-search-pill {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid #EDE1E5;
+  border-radius: 9999px;
+  color: #3D3236;
+  font-size: 13.5px;
+  box-shadow: 0 2px 10px -3px rgba(180, 136, 148, 0.07);
+  transition:
+    border-color 200ms var(--ios-ease),
+    background-color 200ms var(--ios-ease),
+    box-shadow 200ms var(--ios-ease);
+}
+.input-search-pill:focus {
+  outline: none;
+  background: #FFFFFF;
+  border-color: #DFABB9;
+  box-shadow:
+    0 0 0 3.5px rgba(220, 153, 170, 0.13),
+    0 3px 10px -2px rgba(180, 136, 148, 0.08);
+}
+
+/* Composite Input Wrapper with Prefix/Suffix Unit (e.g., ¥ or 分钟) */
+.input-affix-wrap {
+  display: flex;
+  align-items: center;
+  background: #FCFAFB;
+  border: 1px solid #EDE1E5;
+  border-radius: 11px;
+  padding: 0 12px;
+  height: 42px;
+  box-shadow: inset 0 1px 1.5px rgba(176, 132, 146, 0.025);
+  transition:
+    border-color 200ms var(--ios-ease),
+    background-color 200ms var(--ios-ease),
+    box-shadow 200ms var(--ios-ease);
+}
+.input-affix-wrap:focus-within {
+  background: #FFFFFF;
+  border-color: #E4B8C4;
+  box-shadow:
+    0 0 0 3px rgba(220, 153, 170, 0.12),
+    0 2px 8px rgba(180, 132, 148, 0.04);
+}
+.input-affix-wrap > input {
+  flex: 1 1 0%;
+  min-width: 0;
+  height: 100%;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  outline: none;
+}
+.input-affix-unit {
+  font-size: 12.5px;
+  color: #AD9BA2;
+  font-weight: 500;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+/* Remove `will-change: transform` from generic `.pressable` so lists & 126 calendar cells don't allocate excess GPU textures */
+.pressable {
+  transition: transform 160ms var(--ios-ease), opacity 160ms var(--ios-ease);
+}
+.pressable:active {
+  transform: scale(0.96);
+}
+
+.spring-pop {
+  animation: springPop 260ms var(--spring-ease);
+}
+@keyframes springPop {
+  0% {
+    transform: scale(0.90);
+  }
+  60% {
+    transform: scale(1.04);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.stagger-item {
+  animation: cardCascade 260ms var(--ios-ease) both;
+  animation-delay: calc(var(--stagger, 0) * 28ms);
+}
+@keyframes cardCascade {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 8px, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.sheet-grabber {
+  width: 38px;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(176, 154, 163, 0.35);
+  margin: 0 auto 14px;
+}
+
+.fade-up-enter-active,
+.fade-up-leave-active {
+  transition: opacity 150ms var(--ios-ease), transform 150ms var(--ios-ease);
+}
+.fade-up-enter-from {
+  opacity: 0;
+  transform: translate3d(0, 5px, 0);
+}
+.fade-up-leave-to {
+  opacity: 0;
+  transform: translate3d(0, -4px, 0);
+}
+
+.skeleton-box {
+  position: relative;
+  overflow: hidden;
+  background-color: #F4E8EC;
+  border-radius: 14px;
+}
+.skeleton-box::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.68) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  animation: shimmer 1.4s infinite;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

@@ -1,0 +1,176 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String            @id @default(cuid())
+  username          String            @unique
+  phone             String?           @unique
+  passwordHash      String
+  studioName        String            @default("嘻嘻化妆室")
+  avatarUrl         String?
+  monthlyTarget     Float             @default(20000)
+  noticeTemplate    String            @default("亲爱的新娘，为了明天呈现最清透服帖的妆效，请留意：\n1. 今晚22:00前敷一片补水面膜，避免熬夜与过多饮水；\n2. 头发洗净吹干，勿用护发素或精油涂抹发根；\n3. 明天请穿前开扣/宽领口衣服，方便换装不蹭妆；\n4. 如有隐形眼镜或美瞳请提前佩戴好。期待明天见！")
+  checklistTemplate String            @default("[\"粉底液/遮瑕/定妆散粉\",\"假睫毛/胶水/双眼皮贴\",\"卷发棒/玉米须夹板/定型喷雾\",\"新娘头饰/耳环/头纱\",\"补妆包/吸油纸/棉签/湿巾\",\"充电宝/小风扇/备用发卡\"]")
+  shareToken        String            @unique @default(cuid())
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  sessions          UserSession[]
+  clients           Client[]
+  orders            Order[]
+  payments          PaymentRecord[]
+  expenses          Expense[]
+  blockedDates      BlockedDate[]
+  packages          PackageTemplate[]
+}
+
+model UserSession {
+  id               String   @id @default(cuid())
+  userId           String
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refreshTokenHash String
+  deviceInfo       String   @default("Unknown Device")
+  ip               String   @default("127.0.0.1")
+  lastActiveAt     DateTime @default(now())
+  expiresAt        DateTime
+  createdAt        DateTime @default(now())
+
+  @@index([userId])
+}
+
+model Client {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  phone       String?
+  wechat      String?
+  source      String?
+  skinType    String?
+  allergyNote String?
+  hairNote    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  orders      Order[]
+
+  @@index([userId])
+}
+
+model Order {
+  id                String           @id @default(cuid())
+  userId            String
+  user              User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  clientId          String?
+  client            Client?          @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  clientName        String
+  clientPhone       String?
+  title             String
+  serviceType       String           @default("新娘全天跟妆")
+  serviceDate       String           // YYYY-MM-DD
+  endDate           String?          // YYYY-MM-DD for multi-day out-of-town
+  startTime         String           // HH:mm
+  endTime           String           // HH:mm
+  commuteMinutes    Int              @default(45)
+  location          String           @default("")
+  status            String           @default("RESERVED") // RESERVED | LOCKED | COMPLETED | SETTLED | CANCELLED
+  basePrice         Float            @default(0)
+  extraTotal        Float            @default(0)
+  discount          Float            @default(0)
+  totalAmount       Float            @default(0)
+  depositPaid       Float            @default(0)
+  balanceDue        Float            @default(0)
+  assistantName     String?
+  assistantFee      Float            @default(0)
+  assistantPaid     Boolean          @default(false)
+  channelCommission Float            @default(0)
+  notes             String           @default("")
+  skinType          String?
+  allergyNote       String?
+  referenceImages   String           @default("[]") // JSON string of string[]
+  checklistJson     String           @default("[]") // JSON string of {id, label, checked}[]
+  deletedAt         DateTime?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  extraItems        OrderExtraItem[]
+  payments          PaymentRecord[]
+  expenses          Expense[]
+
+  @@index([userId, serviceDate])
+  @@index([userId, status])
+}
+
+model OrderExtraItem {
+  id        String @id @default(cuid())
+  orderId   String
+  order     Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  name      String
+  unitPrice Float
+  quantity  Int    @default(1)
+  subtotal  Float
+
+  @@index([orderId])
+}
+
+model PaymentRecord {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  type      String   // DEPOSIT | BALANCE | REFERRAL
+  amount    Float
+  channel   String   @default("WECHAT") // WECHAT | ALIPAY | BANK | CASH
+  paidAt    DateTime @default(now())
+  note      String   @default("")
+
+  @@index([userId, paidAt])
+  @@index([orderId])
+}
+
+model Expense {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orderId    String?
+  order      Order?   @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  category   String   // 耗材采购 | 交通打车 | 助理费用 | 推广返点 | 工作室杂费 | 其他
+  amount     Float
+  incurredAt DateTime @default(now())
+  note       String   @default("")
+
+  @@index([userId, incurredAt])
+}
+
+model BlockedDate {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date      String   // YYYY-MM-DD
+  reason    String   @default("休息日")
+  createdAt DateTime @default(now())
+
+  @@unique([userId, date])
+  @@index([userId, date])
+}
+
+model PackageTemplate {
+  id                 String   @id @default(cuid())
+  userId             String
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name               String
+  category           String   @default("MAIN") // MAIN | EXTRA
+  price              Float
+  defaultDurationMin Int      @default(360)
+  description        String   @default("")
+  createdAt          DateTime @default(now())
+
+  @@index([userId])
+}

@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="roseGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#EB94AC"/>
+      <stop offset="55%" stop-color="#D46884"/>
+      <stop offset="100%" stop-color="#B84B6A"/>
+    </linearGradient>
+    <linearGradient id="pearlGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#FFF0F4"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="124" fill="url(#roseGrad)"/>
+  <circle cx="256" cy="256" r="168" fill="none" stroke="rgba(255,255,255,0.28)" stroke-width="3"/>
+  <path d="M256 124 C272 198, 314 240, 388 256 C314 272, 272 314, 256 388 C240 314, 198 272, 124 256 C198 240, 240 198, 256 124 Z" fill="url(#pearlGrad)"/>
+  <circle cx="358" cy="152" r="20" fill="#FFF5EC" opacity="0.92"/>
+  <circle cx="164" cy="356" r="12" fill="#FFF5EC" opacity="0.75"/>
+</svg>

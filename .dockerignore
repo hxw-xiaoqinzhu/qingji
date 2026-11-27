@@ -1,0 +1,14 @@
+node_modules
+**/node_modules
+frontend/dist
+backend/dist
+backend/prisma/*.db
+backend/prisma/*.db-journal
+backend/uploads
+cloudbase-server
+cloudbase-functions
+.git
+.env
+frontend/.env.production
+frontend/.env.cloudbase
+*.log
