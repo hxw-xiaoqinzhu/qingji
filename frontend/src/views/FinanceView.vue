@@ -149,18 +149,25 @@
           </div>
         </section>
 
-        <!-- 6-Month Rose Gradient Bar Chart (Tooltip only, zero dashed axis line) -->
+        <!-- 6-Month Rose Gradient Bar Chart (Shows CuteEmptyState when all 6 months are zero) -->
         <section class="card-soft p-5 stagger-item" style="--stagger: 1">
           <div class="flex items-center justify-between mb-2">
             <div>
               <h2 class="text-[15px] font-semibold text-ink">近 6 月营收趋势</h2>
-              <p class="text-[11px] text-ink-muted mt-0.5">轻触柱形查看当月明细数据</p>
+              <p v-if="hasTrendData" class="text-[11px] text-ink-muted mt-0.5">轻触柱形查看当月明细数据</p>
             </div>
             <span class="px-2.5 py-1 rounded-full bg-brand-soft text-brand-deep text-[11px] font-semibold tabular-nums">
               本月 {{ stats.summary.orderCount }} 单
             </span>
           </div>
-          <div ref="barChartRef" class="w-full h-44" />
+          <div v-if="hasTrendData" ref="barChartRef" class="w-full h-44" />
+          <CuteEmptyState
+            v-else
+            variant="finance"
+            title="近 6 月暂无营收趋势"
+            description="记入妆造预约后，这里将自动生成月度营收柱状图"
+            compact
+          />
         </section>
 
         <!-- Couture Donut Breakdown Chart (Shows CuteEmptyState when no orders this month) -->
@@ -326,7 +333,7 @@
 </template>
 
 <script setup lang="ts">
-import { nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import dayjs from 'dayjs';
 import { showToast } from 'vant';
@@ -363,7 +370,10 @@ const month = ref(dayjs().month() + 1);
 
 const mode = ref<'service_date' | 'cash_date'>('service_date');
 const stats = ref<StatsOverview | null>(null);
-const loading = ref(false);
+const loading = ref(true);
+const hasTrendData = computed(() =>
+  Boolean(stats.value?.trend?.some((t) => Number(t.revenue || 0) > 0))
+);
 const animatedRevenue = ref(0);
 
 const barChartRef = ref<HTMLElement | null>(null);
@@ -433,7 +443,7 @@ function clampTooltipPosition(
 function renderCharts() {
   if (!stats.value) return;
 
-  if (barChartRef.value) {
+  if (barChartRef.value && hasTrendData.value) {
     if (barChart && barChart.getDom() !== barChartRef.value) {
       barChart.dispose();
       barChart = null;
