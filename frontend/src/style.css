@@ -45,13 +45,16 @@
   html,
   body {
     position: fixed;
-    inset: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     margin: 0;
     padding: 0;
     width: 100%;
-    height: var(--app-height, 100vh);
+    height: auto;
     overflow: hidden;
-    background-color: #FCF5F7;
+    background-color: #FFFCFD;
     color: #2B1E23;
     overscroll-behavior: none;
     -webkit-tap-highlight-color: transparent;
@@ -59,13 +62,14 @@
     font-family: var(--app-font);
   }
 
-  /* Fullscreen edge-to-edge lock (Keyboard-immune height — never shrinks when soft keyboard opens) */
+  /* Fullscreen edge-to-edge lock: top:0 + bottom:0 hits true 0.00px physical bottom in Safari, WeChat & PWA! */
   #app {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
-    height: var(--app-height, 100vh);
+    bottom: 0;
+    height: auto;
     width: 100%;
     max-width: 480px;
     margin: 0 auto;
@@ -74,6 +78,14 @@
     overflow: hidden;
     background-color: #FCF5F7;
     box-shadow: 0 0 60px rgba(160, 90, 112, 0.12);
+  }
+
+  /* ONLY while soft keyboard is open, lock height to pre-keyboard pixel height so #app never shrinks */
+  html.kb-open,
+  html.kb-open body,
+  html.kb-open #app {
+    bottom: auto;
+    height: var(--app-height, 100vh);
   }
 
   input,
@@ -238,7 +250,7 @@ html.kb-open .van-popup--bottom {
   padding-bottom: var(--kb-height, 0px);
 }
 
-/* Docked Bottom Navigation / Sticky Footer Bar (Flush to physical bottom, never clipped) */
+/* Docked Bottom Navigation / Sticky Footer Bar (Flush right down to physical bottom) */
 .dock-glass-bar {
   position: relative;
   flex-shrink: 0;
@@ -246,7 +258,7 @@ html.kb-open .van-popup--bottom {
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
   border-top: 1px solid rgba(212, 104, 132, 0.09);
-  padding-bottom: max(10px, calc(env(safe-area-inset-bottom, 0px) - 12px));
+  padding-bottom: max(10px, calc(env(safe-area-inset-bottom, 0px) * 0.42));
   z-index: 30;
 }
 

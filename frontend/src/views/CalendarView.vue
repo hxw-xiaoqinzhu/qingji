@@ -63,26 +63,9 @@
               <div class="px-1.5 pt-0.5 flex items-center gap-3.5 h-[18px]">
                 <div class="skeleton-box h-3 w-12 rounded-full" />
                 <div class="skeleton-box h-3 w-12 rounded-full" />
+                <div class="skeleton-box h-3 w-10 rounded-full" />
               </div>
             </section>
-            <div class="flex items-center justify-between mt-4 mb-2.5 px-1 h-[22px]">
-              <div class="skeleton-box h-4 w-36 rounded-full" />
-              <div class="skeleton-box h-4 w-16 rounded-full" />
-            </div>
-            <div class="card-soft p-4 pl-5 space-y-3 min-h-[116px]">
-              <div class="flex items-center justify-between">
-                <div class="skeleton-box h-5 w-28 rounded-full" />
-                <div class="skeleton-box h-5 w-14 rounded-full" />
-              </div>
-              <div class="flex items-center gap-3">
-                <div class="skeleton-box w-10 h-10 rounded-2xl shrink-0" />
-                <div class="flex-1 space-y-2">
-                  <div class="skeleton-box h-4 w-36" />
-                  <div class="skeleton-box h-3 w-28" />
-                </div>
-                <div class="skeleton-box h-6 w-16" />
-              </div>
-            </div>
           </div>
         </Transition>
 
@@ -216,117 +199,6 @@
           </span>
         </div>
       </section>
-
-      <!-- Selected Day Summary Bar -->
-      <div class="flex items-center justify-between mt-4 mb-2.5 px-1">
-        <h2 class="text-[15px] font-semibold text-ink tabular-nums">{{ selectedDateHeading }}</h2>
-        <span
-          v-if="selectedDayOrders.length > 0"
-          class="px-2.5 py-0.5 rounded-full bg-brand-soft text-brand-deep text-[11px] font-semibold tabular-nums"
-        >
-          {{ selectedDayOrders.length }} 场妆造
-        </span>
-        <span v-else class="text-[12px] text-ink-muted">当日空闲</span>
-      </div>
-
-      <!-- Selected Day Itinerary Cards (With Universal Swipe-Left Edit & Delete) -->
-      <div class="space-y-2.5">
-        <template v-if="selectedDayOrders.length > 0">
-          <van-swipe-cell
-            v-for="order in selectedDayOrders"
-            :key="order.id"
-            class="rounded-[22px] overflow-hidden"
-          >
-            <article
-              class="card-soft p-4 pl-5 relative overflow-hidden pressable cursor-pointer"
-              @click="router.push(`/orders/${order.id}`)"
-            >
-              <span
-                class="absolute left-0 top-3 bottom-3 w-1 rounded-r-full"
-                :class="statusMeta(order.status, order.balanceDue).ribbonClass"
-              />
-
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                  <span class="px-2.5 py-0.5 rounded-full bg-brand-soft text-brand-deep text-[12px] font-semibold tabular-nums">
-                    {{ order.startTime }} - {{ order.endTime }}
-                  </span>
-                  <span
-                    v-if="order.endDate && order.endDate !== order.serviceDate"
-                    class="text-[11px] text-champagne font-medium"
-                  >
-                    跨天连档
-                  </span>
-                </div>
-                <span
-                  class="px-2.5 py-0.5 rounded-full text-[11px] font-medium"
-                  :class="[statusMeta(order.status, order.balanceDue).bgClass, statusMeta(order.status, order.balanceDue).textClass]"
-                >
-                  {{ statusMeta(order.status, order.balanceDue).label }}
-                </span>
-              </div>
-
-              <div class="flex items-center justify-between mt-3">
-                <div class="flex items-center gap-3 min-w-0 pr-3">
-                  <div
-                    class="w-10 h-10 rounded-2xl bg-gradient-to-br flex items-center justify-center text-[15px] font-semibold shrink-0"
-                    :class="serviceCategoryVisual(order.serviceType).avatarBg"
-                  >
-                    {{ order.clientName.slice(0, 1) }}
-                  </div>
-                  <div class="min-w-0">
-                    <h3 class="text-[15px] font-semibold text-ink truncate">
-                      {{ order.clientName }}
-                      <span class="text-[13px] font-normal text-ink-secondary">· {{ order.serviceType }}</span>
-                    </h3>
-                    <p class="text-[12px] text-ink-muted mt-0.5 truncate flex items-center gap-1">
-                      <IconPearlPin :size="13" class="text-brand shrink-0" />
-                      <span class="truncate">{{ order.location || '待确认出妆地点' }}</span>
-                    </p>
-                  </div>
-                </div>
-
-                <div class="text-right shrink-0 tabular-nums">
-                  <div class="text-[17px] font-semibold text-ink">
-                    <span class="text-[12px] font-normal mr-0.5">¥</span>{{ ui.formatMoney(order.totalAmount, '') }}
-                  </div>
-                  <div v-if="order.balanceDue > 0" class="text-[11px] text-status-danger-text mt-0.5">
-                    尾款 {{ ui.formatMoney(order.balanceDue) }}
-                  </div>
-                </div>
-              </div>
-            </article>
-
-            <template #right>
-              <div class="flex h-full pl-2 gap-1.5">
-                <button
-                  type="button"
-                  class="h-full px-4 rounded-[18px] bg-brand-soft text-brand-deep text-[13px] font-medium"
-                  @click.stop="router.push(`/orders/${order.id}/edit`)"
-                >
-                  编辑
-                </button>
-                <button
-                  type="button"
-                  class="h-full px-4 rounded-[18px] bg-status-danger-bg text-status-danger-text text-[13px] font-medium"
-                  @click.stop="deleteCalendarOrder(order)"
-                >
-                  删除
-                </button>
-              </div>
-            </template>
-          </van-swipe-cell>
-        </template>
-
-        <div v-else class="card-soft">
-          <CuteEmptyState
-            variant="calendar"
-            title="当日档期留白可约"
-            description="轻点底部中央按钮，即可记录新娘试妆或跟妆行程"
-            compact
-          />
-        </div>
-      </div>
         </div>
       </div>
     </div>
@@ -451,14 +323,13 @@ import http from '@/api/http';
 import { useUiStore } from '@/stores/ui';
 import { useAuthStore } from '@/stores/auth';
 import { useScrollHeader } from '@/composables/useScrollHeader';
-import { serviceCategoryVisual, statusMeta } from '@/utils/format';
+import { statusMeta } from '@/utils/format';
 import {
   IconLashEyeClosed,
   IconLashEyeOpen,
   IconPearlPin,
   IconPosterCard,
 } from '@/components/icons/BeautyIcons';
-import CuteEmptyState from '@/components/CuteEmptyState.vue';
 import MonthGlassSwitcher from '@/components/MonthGlassSwitcher.vue';
 import SchedulePosterModal from '@/components/SchedulePosterModal.vue';
 import type { Order } from '@/types';
