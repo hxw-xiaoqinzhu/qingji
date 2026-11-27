@@ -2,7 +2,11 @@
   <div class="h-full flex flex-col overflow-hidden">
     <!-- Adaptive Top Header: Transparent at rest -> Smoothly fades to UI Pink on scroll -->
     <header class="nav-adaptive px-4 pb-3 flex items-center justify-between" :style="headerStyle">
-      <h1 class="text-[22px] font-semibold tracking-tight text-ink">美学工作室</h1>
+      <!-- Decorative Editorial Atelier Pill (No plain page title) -->
+      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/75 backdrop-blur-md border border-white/90 shadow-[0_4px_14px_-8px_rgba(182,126,144,0.3)] select-none">
+        <span class="w-2 h-2 rounded-full bg-[#DF9BB0] shadow-[0_0_8px_rgba(223,155,176,0.85)]" />
+        <span class="text-[12px] font-medium text-[#7D5E69] tracking-[0.04em]">QingJi · 温柔营业中</span>
+      </div>
       <!-- Clean 34x34px Pure White Settings Gear Button -> Navigates to Dedicated Settings Page -->
       <button
         type="button"
@@ -337,7 +341,7 @@
         <div class="flex items-center justify-between mb-3 shrink-0">
           <div>
             <h3 class="text-[17px] font-semibold text-ink">报价套餐库 ({{ packages.length }})</h3>
-            <p class="text-[11px] text-ink-muted mt-0.5">排单时可一键从套餐库/增项库选取带入</p>
+            <p class="text-[11px] text-ink-muted mt-0.5">编辑完成后可一键生成专属可爱报价海报</p>
           </div>
           <div class="flex items-center gap-2">
             <button
@@ -347,7 +351,7 @@
               @click="copyFullPriceList"
             >
               <Copy class="w-3.5 h-3.5" />
-              <span>复制报价单</span>
+              <span>复制文案</span>
             </button>
             <button type="button" class="icon-btn-white" @click="showPackagesSheet = false">
               <X class="w-4 h-4" />
@@ -504,7 +508,7 @@
             />
             <button
               type="button"
-              class="btn-unified w-full btn-rose text-white !h-[40px] !text-[13px]"
+              class="btn-unified w-full btn-glass !text-brand-deep !h-[40px] !text-[13px]"
               :disabled="savingPkg"
               @click="savePackage"
             >
@@ -512,8 +516,30 @@
             </button>
           </div>
         </div>
+
+        <!-- Primary CTA: Confirm & Generate Cute Designer Price-List Poster -->
+        <div v-if="packages.length > 0" class="pt-3 shrink-0">
+          <button
+            type="button"
+            class="btn-unified w-full btn-rose text-white flex items-center justify-center gap-1.5"
+            @click="openPricePoster"
+          >
+            <Sparkles class="w-4 h-4" />
+            <span>确认生成可爱报价海报</span>
+          </button>
+        </div>
       </div>
     </van-popup>
+
+    <!-- Cute Designer Price-List Poster Modal (Long-Press Image to Save to Album) -->
+    <PriceListPosterModal
+      v-model:show="showPricePoster"
+      :studio-name="auth.user?.studioName || '嘻嘻化妆室'"
+      :avatar-url="auth.user?.avatarUrl"
+      :bio="auth.user?.bio"
+      :phone="auth.user?.phone"
+      :packages="packages"
+    />
 
     <!-- Sheet: Rich Bride Client Archive (Search + Filters + Contact + Skin/Hair Edit + Expandable Order Details) -->
     <van-popup v-model:show="showClientsSheet" position="bottom" teleport="body" round :style="{ minHeight: '62dvh', maxHeight: '88dvh' }">
@@ -950,6 +976,7 @@ import {
   IconVanityMirror,
 } from '@/components/icons/BeautyIcons';
 import CuteEmptyState from '@/components/CuteEmptyState.vue';
+import PriceListPosterModal from '@/components/PriceListPosterModal.vue';
 import StudioAvatar from '@/components/StudioAvatar.vue';
 import type { ClientItem, Order, PackageTemplate, UserSession } from '@/types';
 
@@ -1041,7 +1068,12 @@ async function saveProfileCard() {
 
 // Packages
 const showPackagesSheet = ref(false);
+const showPricePoster = ref(false);
 const loadingPackages = ref(false);
+
+function openPricePoster() {
+  showPricePoster.value = true;
+}
 const savingPkg = ref(false);
 const packages = ref<PackageTemplate[]>([]);
 const pkgFilter = ref<'ALL' | 'MAIN' | 'EXTRA'>('ALL');

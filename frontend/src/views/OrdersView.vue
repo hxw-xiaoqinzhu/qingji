@@ -2,9 +2,15 @@
   <div class="h-full flex flex-col overflow-hidden">
     <!-- Fixed Top Header: Transparent at rest -> Smoothly fades to UI Pink on scroll -->
     <header class="nav-adaptive px-4 pb-3 space-y-2.5" :style="headerStyle">
-      <div class="flex items-baseline gap-2.5">
-        <h1 class="text-[22px] font-semibold tracking-tight text-ink leading-none">妆造行程</h1>
-        <span class="text-[12.5px] font-semibold text-[#66555C] tabular-nums leading-none">
+      <!-- Decorative Editorial Whisper Ribbon (No plain page title) -->
+      <div class="flex items-center justify-between">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/75 backdrop-blur-md border border-white/90 shadow-[0_4px_14px_-8px_rgba(182,126,144,0.3)]">
+          <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <path d="M10 1.5L11.7 7.3L17.5 9L11.7 10.7L10 16.5L8.3 10.7L2.5 9L8.3 7.3L10 1.5Z" fill="#D995A8" />
+          </svg>
+          <span class="text-[12px] font-medium text-[#7D5E69] tracking-[0.03em]">把每一次相遇，认真排进时光里</span>
+        </div>
+        <span class="px-2.5 py-1 rounded-full bg-white/80 border border-white/90 text-[12px] font-semibold text-[#66555C] tabular-nums leading-none">
           共 {{ orders.length }} 场预约
         </span>
       </div>
