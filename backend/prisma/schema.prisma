@@ -171,6 +171,7 @@ model PackageTemplate {
   price              Float
   defaultDurationMin Int      @default(360)
   description        String   @default("")
+  addonsJson         String   @default("[]") // JSON string of {id, name, price}[]
   createdAt          DateTime @default(now())
 
   @@index([userId])

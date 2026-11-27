@@ -80,8 +80,22 @@ const emit = defineEmits<{
 const posterDataUrl = ref('');
 const rendering = ref(false);
 
-const mainPackages = computed(() => props.packages.filter((p) => p.category === 'MAIN'));
-const extraPackages = computed(() => props.packages.filter((p) => p.category === 'EXTRA'));
+const selectedPackages = computed(() => props.packages || []);
+
+function addonsSum(pkg: PackageTemplate): number {
+  return (pkg.addons || []).reduce((sum, a) => sum + (Number(a.price) || 0), 0);
+}
+
+function pkgSubtotal(pkg: PackageTemplate): number {
+  return (Number(pkg.price) || 0) + addonsSum(pkg);
+}
+
+function fmtMoney(v: number): string {
+  const n = Number(v) || 0;
+  return Number.isInteger(n) ? n.toLocaleString('zh-CN') : n.toFixed(2);
+}
+
+const grandTotal = computed(() => selectedPackages.value.reduce((sum, p) => sum + pkgSubtotal(p), 0));
 
 const FONT_STACK = `-apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif`;
 
@@ -402,32 +416,22 @@ async function renderPoster() {
     mctx.font = `400 11.5px ${FONT_STACK}`;
     const bioLines = wrapTextLines(mctx, bioText, contentW - 24);
 
-    // Measure Main Package Card Heights
-    const mainLayouts = mainPackages.value.map((pkg) => {
+    // Measure Unified Package Card Heights (Main Makeup + Optional Add-ons + Subtotal)
+    const packageLayouts = selectedPackages.value.map((pkg) => {
       mctx.font = `400 11.5px ${FONT_STACK}`;
       const descLines = wrapTextLines(mctx, pkg.description || '', contentW - 28);
-      const cardH = 16 + 24 + (descLines.length > 0 ? 8 + descLines.length * 17 : 0) + 15;
-      return { pkg, descLines, cardH };
+      const addons = pkg.addons || [];
+      let cardH = 16 + 24; // top pad + title/price row
+      if (descLines.length > 0) {
+        cardH += 8 + descLines.length * 17;
+      }
+      if (addons.length > 0) {
+        // divider gap + section label + each addon row + subtotal row
+        cardH += 12 + 18 + addons.length * 22 + 8 + 22;
+      }
+      cardH += 15; // bottom pad
+      return { pkg, descLines, addons, subtotal: pkgSubtotal(pkg), cardH };
     });
-
-    // Measure 2-Column Extra Package Rows
-    const extraGap = 10;
-    const extraColW = (contentW - extraGap) / 2; // 144.5
-    const extraRows: Array<{ left: any; right?: any; rowH: number }> = [];
-    for (let i = 0; i < extraPackages.value.length; i += 2) {
-      const calcExtra = (ep: PackageTemplate) => {
-        mctx.font = `600 12.5px ${FONT_STACK}`;
-        const nameLines = wrapTextLines(mctx, ep.name, extraColW - 22);
-        mctx.font = `400 10.5px ${FONT_STACK}`;
-        const descLines = wrapTextLines(mctx, ep.description || '', extraColW - 22);
-        const h = 12 + nameLines.length * 17 + 6 + 18 + (descLines.length > 0 ? 5 + descLines.length * 15 : 0) + 12;
-        return { ep, nameLines, descLines, h };
-      };
-      const left = calcExtra(extraPackages.value[i]);
-      const right = extraPackages.value[i + 1] ? calcExtra(extraPackages.value[i + 1]) : undefined;
-      const rowH = Math.max(left.h, right?.h || 0);
-      extraRows.push({ left, right, rowH });
-    }
 
     // Calculate Exact Total Height
     let cursorY = outerPad + 22; // Top of inner card content
@@ -435,18 +439,13 @@ async function renderPoster() {
     cursorY += 68 + 14; // Avatar + margin
     cursorY += 26 + 6 + bioLines.length * 17 + 18; // Studio title + bio + dashed divider space
 
-    if (mainLayouts.length > 0) {
+    if (packageLayouts.length > 0) {
       cursorY += 18 + 26 + 12; // Section spacing + pill + margin
-      for (let i = 0; i < mainLayouts.length; i++) {
-        cursorY += mainLayouts[i].cardH + (i < mainLayouts.length - 1 ? 10 : 0);
+      for (let i = 0; i < packageLayouts.length; i++) {
+        cursorY += packageLayouts[i].cardH + (i < packageLayouts.length - 1 ? 10 : 0);
       }
-    }
-
-    if (extraRows.length > 0) {
-      cursorY += 18 + 26 + 12;
-      for (let i = 0; i < extraRows.length; i++) {
-        cursorY += extraRows[i].rowH + (i < extraRows.length - 1 ? 10 : 0);
-      }
+      // Grand Total Summary Banner
+      cursorY += 14 + 54;
     }
 
     const footerContentH = props.phone ? 34 : 26;
@@ -552,12 +551,12 @@ async function renderPoster() {
     ctx.stroke();
     ctx.restore();
 
-    // 6. Main Packages Section
-    if (mainLayouts.length > 0) {
+    // 6. Selected Packages Section (Unified Cards with Nested Add-ons + Grand Total)
+    if (packageLayouts.length > 0) {
       y += 18;
       const secPillH = 26;
       ctx.font = `600 11.5px ${FONT_STACK}`;
-      const mainSecLabel = '主推妆造套餐';
+      const mainSecLabel = '专属妆造报价明细';
       const mainSecLabelW = measureInkWidth(ctx, mainSecLabel);
       const sR = 3.5;
       const sGap = 5.5;
@@ -579,14 +578,14 @@ async function renderPoster() {
 
       ctx.font = `500 10px ${FONT_STACK}`;
       ctx.fillStyle = '#BFA5AE';
-      const sigText = 'SIGNATURE';
+      const sigText = 'QUOTATION';
       const sigW = ctx.measureText(sigText).width;
       drawInkLeftText(ctx, sigText, contentX + contentW - sigW, secCenterY);
 
       y += secPillH + 12;
 
-      for (let i = 0; i < mainLayouts.length; i++) {
-        const { pkg, descLines, cardH: itemH } = mainLayouts[i];
+      for (let i = 0; i < packageLayouts.length; i++) {
+        const { pkg, descLines, addons, subtotal, cardH: itemH } = packageLayouts[i];
         const cardGrad = ctx.createLinearGradient(contentX, y, contentX + contentW, y + itemH);
         cardGrad.addColorStop(0, '#FFF7FA');
         cardGrad.addColorStop(1, '#FFFDFB');
@@ -597,16 +596,14 @@ async function renderPoster() {
         ctx.lineWidth = 1;
         ctx.stroke();
 
-        // EXACT SAME HORIZONTAL CENTERLINE for Title, Duration Pill, and Price!
+        // Top Row: Package Name + Duration Pill + Main Makeup Price
         const rowCenterY = y + 16 + 12;
 
-        // Left: Package Name
         ctx.font = `700 15px ${FONT_STACK}`;
         ctx.fillStyle = '#3B2B31';
         drawInkLeftText(ctx, pkg.name, contentX + 14, rowCenterY);
         const nameW = ctx.measureText(pkg.name).width;
 
-        // Middle: Duration Pill centered on exact same rowCenterY!
         if (pkg.defaultDurationMin > 0) {
           const durLabel = `约 ${formatDuration(pkg.defaultDurationMin)}`;
           ctx.font = `500 10.5px ${FONT_STACK}`;
@@ -627,103 +624,116 @@ async function renderPoster() {
           drawInkCenteredText(ctx, durLabel, pillX + pillW / 2, rowCenterY);
         }
 
-        // Right: Price aligned on exact same rowCenterY!
-        const priceNumStr = String(pkg.price);
-        ctx.font = `700 18px ${FONT_STACK}`;
+        const priceNumStr = fmtMoney(pkg.price);
+        ctx.font = `700 17px ${FONT_STACK}`;
         const numW = ctx.measureText(priceNumStr).width;
-        ctx.font = `700 12.5px ${FONT_STACK}`;
+        ctx.font = `700 12px ${FONT_STACK}`;
         const yenW = ctx.measureText('¥').width;
         const priceRightX = contentX + contentW - 14;
 
         ctx.fillStyle = '#C76A86';
-        ctx.font = `700 12.5px ${FONT_STACK}`;
+        ctx.font = `700 12px ${FONT_STACK}`;
         drawInkLeftText(ctx, '¥', priceRightX - numW - yenW - 1.5, rowCenterY + 1);
-        ctx.font = `700 18px ${FONT_STACK}`;
+        ctx.font = `700 17px ${FONT_STACK}`;
         drawInkLeftText(ctx, priceNumStr, priceRightX - numW, rowCenterY);
+
+        let curY = y + 16 + 24;
 
         // Description lines
         if (descLines.length > 0) {
-          let descY = y + 16 + 24 + 8;
+          curY += 8;
           ctx.font = `400 11.5px ${FONT_STACK}`;
           ctx.fillStyle = '#7D646D';
           for (const dLine of descLines) {
-            drawInkLeftText(ctx, dLine, contentX + 14, descY + 8.5);
-            descY += 17;
+            drawInkLeftText(ctx, dLine, contentX + 14, curY + 8.5);
+            curY += 17;
           }
         }
 
-        y += itemH + (i < mainLayouts.length - 1 ? 10 : 0);
-      }
-    }
-
-    // 7. Extra Packages Section (2-Column Cards)
-    if (extraRows.length > 0) {
-      y += 18;
-      const secPillH = 26;
-      ctx.font = `600 11.5px ${FONT_STACK}`;
-      const extraSecLabel = '贴心增项服务';
-      const extraSecLabelW = measureInkWidth(ctx, extraSecLabel);
-      const sR = 3.5;
-      const sGap = 5.5;
-      const extraGroupW = sR * 2 + sGap + extraSecLabelW;
-      const secPillW = Math.ceil(extraGroupW + 24);
-      const secCenterY = y + secPillH / 2;
-
-      roundRectPath(ctx, contentX, y, secPillW, secPillH, 13);
-      ctx.fillStyle = '#FAF2F5';
-      ctx.fill();
-
-      const groupStartX = contentX + (secPillW - extraGroupW) / 2;
-      drawFourPointStar(ctx, groupStartX + sR, secCenterY, sR, '#9E6879');
-      ctx.fillStyle = '#9E6879';
-      drawInkCenteredText(ctx, extraSecLabel, groupStartX + sR * 2 + sGap + extraSecLabelW / 2, secCenterY);
-
-      ctx.font = `500 10px ${FONT_STACK}`;
-      ctx.fillStyle = '#BFA5AE';
-      const addText = 'ADD-ONS';
-      const addW = ctx.measureText(addText).width;
-      drawInkLeftText(ctx, addText, contentX + contentW - addW, secCenterY);
-
-      y += secPillH + 12;
-
-      for (let i = 0; i < extraRows.length; i++) {
-        const { left, right, rowH } = extraRows[i];
-        const drawExtraCard = (item: any, x: number) => {
-          roundRectPath(ctx, x, y, extraColW, rowH, 15);
-          ctx.fillStyle = '#FCF7F9';
-          ctx.fill();
-          ctx.strokeStyle = '#F3E4E9';
+        // Nested Add-on Services & Per-Package Subtotal
+        if (addons.length > 0) {
+          curY += 12;
+          ctx.save();
+          ctx.setLineDash([3, 3]);
+          ctx.strokeStyle = '#F2DEE5';
           ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(contentX + 14, curY);
+          ctx.lineTo(contentX + contentW - 14, curY);
           ctx.stroke();
+          ctx.restore();
 
-          let cy = y + 12;
-          ctx.font = `600 12.5px ${FONT_STACK}`;
-          ctx.fillStyle = '#3F2F35';
-          for (const nl of item.nameLines) {
-            drawInkLeftText(ctx, nl, x + 11, cy + 8.5);
-            cy += 17;
+          curY += 10;
+          ctx.font = `600 10.5px ${FONT_STACK}`;
+          ctx.fillStyle = '#A97A89';
+          drawInkLeftText(ctx, '附带增项服务', contentX + 14, curY + 4);
+          curY += 12;
+
+          for (const addon of addons) {
+            const addonCenterY = curY + 11;
+            ctx.font = `400 12px ${FONT_STACK}`;
+            ctx.fillStyle = '#5B454D';
+            drawInkLeftText(ctx, `· ${addon.name}`, contentX + 14, addonCenterY);
+
+            const aPriceText = `¥${fmtMoney(addon.price)}`;
+            ctx.font = `600 12px ${FONT_STACK}`;
+            const aW = ctx.measureText(aPriceText).width;
+            ctx.fillStyle = '#AD6E82';
+            drawInkLeftText(ctx, aPriceText, contentX + contentW - 14 - aW, addonCenterY);
+            curY += 22;
           }
-          cy += 6;
-          ctx.font = `700 15px ${FONT_STACK}`;
-          ctx.fillStyle = '#C4718A';
-          drawInkLeftText(ctx, `¥${item.ep.price}`, x + 11, cy + 9);
-          cy += 18;
 
-          if (item.descLines.length > 0) {
-            cy += 5;
-            ctx.font = `400 10.5px ${FONT_STACK}`;
-            ctx.fillStyle = '#9A818A';
-            for (const dl of item.descLines) {
-              drawInkLeftText(ctx, dl, x + 11, cy + 7.5);
-              cy += 15;
-            }
-          }
-        };
+          curY += 8;
+          const subCenterY = curY + 9;
+          ctx.font = `600 11.5px ${FONT_STACK}`;
+          ctx.fillStyle = '#8F6C77';
+          drawInkLeftText(ctx, '本套餐小计', contentX + 14, subCenterY);
 
-        drawExtraCard(left, contentX);
-        if (right) drawExtraCard(right, contentX + extraColW + extraGap);
-        y += rowH + (i < extraRows.length - 1 ? 10 : 0);
+          const subPriceText = `¥${fmtMoney(subtotal)}`;
+          ctx.font = `700 13.5px ${FONT_STACK}`;
+          const sW = ctx.measureText(subPriceText).width;
+          ctx.fillStyle = '#B85D79';
+          drawInkLeftText(ctx, subPriceText, contentX + contentW - 14 - sW, subCenterY);
+        }
+
+        y += itemH + (i < packageLayouts.length - 1 ? 10 : 0);
       }
+
+      // 7. Grand Total Summary Card
+      y += 14;
+      const totalHBox = 54;
+      const totalGrad = ctx.createLinearGradient(contentX, y, contentX + contentW, y + totalHBox);
+      totalGrad.addColorStop(0, '#FDEBF1');
+      totalGrad.addColorStop(1, '#FDF2EC');
+      roundRectPath(ctx, contentX, y, contentW, totalHBox, 16);
+      ctx.fillStyle = totalGrad;
+      ctx.fill();
+      ctx.strokeStyle = '#F3D4DF';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      const totalMidY = y + totalHBox / 2;
+      ctx.font = `700 13px ${FONT_STACK}`;
+      ctx.fillStyle = '#8E4F64';
+      drawInkLeftText(ctx, '报价总计', contentX + 16, totalMidY - 7);
+      ctx.font = `400 10.5px ${FONT_STACK}`;
+      ctx.fillStyle = '#A87C8B';
+      drawInkLeftText(ctx, `共 ${packageLayouts.length} 个已选套餐`, contentX + 16, totalMidY + 10);
+
+      const grandStr = fmtMoney(grandTotal.value);
+      ctx.font = `700 22px ${FONT_STACK}`;
+      const gNumW = ctx.measureText(grandStr).width;
+      ctx.font = `700 14px ${FONT_STACK}`;
+      const gYenW = ctx.measureText('¥').width;
+      const gRightX = contentX + contentW - 16;
+
+      ctx.fillStyle = '#BD5B79';
+      ctx.font = `700 14px ${FONT_STACK}`;
+      drawInkLeftText(ctx, '¥', gRightX - gNumW - gYenW - 2, totalMidY + 2);
+      ctx.font = `700 22px ${FONT_STACK}`;
+      drawInkLeftText(ctx, grandStr, gRightX - gNumW, totalMidY);
+
+      y += totalHBox;
     }
 
     // 8. Footer Dashed Line + Centered Footer Stamp

@@ -777,8 +777,8 @@ export async function firebaseRequest(
   if (method === 'GET' && pathOnly === '/packages') {
     const snap = await getDocs(collection(db, 'users', uid, 'packages'));
     const packages: PackageTemplate[] = snap.docs
-      .map((d) => ({ id: d.id, ...(d.data() as any) }))
-      .sort((a, b) => (a.category === b.category ? b.price - a.price : a.category === 'MAIN' ? -1 : 1));
+      .map((d) => ({ id: d.id, addons: [], ...(d.data() as any) }))
+      .sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
     return { data: { packages } };
   }
 
@@ -788,12 +788,27 @@ export async function firebaseRequest(
       name: String(body.name || '').trim(),
       category: body.category === 'EXTRA' ? 'EXTRA' : 'MAIN',
       price: Number(body.price || 0),
-      defaultDurationMin: Number(body.defaultDurationMin || 180),
+      defaultDurationMin: Math.max(0, Number(body.defaultDurationMin || 0)),
       description: String(body.description || ''),
+      addons: Array.isArray(body.addons) ? body.addons : [],
       createdAt: new Date().toISOString(),
     };
     await setDoc(doc(db, 'users', uid, 'packages', id), pkg);
     return { data: { package: { id, ...pkg } } };
+  }
+
+  if (method === 'PUT' && pathOnly.startsWith('/packages/')) {
+    const id = pathOnly.slice('/packages/'.length);
+    const ref = doc(db, 'users', uid, 'packages', id);
+    const updates: Record<string, any> = {};
+    if (body.name !== undefined) updates.name = String(body.name || '').trim();
+    if (body.price !== undefined) updates.price = Number(body.price || 0);
+    if (body.defaultDurationMin !== undefined) updates.defaultDurationMin = Math.max(0, Number(body.defaultDurationMin || 0));
+    if (body.description !== undefined) updates.description = String(body.description || '');
+    if (body.addons !== undefined) updates.addons = Array.isArray(body.addons) ? body.addons : [];
+    await updateDoc(ref, updates);
+    const snap = await getDoc(ref);
+    return { data: { package: { id, addons: [], ...(snap.data() as any) } } };
   }
 
   if (method === 'DELETE' && pathOnly.startsWith('/packages/')) {

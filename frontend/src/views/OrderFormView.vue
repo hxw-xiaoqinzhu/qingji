@@ -223,7 +223,7 @@
           <div class="flex items-center justify-between mb-1.5">
             <label class="text-[12px] text-ink-secondary font-medium">妆型名称</label>
             <button
-              v-if="mainPackages.length > 0"
+              v-if="packages.length > 0"
               type="button"
               class="text-[11.5px] font-medium text-[#A46B7D] pressable"
               @click="showPackagePicker = true"
@@ -477,7 +477,7 @@
         </div>
         <div class="flex-1 overflow-y-auto no-scrollbar space-y-2.5">
           <button
-            v-for="pkg in mainPackages"
+            v-for="pkg in packages"
             :key="pkg.id"
             type="button"
             class="w-full text-left bg-white rounded-2xl p-3.5 flex items-center justify-between gap-3 pressable"
@@ -486,9 +486,14 @@
             <div class="min-w-0 flex-1">
               <div class="text-[14.5px] font-semibold text-ink truncate">{{ pkg.name }}</div>
               <p v-if="pkg.description" class="text-[11.5px] text-ink-muted mt-0.5 line-clamp-2">{{ pkg.description }}</p>
+              <div v-if="pkg.addons && pkg.addons.length > 0" class="text-[11px] text-[#A46B7D] mt-1">
+                含 {{ pkg.addons.length }} 项增项（{{ pkg.addons.map((a) => a.name).join('、') }}）
+              </div>
             </div>
             <div class="text-right shrink-0 tabular-nums">
-              <div class="text-[15px] font-semibold text-brand-deep">¥{{ pkg.price }}</div>
+              <div class="text-[15px] font-semibold text-brand-deep">
+                ¥{{ pkg.price + (pkg.addons || []).reduce((s, a) => s + (Number(a.price) || 0), 0) }}
+              </div>
               <div v-if="pkg.defaultDurationMin > 0" class="text-[10.5px] text-ink-muted mt-0.5">
                 约 {{ Number.isInteger(pkg.defaultDurationMin / 60) ? pkg.defaultDurationMin / 60 : (pkg.defaultDurationMin / 60).toFixed(1) }}h
               </div>
@@ -565,6 +570,14 @@ function applyPackageFromLibrary(pkg: PackageTemplate) {
     const [h, m] = form.startTime.split(':').map(Number);
     const totalMin = Math.min(23 * 60 + 59, (h || 0) * 60 + (m || 0) + pkg.defaultDurationMin);
     form.endTime = `${String(Math.floor(totalMin / 60)).padStart(2, '0')}:${String(totalMin % 60).padStart(2, '0')}`;
+  }
+  if (pkg.addons && pkg.addons.length > 0) {
+    form.extraItems = pkg.addons.map((a) => ({
+      name: a.name,
+      unitPrice: Number(a.price) || 0,
+      quantity: 1,
+      subtotal: Number(a.price) || 0,
+    }));
   }
   showPackagePicker.value = false;
   showToast(`已带入「${pkg.name}」`);

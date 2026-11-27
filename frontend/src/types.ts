@@ -89,6 +89,12 @@ export interface BlockedDate {
   reason: string;
 }
 
+export interface PackageAddon {
+  id: string;
+  name: string;
+  price: number;
+}
+
 export interface PackageTemplate {
   id: string;
   name: string;
@@ -96,6 +102,7 @@ export interface PackageTemplate {
   price: number;
   defaultDurationMin: number;
   description: string;
+  addons?: PackageAddon[];
 }
 
 export interface ClientItem {
