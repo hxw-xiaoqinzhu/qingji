@@ -456,8 +456,14 @@
       </button>
     </div>
 
-    <!-- Clean Bottom Picker Sheet for Saved Main Packages -->
-    <van-popup v-model:show="showPackagePicker" position="bottom" teleport="body" round :style="{ maxHeight: 'calc(var(--app-height, 100vh) * 0.72)' }">
+    <!-- Clean Bottom Picker Sheet for Saved Main Packages (Pure-white borderless cards) -->
+    <van-popup
+      v-model:show="showPackagePicker"
+      position="bottom"
+      teleport="body"
+      round
+      :style="{ maxHeight: 'calc(var(--app-height, 100vh) * 0.72)', backgroundColor: '#FDF8FA' }"
+    >
       <div class="p-5 pb-safe-sheet flex flex-col" style="max-height: calc(var(--app-height, 100vh) * 0.72)">
         <div class="sheet-grabber shrink-0" />
         <div class="flex items-center justify-between mb-3 shrink-0">
@@ -474,7 +480,7 @@
             v-for="pkg in mainPackages"
             :key="pkg.id"
             type="button"
-            class="w-full text-left bg-canvas rounded-2xl p-3.5 flex items-center justify-between gap-3 pressable"
+            class="w-full text-left bg-white rounded-2xl p-3.5 flex items-center justify-between gap-3 pressable"
             @click="applyPackageFromLibrary(pkg)"
           >
             <div class="min-w-0 flex-1">

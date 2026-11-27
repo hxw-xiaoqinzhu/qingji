@@ -213,8 +213,14 @@
       </div>
     </div>
 
-    <!-- Sheet: Custom Profile Card Editor (Avatar + Nickname + Playful Quote) -->
-    <van-popup v-model:show="showProfileEditor" position="bottom" teleport="body" round :style="{ maxHeight: 'calc(var(--app-height, 100vh) * 0.88)' }">
+    <!-- Sheet: Custom Profile Card Editor (Borderless pure-white card + color blocks) -->
+    <van-popup
+      v-model:show="showProfileEditor"
+      position="bottom"
+      teleport="body"
+      round
+      :style="{ maxHeight: 'calc(var(--app-height, 100vh) * 0.88)', backgroundColor: '#FDF8FA' }"
+    >
       <div class="p-5 pb-safe-sheet flex flex-col" style="max-height: calc(var(--app-height, 100vh) * 0.88)">
         <div class="sheet-grabber shrink-0" />
         <div class="flex items-center justify-between mb-4 shrink-0">
@@ -229,7 +235,7 @@
 
         <div class="flex-1 overflow-y-auto no-scrollbar space-y-4 pb-2">
           <!-- Avatar Preview + Upload + Presets -->
-          <div class="bg-[#FAF2F5]/75 border border-[#F2E4E9] rounded-2xl p-4 space-y-3.5">
+          <div class="bg-white rounded-2xl p-4 space-y-3.5">
             <div class="flex items-center gap-4">
               <div class="avatar-ring shrink-0">
                 <StudioAvatar :src="profileForm.avatarUrl" :size="64" rounded-class="rounded-full" />
@@ -238,7 +244,7 @@
                 <div class="text-[13px] font-semibold text-ink">专属头像</div>
                 <div class="flex items-center gap-2">
                   <label
-                    class="inline-flex items-center gap-1.5 px-3.5 h-8 rounded-full bg-white border border-[#EEDCE3] text-[12px] font-medium text-[#A46B7D] cursor-pointer pressable"
+                    class="inline-flex items-center gap-1.5 px-3.5 h-8 rounded-full bg-[#FAF0F3] text-[12px] font-medium text-[#A46B7D] cursor-pointer pressable"
                   >
                     <Camera class="w-3.5 h-3.5" />
                     <span>{{ uploadingAvatar ? '上传中...' : '从相册上传' }}</span>
@@ -253,7 +259,7 @@
                   <button
                     v-if="profileForm.avatarUrl && profileForm.avatarUrl !== 'preset:ribbon'"
                     type="button"
-                    class="px-3 h-8 rounded-full bg-white/80 text-[11.5px] text-ink-muted"
+                    class="px-3 h-8 rounded-full bg-[#FAF4F6] text-[11.5px] text-ink-muted"
                     @click="profileForm.avatarUrl = 'preset:ribbon'"
                   >
                     恢复默认
@@ -269,11 +275,11 @@
                   v-for="preset in avatarPresets"
                   :key="preset.id"
                   type="button"
-                  class="flex flex-col items-center gap-1.5 p-2 rounded-2xl border transition-all pressable"
+                  class="flex flex-col items-center gap-1.5 p-2 rounded-2xl transition-all pressable"
                   :class="
                     (profileForm.avatarUrl || 'preset:ribbon') === preset.id
-                      ? 'bg-white border-[#D99AAF] shadow-[0_4px_12px_rgba(201,134,154,0.18)]'
-                      : 'bg-white/60 border-transparent'
+                      ? 'bg-[#F8E7EE]'
+                      : 'bg-[#FAF5F7]'
                   "
                   @click="profileForm.avatarUrl = preset.id"
                 >
@@ -603,7 +609,7 @@
               :key="tab.value"
               type="button"
               class="shrink-0 px-3.5 h-7 rounded-full text-[12px] font-medium transition-colors"
-              :class="clientFilter === tab.value ? 'bg-brand text-white' : 'bg-white text-ink-secondary border border-[#F1E2E7]'"
+              :class="clientFilter === tab.value ? 'bg-brand text-white' : 'bg-white text-ink-secondary'"
               @click="clientFilter = tab.value"
             >
               {{ tab.label }}
@@ -624,7 +630,7 @@
               :key="c.id"
               class="rounded-[20px] overflow-hidden"
             >
-              <article class="bg-white border border-[#F2E3E8] rounded-[20px] p-4 space-y-3 shadow-[0_6px_18px_-12px_rgba(182,124,144,0.2)]">
+              <article class="bg-white rounded-[20px] p-4 space-y-3">
                 <!-- Top Identity Row + Pending Balance in Top-Right Slot -->
                 <div class="flex items-start justify-between gap-2.5">
                   <div class="flex items-center gap-3 min-w-0">
@@ -669,7 +675,7 @@
                   <a
                     v-if="c.phone"
                     :href="`tel:${c.phone}`"
-                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FAF5F7] text-ink-secondary pressable"
+                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FAF4F6] text-ink-secondary pressable"
                   >
                     <Phone class="w-3 h-3 text-[#AD7485]" />
                     <span>{{ c.phone }}</span>
@@ -677,7 +683,7 @@
                   <button
                     v-if="c.wechat"
                     type="button"
-                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FAF5F7] text-ink-secondary pressable"
+                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FAF4F6] text-ink-secondary pressable"
                     @click="copyText(c.wechat, '已复制微信号')"
                   >
                     <Copy class="w-3 h-3 text-[#AD7485]" />
@@ -685,8 +691,8 @@
                   </button>
                 </div>
 
-                <!-- Beauty Profile Tags (Skin / Hair / Allergy) -->
-                <div v-if="c.skinType || c.allergyNote || c.hairNote" class="bg-[#FCF8FA] border border-[#F4E7EC] rounded-2xl px-3 py-2.5 text-[12px] text-ink-secondary space-y-1">
+                <!-- Beauty Profile Tags (Borderless soft color block) -->
+                <div v-if="c.skinType || c.allergyNote || c.hairNote" class="bg-[#FAF4F6] rounded-2xl px-3 py-2.5 text-[12px] text-ink-secondary space-y-1">
                   <div v-if="c.skinType || c.hairNote" class="flex flex-wrap gap-x-3.5 gap-y-0.5">
                     <span v-if="c.skinType"><span class="text-ink-muted">肤质：</span>{{ c.skinType }}</span>
                     <span v-if="c.hairNote"><span class="text-ink-muted">发质：</span>{{ c.hairNote }}</span>
@@ -696,7 +702,7 @@
                   </div>
                 </div>
 
-                <!-- Order History List -->
+                <!-- Order History List (Borderless soft color block) -->
                 <div v-if="c.orders && c.orders.length > 0" class="space-y-1.5 pt-0.5">
                   <div class="flex items-center justify-between text-[11px] text-ink-muted px-0.5">
                     <span>历史妆造行程</span>
@@ -713,7 +719,7 @@
                     v-for="o in (expandedClientIds.has(c.id) ? c.orders : c.orders.slice(0, 1))"
                     :key="o.id"
                     type="button"
-                    class="w-full text-left bg-[#FCF8FA] rounded-2xl px-3 py-2.5 border border-[#F3E6EB] flex items-center justify-between gap-2 pressable"
+                    class="w-full text-left bg-[#FAF4F6] rounded-2xl px-3 py-2.5 flex items-center justify-between gap-2 pressable"
                     @click="jumpToOrder(o.id)"
                   >
                     <div class="min-w-0 flex-1">
@@ -881,7 +887,7 @@
               :key="`chk-${idx}-${item}`"
               class="rounded-[18px] overflow-hidden"
             >
-              <div class="bg-white border border-[#F2E3E8] rounded-[18px] px-4 py-3.5 flex items-center gap-3">
+              <div class="bg-white rounded-[18px] px-4 py-3.5 flex items-center gap-3">
                 <span class="w-6 h-6 rounded-full bg-[#FAF0F3] text-[#AD7485] text-[11px] font-semibold flex items-center justify-center shrink-0 tabular-nums">
                   {{ idx + 1 }}
                 </span>
@@ -964,7 +970,13 @@
     </van-popup>
 
     <!-- Sheet: Multi-device Sessions -->
-    <van-popup v-model:show="showSessionsSheet" position="bottom" teleport="body" round :style="{ minHeight: 'calc(var(--app-height, 100vh) * 0.50)', maxHeight: 'calc(var(--app-height, 100vh) * 0.80)' }">
+    <van-popup
+      v-model:show="showSessionsSheet"
+      position="bottom"
+      teleport="body"
+      round
+      :style="{ minHeight: 'calc(var(--app-height, 100vh) * 0.50)', maxHeight: 'calc(var(--app-height, 100vh) * 0.80)', backgroundColor: '#FDF8FA' }"
+    >
       <div class="p-5 pb-safe-sheet flex flex-col" style="min-height: calc(var(--app-height, 100vh) * 0.50); max-height: calc(var(--app-height, 100vh) * 0.80)">
         <div class="sheet-grabber shrink-0" />
         <div class="flex items-center justify-between mb-1 shrink-0">
@@ -976,12 +988,12 @@
         <p class="text-[12px] text-ink-muted mb-3 shrink-0">移除后该设备将自动退出并需重新登录</p>
         <div class="flex-1 overflow-y-auto no-scrollbar relative">
           <Transition name="skeleton-dissolve">
-            <div v-if="loadingSessions" class="absolute inset-0 z-10 bg-white space-y-2.5 pointer-events-none">
+            <div v-if="loadingSessions" class="absolute inset-0 z-10 bg-[#FDF8FA] space-y-2.5 pointer-events-none">
               <div v-for="i in 2" :key="i" class="skeleton-box h-[66px] w-full rounded-2xl" />
             </div>
           </Transition>
           <div v-if="sessions.length > 0" class="space-y-2.5">
-            <div v-for="s in sessions" :key="s.id" class="bg-canvas rounded-2xl p-3.5 flex items-center justify-between">
+            <div v-for="s in sessions" :key="s.id" class="bg-white rounded-2xl p-3.5 flex items-center justify-between">
               <div>
                 <div class="text-[14px] font-medium text-ink flex items-center gap-2">
                   <span>{{ s.deviceInfo }}</span>
@@ -1011,8 +1023,14 @@
       </div>
     </van-popup>
 
-    <!-- Sheet: Recycle Bin (With One-Tap Empty Trash + Cascade Client Cleanup) -->
-    <van-popup v-model:show="showRecycleSheet" position="bottom" teleport="body" round :style="{ minHeight: 'calc(var(--app-height, 100vh) * 0.54)', maxHeight: 'calc(var(--app-height, 100vh) * 0.82)' }">
+    <!-- Sheet: Recycle Bin (Pure-white borderless cards + One-Tap Empty Trash) -->
+    <van-popup
+      v-model:show="showRecycleSheet"
+      position="bottom"
+      teleport="body"
+      round
+      :style="{ minHeight: 'calc(var(--app-height, 100vh) * 0.54)', maxHeight: 'calc(var(--app-height, 100vh) * 0.82)', backgroundColor: '#FDF8FA' }"
+    >
       <div class="p-5 pb-safe-sheet flex flex-col" style="min-height: calc(var(--app-height, 100vh) * 0.54); max-height: calc(var(--app-height, 100vh) * 0.82)">
         <div class="sheet-grabber shrink-0" />
         <div class="flex items-center justify-between mb-3 shrink-0">
@@ -1033,12 +1051,12 @@
         </div>
         <div class="flex-1 overflow-y-auto no-scrollbar relative">
           <Transition name="skeleton-dissolve">
-            <div v-if="loadingRecycle" class="absolute inset-0 z-10 bg-white space-y-2.5 pointer-events-none">
+            <div v-if="loadingRecycle" class="absolute inset-0 z-10 bg-[#FDF8FA] space-y-2.5 pointer-events-none">
               <div v-for="i in 3" :key="i" class="skeleton-box h-[66px] w-full rounded-2xl" />
             </div>
           </Transition>
           <div v-if="deletedOrders.length" class="space-y-2.5">
-            <div v-for="o in deletedOrders" :key="o.id" class="bg-canvas rounded-2xl p-3.5 flex items-center justify-between">
+            <div v-for="o in deletedOrders" :key="o.id" class="bg-white rounded-2xl p-3.5 flex items-center justify-between">
               <div>
                 <div class="text-[14px] font-medium text-ink">{{ o.clientName }} · {{ o.serviceType }}</div>
                 <div class="text-[11px] text-ink-muted tabular-nums">{{ o.serviceDate }} · ¥{{ o.totalAmount }}</div>

@@ -22,18 +22,7 @@ export function useViewportLock() {
   let lastWidth = 0;
   let settleTimer: ReturnType<typeof setTimeout> | null = null;
 
-  const isStandalone = () =>
-    (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
-    (window.navigator as any).standalone === true;
-
   function applyAppHeight(h: number) {
-    if (isStandalone()) {
-      // In iOS Home-Screen PWA standalone mode, 100lvh reaches the true physical bottom edge
-      // (whereas window.innerHeight can be ~44px shorter on iOS Safari WebApp, leaving a white bottom gap).
-      lockedHeight = Math.max(h, window.screen.height);
-      document.documentElement.style.setProperty('--app-height', '100lvh');
-      return;
-    }
     if (h > 200) {
       lockedHeight = h;
       document.documentElement.style.setProperty('--app-height', `${Math.round(h)}px`);

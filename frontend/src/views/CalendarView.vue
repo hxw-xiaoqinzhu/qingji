@@ -152,11 +152,11 @@
                   :class="[
                     cell.shapeClass,
                     cell.tagLabel
-                      ? [cell.tileClass, cell.date === selectedDate ? 'ring-2 ring-[#C77D92] ring-offset-1' : '']
-                      : cell.date === selectedDate
-                        ? 'bg-[#FAF0F3] text-brand-deep border border-[#DC99AA]'
-                        : cell.isToday
-                          ? 'bg-[#FCF2F5] text-brand-deep border border-[#F2DCE3]'
+                      ? [cell.tileClass, cell.isToday ? 'ring-[1.5px] ring-[#F3D3DE] ring-offset-[1.5px]' : '']
+                      : cell.isToday
+                        ? 'bg-[#F8EAEF] text-brand-deep'
+                        : cell.date === selectedDate
+                          ? 'bg-[#FAF2F5] text-brand-deep'
                           : cell.inCurrentMonth
                             ? 'text-ink'
                             : 'text-ink-muted/35',
@@ -212,7 +212,7 @@
             <i class="w-2.5 h-2.5 rounded-[4px] btn-rose inline-block" />有行程
           </span>
           <span class="flex items-center gap-1.5">
-            <i class="w-2.5 h-2.5 rounded-[4px] bg-[#FCF2F5] border border-[#F2DCE3] inline-block" />今日
+            <i class="w-2.5 h-2.5 rounded-[4px] bg-[#F8EAEF] inline-block" />今日
           </span>
         </div>
       </section>
@@ -331,15 +331,15 @@
       </div>
     </div>
 
-    <!-- Day Schedule Popup (Opens when tapping a date with booked tasks) -->
+    <!-- Day Schedule Popup (Generous default height, pinned bottom button, borderless pure-white cards) -->
     <van-popup
       v-model:show="showDayScheduleSheet"
       position="bottom"
       teleport="body"
       round
-      :style="{ maxHeight: 'calc(var(--app-height, 100vh) * 0.78)', backgroundColor: '#FDF8FA' }"
+      :style="{ minHeight: 'calc(var(--app-height, 100vh) * 0.64)', maxHeight: 'calc(var(--app-height, 100vh) * 0.86)', backgroundColor: '#FDF8FA' }"
     >
-      <div class="p-5 pb-safe-sheet flex flex-col" style="max-height: calc(var(--app-height, 100vh) * 0.78)">
+      <div class="p-5 pb-safe-sheet flex flex-col" style="min-height: calc(var(--app-height, 100vh) * 0.64); max-height: calc(var(--app-height, 100vh) * 0.86)">
         <div class="sheet-grabber shrink-0" />
         <div class="flex items-center justify-between mb-3.5 shrink-0">
           <div>
@@ -358,7 +358,7 @@
             class="rounded-[20px] overflow-hidden"
           >
             <article
-              class="bg-white border border-[#F2E3E8] rounded-[20px] p-4 pl-5 relative overflow-hidden pressable cursor-pointer"
+              class="bg-white rounded-[20px] p-4 pl-5 relative overflow-hidden pressable cursor-pointer"
               @click="openOrderDetailFromSheet(order.id)"
             >
               <span

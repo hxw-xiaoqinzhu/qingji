@@ -36,12 +36,6 @@
   --van-toast-radius: 999px;
 }
 
-@media all and (display-mode: standalone) {
-  :root {
-    --app-height: 100lvh;
-  }
-}
-
 @layer base {
   * {
     box-sizing: border-box;
@@ -244,7 +238,7 @@ html.kb-open .van-popup--bottom {
   padding-bottom: var(--kb-height, 0px);
 }
 
-/* Docked Bottom Navigation / Sticky Footer Bar (Flush to physical bottom, zero oversized gap) */
+/* Docked Bottom Navigation / Sticky Footer Bar (Flush to physical bottom, never clipped) */
 .dock-glass-bar {
   position: relative;
   flex-shrink: 0;
@@ -252,7 +246,7 @@ html.kb-open .van-popup--bottom {
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
   border-top: 1px solid rgba(212, 104, 132, 0.09);
-  padding-bottom: max(10px, calc(env(safe-area-inset-bottom, 0px) - 14px));
+  padding-bottom: max(10px, calc(env(safe-area-inset-bottom, 0px) - 12px));
   z-index: 30;
 }
 
