@@ -128,6 +128,16 @@ function onStorageSync(e: StorageEvent) {
   }
 }
 
+// Block iOS Safari / Standalone PWA left-edge swipe-back gesture on top-level Tab pages & Login
+function onEdgeSwipeGuard(e: TouchEvent) {
+  if (!showTabbar.value && route.path !== '/login') return;
+  if (e.touches.length !== 1) return;
+  const x = e.touches[0].pageX;
+  if (x <= 28) {
+    e.preventDefault();
+  }
+}
+
 watch(
   () => auth.accessToken,
   (token) => {
@@ -149,6 +159,7 @@ onMounted(() => {
   window.addEventListener('visibilitychange', onVisibilityOrFocus);
   window.addEventListener('focus', onVisibilityOrFocus);
   window.addEventListener('storage', onStorageSync);
+  document.addEventListener('touchstart', onEdgeSwipeGuard, { passive: false });
 });
 
 onBeforeUnmount(() => {
@@ -158,5 +169,6 @@ onBeforeUnmount(() => {
   window.removeEventListener('visibilitychange', onVisibilityOrFocus);
   window.removeEventListener('focus', onVisibilityOrFocus);
   window.removeEventListener('storage', onStorageSync);
+  document.removeEventListener('touchstart', onEdgeSwipeGuard);
 });
 </script>

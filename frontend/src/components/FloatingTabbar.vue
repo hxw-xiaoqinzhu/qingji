@@ -144,7 +144,7 @@ const activeColIndex = computed(() => {
 
 function go(path: string) {
   if (route.path !== path) {
-    router.push(path);
+    router.replace(path);
   }
 }
 

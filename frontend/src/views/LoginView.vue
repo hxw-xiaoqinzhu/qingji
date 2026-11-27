@@ -15,19 +15,8 @@
 
     <!-- Main Column (Card shifted lower with airy upper sky) -->
     <div class="relative z-10 w-full max-w-[390px] mx-auto px-5 pt-safe-screen pb-8 flex-1 flex flex-col">
-      <!-- Top Brand Whisper Pill -->
-      <div class="pt-3 flex items-center justify-between select-none">
-        <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/42 backdrop-blur-md border border-white/65 text-[11.5px] font-medium text-[#7B4D5D]">
-          <span class="w-1.5 h-1.5 rounded-full bg-[#D98BA2]" />
-          <span>晴记 · 美妆档期手账</span>
-        </div>
-        <svg class="w-5 h-5 opacity-75" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M12 2L13.9 8.1L20 10L13.9 11.9L12 18L10.1 11.9L4 10L10.1 8.1L12 2Z" fill="#FFFFFF" />
-        </svg>
-      </div>
-
       <!-- Airy Upper Spacer Pushing Greeting + Card Comfortably Lower -->
-      <div class="h-[68px] shrink-0" />
+      <div class="h-[96px] shrink-0" />
 
       <!-- Cute Chubby Bold Greeting + Perched Circular Avatar Medallion -->
       <div class="relative flex items-end justify-between px-1 pb-5 select-none">
