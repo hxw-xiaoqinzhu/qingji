@@ -1,7 +1,7 @@
 <template>
   <div class="login-page relative h-full scroll-pane no-scrollbar overflow-x-hidden flex flex-col">
-    <!-- Top Pale Pastel Blush-Rose Gradient Canopy with Floating Translucent Bubbles -->
-    <div class="login-hero-bg" aria-hidden="true">
+    <!-- Full-Screen Pale Pastel Blush-Pink Canvas + Floating Translucent Bubbles -->
+    <div class="login-full-bg" aria-hidden="true">
       <div class="login-hero-beam" />
       <span class="sky-bubble b1" />
       <span class="sky-bubble b2" />
@@ -10,28 +10,34 @@
       <span class="sky-bubble b5" />
       <span class="sky-bubble b6" />
       <span class="sky-bubble b7" />
+      <span class="sky-bubble b8" />
     </div>
 
-    <!-- Balanced Editorial Column (Fills top canopy gracefully, never hollow) -->
+    <!-- Main Column (Card shifted lower with airy upper sky) -->
     <div class="relative z-10 w-full max-w-[390px] mx-auto px-5 pt-safe-screen pb-8 flex-1 flex flex-col">
       <!-- Top Brand Whisper Pill -->
-      <div class="pt-3 pb-5 flex items-center justify-between select-none">
-        <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/35 backdrop-blur-md border border-white/55 text-[11.5px] font-medium text-[#7B4D5D]">
+      <div class="pt-3 flex items-center justify-between select-none">
+        <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/42 backdrop-blur-md border border-white/65 text-[11.5px] font-medium text-[#7B4D5D]">
           <span class="w-1.5 h-1.5 rounded-full bg-[#D98BA2]" />
           <span>晴记 · 美妆档期手账</span>
         </div>
-        <svg class="w-5 h-5 opacity-70" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <svg class="w-5 h-5 opacity-75" viewBox="0 0 24 24" fill="none" aria-hidden="true">
           <path d="M12 2L13.9 8.1L20 10L13.9 11.9L12 18L10.1 11.9L4 10L10.1 8.1L12 2Z" fill="#FFFFFF" />
         </svg>
       </div>
 
-      <!-- Greeting + Perched Circular Avatar Medallion -->
-      <div class="relative flex items-end justify-between px-1 pb-5 pt-2 select-none">
+      <!-- Airy Upper Spacer Pushing Greeting + Card Comfortably Lower -->
+      <div class="h-[68px] shrink-0" />
+
+      <!-- Cute Chubby Bold Greeting + Perched Circular Avatar Medallion -->
+      <div class="relative flex items-end justify-between px-1 pb-5 select-none">
         <div class="pb-1 pr-3 min-w-0">
-          <h1 class="text-[36px] font-bold tracking-[0.03em] text-white leading-none login-hello-shadow">
-            Hello !
-          </h1>
-          <p class="text-[13.5px] text-[#6B4854]/90 mt-2.5 font-medium tracking-[0.02em]">
+          <!-- Custom Cute Chubby Rounded Vector Wordmark "Hello !" (100% consistent across iOS/Android/WeChat) -->
+          <div class="flex items-center gap-1.5">
+            <span class="cute-hello-text">Hello</span>
+            <span class="cute-hello-bang">!</span>
+          </div>
+          <p class="text-[13.5px] text-[#6E4956] mt-2 font-medium tracking-[0.02em]">
             很高兴认识您，欢迎来到晴记
           </p>
         </div>
@@ -54,46 +60,45 @@
         </div>
       </div>
 
-      <!-- Signature Seamless Curved Folder-Tab Card -->
-      <div class="login-card-wrap relative z-10">
-        <!-- Folder Tab Bar (One Continuous Seamless SVG Curve — Zero Corner Seam!) -->
-        <div class="relative flex h-[54px] overflow-hidden rounded-t-[26px]">
-          <!-- Frosted Background Strip Behind Inactive Tab -->
-          <div class="login-tab-backdrop" aria-hidden="true" />
+      <!-- Seamless Translucent Frosted-Glass Curved Folder-Tab Card -->
+      <div class="login-glass-card relative z-10 overflow-hidden rounded-[26px]">
+        <!-- Single Unified Full-Card SVG Backdrop (Zero seam between curved active tab & translucent glass body!) -->
+        <svg
+          class="pointer-events-none absolute inset-0 w-full h-full z-0"
+          viewBox="0 0 360 400"
+          preserveAspectRatio="none"
+          aria-hidden="true"
+        >
+          <!-- Subtle Frosted Inactive Top Strip -->
+          <rect x="0" y="0" width="360" height="55" fill="rgba(255, 240, 245, 0.34)" />
 
-          <!-- Seamless Single-Path Active White Tab Silhouette -->
-          <svg
-            class="pointer-events-none absolute inset-0 w-full h-[55px] z-[2]"
-            viewBox="0 0 360 55"
-            preserveAspectRatio="none"
-            aria-hidden="true"
-          >
-            <path
-              v-if="mode === 'login'"
-              d="M0,55 L0,26 Q0,0 26,0 L160,0 C186,0 190,54 222,54 L360,54 L360,55 Z"
-              fill="#FFFFFF"
-            />
-            <path
-              v-else
-              d="M0,55 L0,54 L138,54 C170,54 174,0 200,0 L334,0 Q360,0 360,26 L360,55 Z"
-              fill="#FFFFFF"
-            />
-          </svg>
+          <!-- Active Translucent White-Glass Tab + Seamless Card Body -->
+          <path
+            v-if="mode === 'login'"
+            d="M0,400 L0,26 Q0,0 26,0 L160,0 C186,0 190,54 222,54 L360,54 L360,400 Z"
+            fill="rgba(255, 255, 255, 0.72)"
+          />
+          <path
+            v-else
+            d="M0,400 L0,54 L138,54 C170,54 174,0 200,0 L334,0 Q360,0 360,26 L360,400 Z"
+            fill="rgba(255, 255, 255, 0.72)"
+          />
+        </svg>
 
-          <!-- Left Tab: 账号登录 -->
+        <!-- Folder Tab Buttons -->
+        <div class="relative z-10 flex h-[54px]">
           <button
             type="button"
-            class="relative z-10 flex-1 flex items-center justify-center text-[15.5px] transition-colors"
+            class="flex-1 flex items-center justify-center text-[15.5px] transition-colors"
             :class="mode === 'login' ? 'font-semibold text-[#3C2C32]' : 'font-medium text-[#7D5E69]'"
             @click="switchMode('login')"
           >
             <span>账号登录</span>
           </button>
 
-          <!-- Right Tab: 注册账号 -->
           <button
             type="button"
-            class="relative z-10 flex-1 flex items-center justify-center text-[15.5px] transition-colors"
+            class="flex-1 flex items-center justify-center text-[15.5px] transition-colors"
             :class="mode === 'register' ? 'font-semibold text-[#3C2C32]' : 'font-medium text-[#7D5E69]'"
             @click="switchMode('register')"
           >
@@ -101,8 +106,8 @@
           </button>
         </div>
 
-        <!-- Pure White Form Body -->
-        <form class="login-card-body px-6 pt-5 pb-7 space-y-5" @submit.prevent="handleSubmit">
+        <!-- Translucent Glass Form Body (Clean 2-Field Layout for Both Login & Register) -->
+        <form class="relative z-10 px-6 pt-5 pb-7 space-y-5" @submit.prevent="handleSubmit">
           <!-- Field 1: Username -->
           <div>
             <label class="block text-[13.5px] font-semibold text-[#3F3036] mb-2 pl-1">账号</label>
@@ -112,19 +117,6 @@
                 type="text"
                 autocomplete="username"
                 placeholder="请输入账号"
-                class="login-pill-input"
-              />
-            </div>
-          </div>
-
-          <!-- Optional Field: Studio Name (Register Mode) -->
-          <div v-if="mode === 'register'" class="stagger-item">
-            <label class="block text-[13.5px] font-semibold text-[#3F3036] mb-2 pl-1">工作室名称</label>
-            <div class="login-pill-field">
-              <input
-                v-model.trim="form.studioName"
-                type="text"
-                placeholder="如：嘻嘻化妆室（选填）"
                 class="login-pill-input"
               />
             </div>
@@ -143,7 +135,7 @@
               />
               <button
                 type="button"
-                class="w-8 h-8 rounded-full flex items-center justify-center text-[#B29DA5] active:bg-white/80 active:text-[#C47E91] transition-colors shrink-0"
+                class="w-8 h-8 rounded-full flex items-center justify-center text-[#AD959E] active:bg-white/80 active:text-[#C47E91] transition-colors shrink-0"
                 :aria-label="showPwd ? '隐藏密码' : '显示密码'"
                 @click.prevent="showPwd = !showPwd"
               >
@@ -156,7 +148,7 @@
           <!-- Inline Soft Error Pill -->
           <p
             v-if="errorMsg"
-            class="text-[12.5px] text-status-danger-text bg-[#FDF2F5] border border-[#F2D6DE] px-4 py-2 rounded-full text-center"
+            class="text-[12.5px] text-status-danger-text bg-white/85 border border-[#F2D6DE] px-4 py-2 rounded-full text-center"
           >
             {{ errorMsg }}
           </p>
@@ -176,7 +168,7 @@
 
       <!-- Subtle Editorial Footer Whisper -->
       <div class="mt-auto pt-8 text-center select-none">
-        <p class="text-[11.5px] text-[#B9A4AC] tracking-[0.06em]">
+        <p class="text-[11.5px] text-[#9E7E89] tracking-[0.06em]">
           每一场双向奔赴 · 都值得被温柔记录
         </p>
       </div>
@@ -204,7 +196,6 @@ const errorMsg = ref('');
 const form = reactive({
   username: '',
   password: '',
-  studioName: '',
 });
 
 function switchMode(target: 'login' | 'register') {
@@ -226,7 +217,6 @@ async function handleSubmit() {
       await auth.register({
         username: form.username,
         password: form.password,
-        studioName: form.studioName || undefined,
       });
     }
     const redirect = (route.query.redirect as string) || '/calendar';
@@ -241,109 +231,144 @@ async function handleSubmit() {
 
 <style scoped>
 .login-page {
-  background: linear-gradient(180deg, #FBF2F5 0%, #FFFFFF 48%, #FFFFFF 100%);
+  background: transparent;
 }
 
-/* Soft Pale Pastel Blush-Pink Gradient Top Canopy */
-.login-hero-bg {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 44%;
-  min-height: 300px;
+/* Full-Screen Pale Pastel Blush-Pink Gradient Canvas (Top-to-Bottom 100% Coverage) */
+.login-full-bg {
+  position: fixed;
+  inset: 0;
   background: linear-gradient(
-    148deg,
-    #E7B5C6 0%,
-    #F1CDD9 42%,
-    #F9E7EE 76%,
-    rgba(255, 255, 255, 0) 100%
+    162deg,
+    #EAC0CF 0%,
+    #F3D3DF 38%,
+    #FAE6EE 72%,
+    #FDF1F5 100%
   );
   overflow: hidden;
   pointer-events: none;
+  z-index: 0;
 }
 
 .login-hero-beam {
   position: absolute;
-  top: -32%;
-  left: -15%;
-  width: 85%;
-  height: 150%;
+  top: -22%;
+  left: -18%;
+  width: 90%;
+  height: 95%;
   background: linear-gradient(
-    130deg,
-    rgba(255, 255, 255, 0.28) 0%,
-    rgba(255, 255, 255, 0.08) 55%,
-    rgba(255, 255, 255, 0) 70%
+    132deg,
+    rgba(255, 255, 255, 0.34) 0%,
+    rgba(255, 255, 255, 0.1) 52%,
+    rgba(255, 255, 255, 0) 72%
   );
   transform: rotate(-12deg);
 }
 
-/* Dreamy Floating Translucent Pastel Bubbles */
+/* Cute Chubby Rounded Heavy Display Typography for "Hello !" */
+.cute-hello-text {
+  font-family: ui-rounded, 'SF Pro Rounded', 'Arial Rounded MT Bold', 'Nunito', 'PingFang SC', sans-serif;
+  font-size: 42px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0.03em;
+  color: #FFFFFF;
+  -webkit-text-stroke: 1.5px #FFFFFF;
+  paint-order: stroke fill;
+  text-shadow:
+    0 4px 14px rgba(176, 108, 130, 0.28),
+    0 1px 2px rgba(176, 108, 130, 0.18);
+}
+
+.cute-hello-bang {
+  display: inline-block;
+  font-family: ui-rounded, 'SF Pro Rounded', 'Arial Rounded MT Bold', 'Nunito', sans-serif;
+  font-size: 42px;
+  font-weight: 900;
+  line-height: 1;
+  color: #FFFFFF;
+  -webkit-text-stroke: 1.5px #FFFFFF;
+  paint-order: stroke fill;
+  transform: rotate(8deg) translateY(-1px);
+  text-shadow:
+    0 4px 14px rgba(176, 108, 130, 0.28),
+    0 1px 2px rgba(176, 108, 130, 0.18);
+}
+
+/* Dreamy Floating Translucent Pastel Bubbles Across Full Screen */
 .sky-bubble {
   position: absolute;
   border-radius: 9999px;
   background: radial-gradient(
     circle at 32% 28%,
-    rgba(255, 255, 255, 0.72) 0%,
-    rgba(255, 255, 255, 0.24) 55%,
+    rgba(255, 255, 255, 0.76) 0%,
+    rgba(255, 255, 255, 0.26) 55%,
     rgba(255, 240, 246, 0.08) 100%
   );
-  border: 1px solid rgba(255, 255, 255, 0.55);
-  box-shadow: inset 0 2px 6px rgba(255, 255, 255, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: inset 0 2px 6px rgba(255, 255, 255, 0.68);
   will-change: transform;
 }
 
 .sky-bubble.b1 {
-  width: 64px;
-  height: 64px;
-  top: 14%;
-  right: 12%;
+  width: 68px;
+  height: 68px;
+  top: 8%;
+  right: 10%;
   animation: bubbleDriftA 13s ease-in-out infinite alternate;
 }
 .sky-bubble.b2 {
-  width: 36px;
-  height: 36px;
-  top: 24%;
-  left: 16%;
+  width: 38px;
+  height: 38px;
+  top: 15%;
+  left: 14%;
   animation: bubbleDriftB 11s ease-in-out infinite alternate;
 }
 .sky-bubble.b3 {
   width: 22px;
   height: 22px;
-  top: 10%;
-  left: 52%;
+  top: 7%;
+  left: 50%;
   animation: bubbleDriftA 9.5s ease-in-out 1.2s infinite alternate;
 }
 .sky-bubble.b4 {
-  width: 48px;
-  height: 48px;
-  top: 46%;
-  left: -10px;
-  opacity: 0.75;
+  width: 52px;
+  height: 52px;
+  top: 32%;
+  left: -12px;
+  opacity: 0.78;
   animation: bubbleDriftB 14s ease-in-out 0.6s infinite alternate;
 }
 .sky-bubble.b5 {
   width: 18px;
   height: 18px;
-  top: 38%;
-  right: 30%;
+  top: 22%;
+  right: 32%;
   animation: bubbleDriftA 8.5s ease-in-out 2s infinite alternate;
 }
 .sky-bubble.b6 {
-  width: 28px;
-  height: 28px;
-  top: 56%;
-  right: 6%;
-  opacity: 0.7;
+  width: 44px;
+  height: 44px;
+  bottom: 12%;
+  right: -8px;
+  opacity: 0.68;
   animation: bubbleDriftB 12s ease-in-out 1.5s infinite alternate;
 }
 .sky-bubble.b7 {
-  width: 14px;
-  height: 14px;
-  top: 18%;
+  width: 15px;
+  height: 15px;
+  top: 12%;
   left: 34%;
   opacity: 0.85;
   animation: bubbleDriftA 10s ease-in-out 0.4s infinite alternate;
+}
+.sky-bubble.b8 {
+  width: 32px;
+  height: 32px;
+  bottom: 8%;
+  left: 12%;
+  opacity: 0.62;
+  animation: bubbleDriftA 12.5s ease-in-out 0.9s infinite alternate;
 }
 
 @keyframes bubbleDriftA {
@@ -364,15 +389,11 @@ async function handleSubmit() {
   }
 }
 
-.login-hello-shadow {
-  text-shadow: 0 2px 12px rgba(173, 108, 129, 0.22);
-}
-
 .login-avatar-glow {
   position: absolute;
   inset: -10px;
   border-radius: 9999px;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.76) 0%, rgba(255, 255, 255, 0) 70%);
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.78) 0%, rgba(255, 255, 255, 0) 70%);
   filter: blur(6px);
   pointer-events: none;
 }
@@ -415,25 +436,14 @@ async function handleSubmit() {
   }
 }
 
-.login-card-wrap {
-  border-radius: 26px;
-  box-shadow: 0 22px 48px -20px rgba(182, 124, 144, 0.22);
-}
-
-.login-tab-backdrop {
-  position: absolute;
-  inset: 0;
-  border-radius: 26px 26px 0 0;
-  background: rgba(255, 255, 255, 0.44);
-  backdrop-filter: blur(18px) saturate(160%);
-  -webkit-backdrop-filter: blur(18px) saturate(160%);
-  border: 1px solid rgba(255, 255, 255, 0.72);
-  border-bottom: none;
-}
-
-.login-card-body {
-  background: #FFFFFF;
-  border-radius: 0 0 26px 26px;
+/* Frosted Translucent Liquid Glass Card */
+.login-glass-card {
+  backdrop-filter: blur(26px) saturate(180%);
+  -webkit-backdrop-filter: blur(26px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow:
+    0 24px 48px -18px rgba(182, 118, 140, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
 .login-pill-field {
@@ -442,15 +452,15 @@ async function handleSubmit() {
   height: 48px;
   padding: 0 14px 0 20px;
   border-radius: 9999px;
-  background: #F8F3F5;
-  border: 1px solid transparent;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(242, 222, 229, 0.9);
   transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
 }
 
 .login-pill-field:focus-within {
-  background: #FFFFFF;
+  background: rgba(255, 255, 255, 0.96);
   border-color: #E7BAC7;
-  box-shadow: 0 0 0 3px rgba(231, 186, 199, 0.22);
+  box-shadow: 0 0 0 3px rgba(231, 186, 199, 0.24);
 }
 
 .login-pill-input {
@@ -465,7 +475,7 @@ async function handleSubmit() {
 }
 
 .login-pill-input::placeholder {
-  color: #BCA8B0;
+  color: #BA9FA8;
   font-weight: 400;
 }
 
@@ -473,7 +483,7 @@ async function handleSubmit() {
   background: linear-gradient(92deg, #EAB7C7 0%, #DF9DB1 52%, #D78FA5 100%);
   box-shadow:
     0 12px 24px -10px rgba(206, 132, 155, 0.62),
-    inset 0 1px 0 rgba(255, 255, 255, 0.42);
+    inset 0 1px 0 rgba(255, 255, 255, 0.45);
   transition: transform 140ms ease, box-shadow 180ms ease, opacity 160ms ease;
 }
 

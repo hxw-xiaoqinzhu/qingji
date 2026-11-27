@@ -457,8 +457,8 @@
     </div>
 
     <!-- Clean Bottom Picker Sheet for Saved Main Packages -->
-    <van-popup v-model:show="showPackagePicker" position="bottom" teleport="body" round :style="{ maxHeight: '72dvh' }">
-      <div class="p-5 pb-safe-sheet flex flex-col max-h-[72dvh]">
+    <van-popup v-model:show="showPackagePicker" position="bottom" teleport="body" round :style="{ maxHeight: 'calc(var(--app-height, 100vh) * 0.72)' }">
+      <div class="p-5 pb-safe-sheet flex flex-col" style="max-height: calc(var(--app-height, 100vh) * 0.72)">
         <div class="sheet-grabber shrink-0" />
         <div class="flex items-center justify-between mb-3 shrink-0">
           <div>

@@ -106,7 +106,7 @@ router.post('/register', async (req: Request, res: Response) => {
         username,
         phone: phone || null,
         passwordHash,
-        studioName: studioName || `${username}的美妆工作室`,
+        studioName: studioName || '晴记工作室',
       },
     });
 

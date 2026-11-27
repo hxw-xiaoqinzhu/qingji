@@ -4,10 +4,10 @@
     teleport="body"
     position="bottom"
     round
-    :style="{ maxHeight: '94dvh', backgroundColor: '#FDF8FA' }"
+    :style="{ maxHeight: 'calc(var(--app-height, 100vh) * 0.94)', backgroundColor: '#FDF8FA' }"
     @update:show="emit('update:show', $event)"
   >
-    <div class="p-5 pb-safe-sheet flex flex-col max-h-[94dvh]">
+    <div class="p-5 pb-safe-sheet flex flex-col" style="max-height: calc(var(--app-height, 100vh) * 0.94)">
       <div class="sheet-grabber shrink-0" />
       <div class="flex items-center justify-between mb-3 shrink-0">
         <div>

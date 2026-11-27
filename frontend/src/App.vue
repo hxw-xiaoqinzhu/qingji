@@ -24,12 +24,15 @@ import http, { API_BASE_URL } from '@/api/http';
 import { isFirebaseMode } from '@/lib/firebase';
 import { waitForFirebaseUser, watchFirebaseSessionRevoked } from '@/api/firebaseBackend';
 import { useAuthStore } from '@/stores/auth';
+import { useViewportLock } from '@/composables/useViewportLock';
 import AmbientSilkBackground from '@/components/AmbientSilkBackground.vue';
 import FloatingTabbar from '@/components/FloatingTabbar.vue';
 
 const route = useRoute();
 const router = useRouter();
 const auth = useAuthStore();
+
+useViewportLock();
 
 const showTabbar = computed(() => Boolean(route.meta.showTabbar));
 

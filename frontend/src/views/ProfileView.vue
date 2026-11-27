@@ -214,8 +214,8 @@
     </div>
 
     <!-- Sheet: Custom Profile Card Editor (Avatar + Nickname + Playful Quote) -->
-    <van-popup v-model:show="showProfileEditor" position="bottom" teleport="body" round :style="{ maxHeight: '88dvh' }">
-      <div class="p-5 pb-safe-sheet flex flex-col max-h-[88dvh]">
+    <van-popup v-model:show="showProfileEditor" position="bottom" teleport="body" round :style="{ maxHeight: 'calc(var(--app-height, 100vh) * 0.88)' }">
+      <div class="p-5 pb-safe-sheet flex flex-col" style="max-height: calc(var(--app-height, 100vh) * 0.88)">
         <div class="sheet-grabber shrink-0" />
         <div class="flex items-center justify-between mb-4 shrink-0">
           <div>
@@ -352,8 +352,8 @@
     </van-popup>
 
     <!-- Sheet: Complete Packages CRUD (Filter + Edit + Description + Duration + Copy Quote + Quick Book) -->
-    <van-popup v-model:show="showPackagesSheet" position="bottom" teleport="body" round :style="{ minHeight: '62dvh', maxHeight: '88dvh' }">
-      <div class="p-5 pb-safe-sheet flex flex-col min-h-[62dvh] max-h-[88dvh]">
+    <van-popup v-model:show="showPackagesSheet" position="bottom" teleport="body" round :style="{ minHeight: 'calc(var(--app-height, 100vh) * 0.62)', maxHeight: 'calc(var(--app-height, 100vh) * 0.88)' }">
+      <div class="p-5 pb-safe-sheet flex flex-col" style="min-height: calc(var(--app-height, 100vh) * 0.62); max-height: calc(var(--app-height, 100vh) * 0.88)">
         <div class="sheet-grabber shrink-0" />
         <div class="flex items-center justify-between mb-3 shrink-0">
           <div>
@@ -559,8 +559,8 @@
     />
 
     <!-- Sheet: Rich Bride Client Archive (Search + Filters + Contact + Skin/Hair Edit + Expandable Order Details) -->
-    <van-popup v-model:show="showClientsSheet" position="bottom" teleport="body" round :style="{ minHeight: '62dvh', maxHeight: '88dvh' }">
-      <div class="p-5 pb-safe-sheet flex flex-col min-h-[62dvh] max-h-[88dvh]">
+    <van-popup v-model:show="showClientsSheet" position="bottom" teleport="body" round :style="{ minHeight: 'calc(var(--app-height, 100vh) * 0.62)', maxHeight: 'calc(var(--app-height, 100vh) * 0.88)' }">
+      <div class="p-5 pb-safe-sheet flex flex-col" style="min-height: calc(var(--app-height, 100vh) * 0.62); max-height: calc(var(--app-height, 100vh) * 0.88)">
         <div class="sheet-grabber shrink-0" />
         <div class="flex items-center justify-between mb-3 shrink-0">
           <div>
@@ -747,8 +747,8 @@
     </van-popup>
 
     <!-- Sheet: Edit Client Beauty Profile -->
-    <van-popup v-model:show="showEditClientSheet" position="bottom" teleport="body" round :style="{ maxHeight: '84dvh' }">
-      <div class="p-5 pb-safe-sheet flex flex-col max-h-[84dvh]">
+    <van-popup v-model:show="showEditClientSheet" position="bottom" teleport="body" round :style="{ maxHeight: 'calc(var(--app-height, 100vh) * 0.84)' }">
+      <div class="p-5 pb-safe-sheet flex flex-col" style="max-height: calc(var(--app-height, 100vh) * 0.84)">
         <div class="sheet-grabber shrink-0" />
         <div class="flex items-center justify-between mb-4 shrink-0">
           <h3 class="text-[17px] font-semibold text-ink">编辑新娘肤质档案</h3>
@@ -845,8 +845,8 @@
     </van-popup>
 
     <!-- Sheet: Multi-device Sessions -->
-    <van-popup v-model:show="showSessionsSheet" position="bottom" teleport="body" round :style="{ minHeight: '50dvh', maxHeight: '80dvh' }">
-      <div class="p-5 pb-safe-sheet flex flex-col min-h-[50dvh] max-h-[80dvh]">
+    <van-popup v-model:show="showSessionsSheet" position="bottom" teleport="body" round :style="{ minHeight: 'calc(var(--app-height, 100vh) * 0.50)', maxHeight: 'calc(var(--app-height, 100vh) * 0.80)' }">
+      <div class="p-5 pb-safe-sheet flex flex-col" style="min-height: calc(var(--app-height, 100vh) * 0.50); max-height: calc(var(--app-height, 100vh) * 0.80)">
         <div class="sheet-grabber shrink-0" />
         <div class="flex items-center justify-between mb-1 shrink-0">
           <h3 class="text-[17px] font-semibold text-ink">多端在线设备管理</h3>
@@ -893,8 +893,8 @@
     </van-popup>
 
     <!-- Sheet: Recycle Bin (With One-Tap Empty Trash + Cascade Client Cleanup) -->
-    <van-popup v-model:show="showRecycleSheet" position="bottom" teleport="body" round :style="{ minHeight: '54dvh', maxHeight: '82dvh' }">
-      <div class="p-5 pb-safe-sheet flex flex-col min-h-[54dvh] max-h-[82dvh]">
+    <van-popup v-model:show="showRecycleSheet" position="bottom" teleport="body" round :style="{ minHeight: 'calc(var(--app-height, 100vh) * 0.54)', maxHeight: 'calc(var(--app-height, 100vh) * 0.82)' }">
+      <div class="p-5 pb-safe-sheet flex flex-col" style="min-height: calc(var(--app-height, 100vh) * 0.54); max-height: calc(var(--app-height, 100vh) * 0.82)">
         <div class="sheet-grabber shrink-0" />
         <div class="flex items-center justify-between mb-3 shrink-0">
           <h3 class="text-[17px] font-semibold text-ink">30 天订单回收站</h3>

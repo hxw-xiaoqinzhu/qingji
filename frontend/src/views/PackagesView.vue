@@ -169,7 +169,7 @@
     </div>
 
     <!-- Clean Add / Edit Package Sheet -->
-    <van-popup v-model:show="showEditorSheet" position="bottom" teleport="body" round :style="{ maxHeight: '82dvh' }">
+    <van-popup v-model:show="showEditorSheet" position="bottom" teleport="body" round :style="{ maxHeight: 'calc(var(--app-height, 100vh) * 0.82)' }">
       <div class="p-5 pb-safe-sheet space-y-4">
         <div class="sheet-grabber" />
         <div class="flex items-center justify-between">

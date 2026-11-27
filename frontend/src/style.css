@@ -7,7 +7,8 @@
   --spring-ease: cubic-bezier(0.34, 1.56, 0.64, 1);
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
-  --app-height: 100dvh;
+  --app-height: 100vh;
+  --kb-height: 0px;
 
   /* Unified Font Stack */
   --app-font: 'PingFang SC', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Hiragino Sans GB', 'Helvetica Neue', sans-serif;
@@ -49,12 +50,14 @@
 
   html,
   body {
+    position: fixed;
+    inset: 0;
     margin: 0;
     padding: 0;
     width: 100%;
-    height: var(--app-height, 100dvh);
+    height: var(--app-height, 100vh);
     overflow: hidden;
-    background-color: #FBE9EF;
+    background-color: #FCF5F7;
     color: #2B1E23;
     overscroll-behavior: none;
     -webkit-tap-highlight-color: transparent;
@@ -62,13 +65,13 @@
     font-family: var(--app-font);
   }
 
-  /* Fullscreen edge-to-edge lock for iPhone Safari & Standalone Home-Screen PWA */
+  /* Fullscreen edge-to-edge lock (Keyboard-immune height — never shrinks when soft keyboard opens) */
   #app {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
-    height: var(--app-height, 100dvh);
+    height: var(--app-height, 100vh);
     width: 100%;
     max-width: 480px;
     margin: 0 auto;
@@ -230,6 +233,15 @@
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain;
+}
+
+/* Smooth inner scroll room when soft keyboard overlays bottom of screen (page shell never moves) */
+html.kb-open .scroll-pane {
+  padding-bottom: calc(28px + var(--kb-height, 0px)) !important;
+}
+
+html.kb-open .van-popup--bottom {
+  padding-bottom: var(--kb-height, 0px);
 }
 
 /* Docked Bottom Navigation / Sticky Footer Bar (Flush to physical iPhone bottom) */

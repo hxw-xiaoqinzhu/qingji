@@ -4,7 +4,7 @@
     teleport="body"
     position="bottom"
     round
-    :style="{ maxHeight: '92dvh', backgroundColor: '#FCF6F8' }"
+    :style="{ maxHeight: 'calc(var(--app-height, 100vh) * 0.92)', backgroundColor: '#FCF6F8' }"
     @update:show="emit('update:show', $event)"
   >
     <div class="p-5 pb-safe-sheet">
