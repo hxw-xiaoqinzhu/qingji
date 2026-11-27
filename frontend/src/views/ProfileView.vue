@@ -631,14 +631,16 @@
               class="rounded-[20px] overflow-hidden"
             >
               <article class="bg-white rounded-[20px] p-4 space-y-3">
-                <!-- Top Identity Row + Pending Balance in Top-Right Slot -->
-                <div class="flex items-start justify-between gap-2.5">
-                  <div class="flex items-center gap-3 min-w-0">
-                    <span class="w-10 h-10 rounded-full bg-brand-soft text-brand-deep flex items-center justify-center text-[15px] font-semibold shrink-0">
+                <!-- Header: Monogram + Identity/Contact + Top-Right Balance Summary -->
+                <div class="flex items-start justify-between gap-3">
+                  <div class="flex items-center gap-3 min-w-0 flex-1">
+                    <span
+                      class="w-11 h-11 rounded-[15px] bg-[#FAF0F3] text-[#AD7485] flex items-center justify-center text-[16px] font-semibold shrink-0"
+                    >
                       {{ c.name.slice(0, 1) }}
                     </span>
-                    <div class="min-w-0">
-                      <div class="flex items-center gap-1.5">
+                    <div class="min-w-0 flex-1">
+                      <div class="flex items-center gap-1.5 min-w-0">
                         <span class="text-[15.5px] font-semibold text-ink truncate">{{ c.name }}</span>
                         <span
                           v-if="c.source"
@@ -647,65 +649,80 @@
                           {{ c.source }}
                         </span>
                       </div>
-                      <div class="text-[11.5px] text-ink-muted mt-0.5 tabular-nums">
-                        共 {{ c.orderCount || 0 }} 单 · 累计 {{ ui.formatMoney(c.totalSpent || 0) }}
+
+                      <!-- Inline Contact Actions (Clean muted row, no bulky floating pills) -->
+                      <div v-if="c.phone || c.wechat" class="flex flex-wrap items-center gap-x-2.5 gap-y-0.5 mt-1 text-[11.5px] text-ink-muted tabular-nums">
+                        <a
+                          v-if="c.phone"
+                          :href="`tel:${c.phone}`"
+                          class="inline-flex items-center gap-1 hover:text-[#AD7485] active:opacity-70"
+                        >
+                          <Phone class="w-3 h-3 text-[#C28D9D] shrink-0" />
+                          <span>{{ c.phone }}</span>
+                        </a>
+                        <button
+                          v-if="c.wechat"
+                          type="button"
+                          class="inline-flex items-center gap-1 hover:text-[#AD7485] active:opacity-70"
+                          @click="copyText(c.wechat, '已复制微信号')"
+                        >
+                          <Copy class="w-3 h-3 text-[#C28D9D] shrink-0" />
+                          <span class="truncate max-w-[120px]">{{ c.wechat }}</span>
+                        </button>
+                      </div>
+                      <div v-else class="text-[11.5px] text-ink-muted mt-1">
+                        左滑补充联系方式与肤质备注
                       </div>
                     </div>
                   </div>
 
-                  <!-- Pending Balance / Settled Badge (Replaces Old Edit/Delete Buttons) -->
-                  <div class="shrink-0 text-right tabular-nums">
+                  <!-- Top-Right Balance Badge + Compact Total Stats -->
+                  <div class="shrink-0 text-right tabular-nums flex flex-col items-end">
                     <span
                       v-if="(c.pendingBalance || 0) > 0"
-                      class="inline-flex items-center px-2.5 py-1 rounded-full bg-status-danger-bg text-status-danger-text text-[11.5px] font-semibold"
+                      class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-status-danger-bg text-status-danger-text text-[11px] font-semibold"
                     >
                       待收 {{ ui.formatMoney(c.pendingBalance || 0) }}
                     </span>
                     <span
                       v-else
-                      class="inline-flex items-center px-2.5 py-1 rounded-full bg-[#FAF2F5] text-[#9B7280] text-[11px] font-medium"
+                      class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-[#FAF2F5] text-[#9B7280] text-[11px] font-medium"
                     >
                       已结清
+                    </span>
+                    <span class="text-[11px] text-ink-muted mt-1">
+                      {{ c.orderCount || 0 }}单 · {{ ui.formatMoney(c.totalSpent || 0) }}
                     </span>
                   </div>
                 </div>
 
-                <!-- Contact Strip -->
-                <div v-if="c.phone || c.wechat" class="flex flex-wrap items-center gap-2 text-[11.5px] tabular-nums">
-                  <a
-                    v-if="c.phone"
-                    :href="`tel:${c.phone}`"
-                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FAF4F6] text-ink-secondary pressable"
-                  >
-                    <Phone class="w-3 h-3 text-[#AD7485]" />
-                    <span>{{ c.phone }}</span>
-                  </a>
-                  <button
-                    v-if="c.wechat"
-                    type="button"
-                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FAF4F6] text-ink-secondary pressable"
-                    @click="copyText(c.wechat, '已复制微信号')"
-                  >
-                    <Copy class="w-3 h-3 text-[#AD7485]" />
-                    <span>微信 {{ c.wechat }}</span>
-                  </button>
-                </div>
-
-                <!-- Beauty Profile Tags (Borderless soft color block) -->
-                <div v-if="c.skinType || c.allergyNote || c.hairNote" class="bg-[#FAF4F6] rounded-2xl px-3 py-2.5 text-[12px] text-ink-secondary space-y-1">
-                  <div v-if="c.skinType || c.hairNote" class="flex flex-wrap gap-x-3.5 gap-y-0.5">
-                    <span v-if="c.skinType"><span class="text-ink-muted">肤质：</span>{{ c.skinType }}</span>
-                    <span v-if="c.hairNote"><span class="text-ink-muted">发质：</span>{{ c.hairNote }}</span>
+                <!-- Beauty Profile Tags (Single sleek borderless color block) -->
+                <div
+                  v-if="c.skinType || c.allergyNote || c.hairNote"
+                  class="bg-[#FAF5F7] rounded-[14px] px-3.5 py-2.5 text-[12px] text-ink-secondary space-y-1.5"
+                >
+                  <div v-if="c.skinType || c.hairNote" class="flex flex-wrap items-center gap-x-4 gap-y-1">
+                    <span v-if="c.skinType" class="inline-flex items-center gap-1">
+                      <span class="text-ink-muted">肤质</span>
+                      <span class="text-ink font-medium">{{ c.skinType }}</span>
+                    </span>
+                    <span v-if="c.hairNote" class="inline-flex items-center gap-1">
+                      <span class="text-ink-muted">发质</span>
+                      <span class="text-ink font-medium">{{ c.hairNote }}</span>
+                    </span>
                   </div>
-                  <div v-if="c.allergyNote" class="text-status-danger-text">
-                    <span>过敏 / 禁忌：</span>{{ c.allergyNote }}
+                  <div v-if="c.allergyNote" class="text-status-danger-text text-[11.5px] leading-relaxed">
+                    <span class="font-medium">禁忌 / 过敏：</span>{{ c.allergyNote }}
                   </div>
                 </div>
 
-                <!-- Order History List (Borderless soft color block) -->
-                <div v-if="c.orders && c.orders.length > 0" class="space-y-1.5 pt-0.5">
-                  <div class="flex items-center justify-between text-[11px] text-ink-muted px-0.5">
-                    <span>历史妆造行程</span>
+                <!-- Recent Orders Strip (Unified soft block, no nested card-in-card clutter) -->
+                <div
+                  v-if="c.orders && c.orders.length > 0"
+                  class="bg-[#FAF6F8] rounded-[14px] px-3.5 py-2.5"
+                >
+                  <div class="flex items-center justify-between text-[11px] text-ink-muted mb-1.5">
+                    <span>近期妆造行程</span>
                     <button
                       v-if="c.orders.length > 1"
                       type="button"
@@ -715,35 +732,34 @@
                       {{ expandedClientIds.has(c.id) ? '收起' : `展开全部 ${c.orders.length} 单` }}
                     </button>
                   </div>
-                  <button
-                    v-for="o in (expandedClientIds.has(c.id) ? c.orders : c.orders.slice(0, 1))"
-                    :key="o.id"
-                    type="button"
-                    class="w-full text-left bg-[#FAF4F6] rounded-2xl px-3 py-2.5 flex items-center justify-between gap-2 pressable"
-                    @click="jumpToOrder(o.id)"
-                  >
-                    <div class="min-w-0 flex-1">
-                      <div class="flex items-center gap-1.5">
-                        <span class="text-[13px] font-semibold text-ink truncate">{{ o.serviceType }}</span>
-                        <span
-                          class="px-1.5 py-0.5 rounded-md text-[10px] font-medium shrink-0"
-                          :class="[statusMeta(o.status, o.balanceDue).bgClass, statusMeta(o.status, o.balanceDue).textClass]"
-                        >
-                          {{ statusMeta(o.status, o.balanceDue).label }}
-                        </span>
+                  <div class="divide-y divide-[#EFE3E8]/70">
+                    <button
+                      v-for="o in (expandedClientIds.has(c.id) ? c.orders : c.orders.slice(0, 1))"
+                      :key="o.id"
+                      type="button"
+                      class="w-full text-left py-2 first:pt-0.5 last:pb-0.5 flex items-center justify-between gap-2.5 active:opacity-70 transition-opacity"
+                      @click="jumpToOrder(o.id)"
+                    >
+                      <div class="min-w-0 flex-1">
+                        <div class="flex items-center gap-1.5">
+                          <span class="text-[13px] font-medium text-ink truncate">{{ o.serviceType }}</span>
+                          <span
+                            class="px-1.5 py-0.5 rounded-md text-[10px] font-medium shrink-0"
+                            :class="[statusMeta(o.status, o.balanceDue).bgClass, statusMeta(o.status, o.balanceDue).textClass]"
+                          >
+                            {{ statusMeta(o.status, o.balanceDue).label }}
+                          </span>
+                        </div>
+                        <div class="text-[11px] text-ink-muted mt-0.5 tabular-nums truncate">
+                          {{ o.serviceDate }} {{ o.startTime }}-{{ o.endTime }}{{ o.location ? ` · ${o.location}` : '' }}
+                        </div>
                       </div>
-                      <div class="text-[11px] text-ink-muted mt-0.5 tabular-nums truncate">
-                        {{ o.serviceDate }} {{ o.startTime }}-{{ o.endTime }}{{ o.location ? ` · ${o.location}` : '' }}
+                      <div class="flex items-center gap-1 shrink-0 tabular-nums">
+                        <span class="text-[13px] font-semibold text-ink">{{ ui.formatMoney(o.totalAmount) }}</span>
+                        <ChevronRight class="w-3.5 h-3.5 text-ink-muted" />
                       </div>
-                    </div>
-                    <div class="text-right shrink-0 tabular-nums">
-                      <div class="text-[13.5px] font-semibold text-ink">{{ ui.formatMoney(o.totalAmount) }}</div>
-                      <div v-if="o.balanceDue > 0" class="text-[10.5px] text-status-danger-text">
-                        尾款 {{ ui.formatMoney(o.balanceDue) }}
-                      </div>
-                      <div v-else class="text-[10.5px] text-ink-muted">已结清</div>
-                    </div>
-                  </button>
+                    </button>
+                  </div>
                 </div>
               </article>
 
@@ -951,21 +967,116 @@
       </div>
     </van-popup>
 
-    <!-- Sheet: Notice Template -->
-    <van-popup v-model:show="showNoticeSheet" position="bottom" teleport="body" round>
-      <div class="p-5 pb-safe-sheet space-y-4">
-        <div class="sheet-grabber" />
-        <div class="flex items-center justify-between">
-          <h3 class="text-[17px] font-semibold text-ink">新娘妆前准备贴士模板</h3>
+    <!-- Sheet: Card-Style Bride Prep Tips Template with Swipe-Left Edit & Delete + Inline Add -->
+    <van-popup
+      v-model:show="showNoticeSheet"
+      position="bottom"
+      teleport="body"
+      round
+      :style="{ minHeight: 'calc(var(--app-height, 100vh) * 0.58)', maxHeight: 'calc(var(--app-height, 100vh) * 0.86)', backgroundColor: '#FDF8FA' }"
+    >
+      <div class="p-5 pb-safe-sheet flex flex-col" style="min-height: calc(var(--app-height, 100vh) * 0.58); max-height: calc(var(--app-height, 100vh) * 0.86)">
+        <div class="sheet-grabber shrink-0" />
+        <div class="flex items-center justify-between mb-3 shrink-0">
+          <div>
+            <h3 class="text-[17px] font-semibold text-ink">新娘妆前准备贴士模板 ({{ noticeItems.length }})</h3>
+            <p class="text-[11.5px] text-ink-muted mt-0.5">自动印在《新娘档期锁定确认函》底部 · 左滑可编辑或删除</p>
+          </div>
           <button type="button" class="icon-btn-white" @click="showNoticeSheet = false">
             <X class="w-4 h-4" />
           </button>
         </div>
-        <p class="text-[12px] text-ink-muted">生成《新娘档期锁定确认函》时将附在底部</p>
-        <textarea v-model="noticeText" rows="6" class="w-full input-silk p-3.5" />
-        <button type="button" class="btn-unified w-full btn-rose text-white" @click="saveNoticeTpl">
-          保存贴士文案
-        </button>
+
+        <!-- Inline Add New Prep Tip Card Bar -->
+        <div class="flex items-center gap-2 mb-3.5 shrink-0">
+          <input
+            v-model.trim="newNoticeItem"
+            type="text"
+            placeholder="新增一条妆前提醒，如：提前一晚敷补水面膜..."
+            class="flex-1 input-silk !bg-white px-3.5 h-[40px]"
+            @keyup.enter="addNoticeItem"
+          />
+          <button
+            type="button"
+            class="btn-unified btn-rose text-white !h-[40px] px-4 shrink-0 text-[13px]"
+            @click="addNoticeItem"
+          >
+            添加
+          </button>
+        </div>
+
+        <!-- Card List with Swipe-Left Edit & Delete -->
+        <div class="flex-1 overflow-y-auto no-scrollbar space-y-2.5 pb-1">
+          <template v-if="noticeItems.length > 0">
+            <van-swipe-cell
+              v-for="(tip, idx) in noticeItems"
+              :key="`tip-${idx}-${tip}`"
+              class="rounded-[18px] overflow-hidden"
+            >
+              <div class="bg-white rounded-[18px] px-4 py-3.5 flex items-start gap-3">
+                <span class="w-6 h-6 mt-0.5 rounded-full bg-[#FAF0F3] text-[#AD7485] text-[11px] font-semibold flex items-center justify-center shrink-0 tabular-nums">
+                  {{ idx + 1 }}
+                </span>
+
+                <template v-if="editingNoticeIdx === idx">
+                  <div class="flex-1 space-y-2">
+                    <textarea
+                      v-model.trim="editingNoticeText"
+                      rows="2"
+                      class="w-full input-silk px-3 py-2 text-[13.5px] leading-snug"
+                    />
+                    <div class="flex items-center justify-end gap-1.5">
+                      <button
+                        type="button"
+                        class="px-3 h-[28px] rounded-full bg-[#FAF2F5] text-ink-muted text-[11.5px]"
+                        @click="editingNoticeIdx = null"
+                      >
+                        取消
+                      </button>
+                      <button
+                        type="button"
+                        class="px-3 h-[28px] rounded-full bg-brand text-white text-[11.5px] font-medium"
+                        @click="confirmEditNoticeItem(idx)"
+                      >
+                        保存
+                      </button>
+                    </div>
+                  </div>
+                </template>
+                <span v-else class="flex-1 text-[13.5px] font-medium text-ink leading-relaxed">
+                  {{ tip }}
+                </span>
+              </div>
+
+              <template #right>
+                <div class="flex h-full pl-2 gap-1.5">
+                  <button
+                    type="button"
+                    class="h-full px-4 rounded-[16px] bg-brand-soft text-brand-deep text-[13px] font-medium"
+                    @click.stop="startEditNoticeItem(idx)"
+                  >
+                    编辑
+                  </button>
+                  <button
+                    type="button"
+                    class="h-full px-4 rounded-[16px] bg-status-danger-bg text-status-danger-text text-[13px] font-medium"
+                    @click.stop="removeNoticeItem(idx)"
+                  >
+                    删除
+                  </button>
+                </div>
+              </template>
+            </van-swipe-cell>
+          </template>
+          <div v-else class="h-full flex items-center justify-center py-6">
+            <CuteEmptyState
+              variant="packages"
+              title="妆前贴士还是空的"
+              description="在上方输入并添加给新娘的妆前小贴士，左滑即可编辑或删除"
+              compact
+            />
+          </div>
+        </div>
       </div>
     </van-popup>
 
@@ -1468,7 +1579,10 @@ const editingChecklistIdx = ref<number | null>(null);
 const editingChecklistText = ref('');
 
 const showNoticeSheet = ref(false);
-const noticeText = ref('');
+const noticeItems = ref<string[]>([]);
+const newNoticeItem = ref('');
+const editingNoticeIdx = ref<number | null>(null);
+const editingNoticeText = ref('');
 
 const showSessionsSheet = ref(false);
 const loadingSessions = ref(false);
@@ -1623,15 +1737,55 @@ async function removeChecklistItem(idx: number) {
   await persistChecklist(next, '已删除');
 }
 
+function parseNoticeItems(raw: string): string[] {
+  return raw
+    .split(/\r?\n/)
+    .map((line) => line.trim().replace(/^(?:\d+[\.、\)）]|[•·\-])\s*/, '').trim())
+    .filter(Boolean);
+}
+
+function serializeNoticeItems(items: string[]): string {
+  return items.map((line, i) => `${i + 1}. ${line}`).join('\n');
+}
+
 function openNoticeTpl() {
-  noticeText.value = auth.user?.noticeTemplate || '';
+  noticeItems.value = parseNoticeItems(auth.user?.noticeTemplate || '');
+  newNoticeItem.value = '';
+  editingNoticeIdx.value = null;
   showNoticeSheet.value = true;
 }
 
-async function saveNoticeTpl() {
-  await auth.updateProfile({ noticeTemplate: noticeText.value });
-  showNoticeSheet.value = false;
-  showToast('妆前贴士已保存');
+async function persistNoticeItems(next: string[], toastMsg?: string) {
+  noticeItems.value = next;
+  await auth.updateProfile({ noticeTemplate: serializeNoticeItems(next) });
+  if (toastMsg) showToast(toastMsg);
+}
+
+async function addNoticeItem() {
+  const val = newNoticeItem.value.trim();
+  if (!val) return showToast('请输入妆前贴士内容');
+  newNoticeItem.value = '';
+  await persistNoticeItems([...noticeItems.value, val], '已添加到妆前贴士');
+}
+
+function startEditNoticeItem(idx: number) {
+  editingNoticeIdx.value = idx;
+  editingNoticeText.value = noticeItems.value[idx] || '';
+}
+
+async function confirmEditNoticeItem(idx: number) {
+  const val = editingNoticeText.value.trim();
+  if (!val) return showToast('内容不能为空');
+  const next = [...noticeItems.value];
+  next[idx] = val;
+  editingNoticeIdx.value = null;
+  await persistNoticeItems(next, '已保存修改');
+}
+
+async function removeNoticeItem(idx: number) {
+  const next = noticeItems.value.filter((_, i) => i !== idx);
+  if (editingNoticeIdx.value === idx) editingNoticeIdx.value = null;
+  await persistNoticeItems(next, '已删除');
 }
 
 async function copyPublicSchedule() {
