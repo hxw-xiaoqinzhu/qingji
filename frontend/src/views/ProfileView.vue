@@ -2,20 +2,11 @@
   <div class="h-full flex flex-col overflow-hidden">
     <!-- Adaptive Top Header: Transparent at rest -> Smoothly fades to UI Pink on scroll -->
     <header class="nav-adaptive px-4 pb-3 flex items-center justify-between" :style="headerStyle">
-      <!-- Decorative Editorial Atelier Pill (No plain page title) -->
+      <!-- Decorative Editorial Atelier Pill (No plain page title, no settings gear) -->
       <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/75 backdrop-blur-md border border-white/90 shadow-[0_4px_14px_-8px_rgba(182,126,144,0.3)] select-none">
         <span class="w-2 h-2 rounded-full bg-[#DF9BB0] shadow-[0_0_8px_rgba(223,155,176,0.85)]" />
         <span class="text-[12px] font-medium text-[#7D5E69] tracking-[0.04em]">晴记 · 温柔营业中</span>
       </div>
-      <!-- Clean 34x34px Pure White Settings Gear Button -> Navigates to Dedicated Settings Page -->
-      <button
-        type="button"
-        class="ios27-icon-btn"
-        aria-label="工作室设置"
-        @click="router.push('/profile/settings')"
-      >
-        <IconSettingsGear :size="17" />
-      </button>
     </header>
 
     <!-- Scrollable Studio Workbench -->
@@ -187,6 +178,15 @@
       <!-- Group 3: Account & Security (Unified Pale Blush Squircles matching above groups) -->
       <section class="card-soft p-2.5 stagger-item" style="--stagger: 3">
         <div class="px-3 pt-1.5 pb-1 text-[11px] font-semibold text-ink-muted tracking-wider">安全与多端同步</div>
+        <button type="button" class="menu-row" @click="openPasswordSheet">
+          <div class="flex items-center gap-3">
+            <span class="icon-squircle" style="background: #FAF0F3; color: #AD7485">
+              <KeyRound class="w-[18px] h-[18px]" />
+            </span>
+            <span class="font-medium text-ink">修改登录密码</span>
+          </div>
+          <ChevronRight class="w-4 h-4 text-ink-muted" />
+        </button>
         <button type="button" class="menu-row" @click="openSessions">
           <div class="flex items-center gap-3">
             <span class="icon-squircle" style="background: #FAF0F3; color: #AD7485">
@@ -206,6 +206,17 @@
           <ChevronRight class="w-4 h-4 text-ink-muted" />
         </button>
       </section>
+
+      <!-- Bottom Logout Button -->
+      <div class="pt-1 pb-2 stagger-item" style="--stagger: 4">
+        <button
+          type="button"
+          class="btn-unified btn-glass w-full !text-status-danger-text"
+          @click="handleLogout"
+        >
+          退出当前账号
+        </button>
+      </div>
     </div>
 
     <!-- Sheet: Custom Profile Card Editor (Avatar + Nickname + Playful Quote) -->
@@ -279,16 +290,28 @@
             </div>
           </div>
 
-          <!-- Nickname / Studio Name -->
-          <div>
-            <label class="block text-[12px] font-medium text-ink-secondary mb-1.5">工作室 / 化妆师昵称</label>
-            <input
-              v-model.trim="profileForm.studioName"
-              type="text"
-              maxlength="30"
-              placeholder="例如：嘻嘻化妆室"
-              class="w-full input-silk px-3.5 h-[42px]"
-            />
+          <!-- Nickname & Optional Contact Phone -->
+          <div class="grid grid-cols-2 gap-2.5">
+            <div>
+              <label class="block text-[12px] font-medium text-ink-secondary mb-1.5">工作室 / 化妆师昵称</label>
+              <input
+                v-model.trim="profileForm.studioName"
+                type="text"
+                maxlength="30"
+                placeholder="例如：嘻嘻化妆室"
+                class="w-full input-silk px-3.5 h-[42px]"
+              />
+            </div>
+            <div>
+              <label class="block text-[12px] font-medium text-ink-secondary mb-1.5">预约电话（选填）</label>
+              <input
+                v-model.trim="profileForm.phone"
+                type="tel"
+                maxlength="20"
+                placeholder="印于海报与确认函"
+                class="w-full input-silk px-3.5 h-[42px] tabular-nums"
+              />
+            </div>
           </div>
 
           <!-- Playful Quote / Bio -->
@@ -937,6 +960,52 @@
         </div>
       </div>
     </van-popup>
+
+    <!-- Sheet: Change Login Password -->
+    <van-popup v-model:show="showPasswordSheet" position="bottom" teleport="body" round>
+      <div class="p-5 pb-safe-sheet space-y-4">
+        <div class="sheet-grabber" />
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-[17px] font-semibold text-ink">修改登录密码</h3>
+            <p class="text-[11.5px] text-ink-muted mt-0.5">修改后其他已登录设备将自动安全退出</p>
+          </div>
+          <button type="button" class="icon-btn-white" @click="showPasswordSheet = false">
+            <X class="w-4 h-4" />
+          </button>
+        </div>
+
+        <div class="space-y-3">
+          <div>
+            <label class="block text-[12px] text-ink-secondary mb-1.5 font-medium">当前原密码</label>
+            <input
+              v-model="pwdForm.oldPassword"
+              type="password"
+              placeholder="请输入当前密码"
+              class="w-full input-silk px-3.5 h-[42px]"
+            />
+          </div>
+          <div>
+            <label class="block text-[12px] text-ink-secondary mb-1.5 font-medium">设置新密码</label>
+            <input
+              v-model="pwdForm.newPassword"
+              type="password"
+              placeholder="请输入新密码（至少 6 位）"
+              class="w-full input-silk px-3.5 h-[42px]"
+            />
+          </div>
+        </div>
+
+        <button
+          type="button"
+          :disabled="savingPwd"
+          class="btn-unified w-full btn-rose text-white disabled:opacity-60"
+          @click="submitChangePassword"
+        >
+          {{ savingPwd ? '更新中...' : '确认更新密码' }}
+        </button>
+      </div>
+    </van-popup>
   </div>
 </template>
 
@@ -949,6 +1018,7 @@ import {
   Camera,
   ChevronRight,
   Copy,
+  KeyRound,
   Pencil,
   Phone,
   RotateCcw,
@@ -971,7 +1041,6 @@ import {
   IconLipstick,
   IconLoveNote,
   IconPosterCard,
-  IconSettingsGear,
   IconSilkLink,
   IconVanityMirror,
 } from '@/components/icons/BeautyIcons';
@@ -1016,12 +1085,14 @@ const savingProfile = ref(false);
 const uploadingAvatar = ref(false);
 const profileForm = reactive({
   studioName: '',
+  phone: '',
   avatarUrl: null as string | null,
   bio: '',
 });
 
 function openProfileEditor() {
   profileForm.studioName = auth.user?.studioName || '嘻嘻化妆室';
+  profileForm.phone = auth.user?.phone || '';
   profileForm.avatarUrl = auth.user?.avatarUrl || null;
   profileForm.bio = auth.user?.bio || '每一笔粉黛，都是双向奔赴的浪漫 ✨';
   showProfileEditor.value = true;
@@ -1056,6 +1127,7 @@ async function saveProfileCard() {
   try {
     await auth.updateProfile({
       studioName: profileForm.studioName.trim(),
+      phone: profileForm.phone.trim() || null,
       avatarUrl: profileForm.avatarUrl,
       bio: profileForm.bio.trim() || '每一笔粉黛，都是双向奔赴的浪漫 ✨',
     });
@@ -1273,6 +1345,55 @@ const sessions = ref<UserSession[]>([]);
 const showRecycleSheet = ref(false);
 const loadingRecycle = ref(false);
 const deletedOrders = ref<Order[]>([]);
+
+// Password Sheet & Logout
+const showPasswordSheet = ref(false);
+const savingPwd = ref(false);
+const pwdForm = reactive({
+  oldPassword: '',
+  newPassword: '',
+});
+
+function openPasswordSheet() {
+  pwdForm.oldPassword = '';
+  pwdForm.newPassword = '';
+  showPasswordSheet.value = true;
+}
+
+async function submitChangePassword() {
+  if (!pwdForm.oldPassword || !pwdForm.newPassword) {
+    return showToast('请填写原密码与新密码');
+  }
+  if (pwdForm.newPassword.length < 6) {
+    return showToast('新密码至少需要 6 位');
+  }
+  savingPwd.value = true;
+  try {
+    await http.post('/auth/change-password', pwdForm);
+    pwdForm.oldPassword = '';
+    pwdForm.newPassword = '';
+    showPasswordSheet.value = false;
+    showToast('密码已更新');
+  } catch (err: any) {
+    showToast(err?.response?.data?.error || '密码修改失败');
+  } finally {
+    savingPwd.value = false;
+  }
+}
+
+async function handleLogout() {
+  try {
+    await showConfirmDialog({
+      title: '退出登录',
+      message: '确定要退出当前账号吗？',
+      confirmButtonColor: '#C67A89',
+    });
+    await auth.logout();
+    router.replace('/login');
+  } catch {
+    // cancelled
+  }
+}
 
 async function openPackages() {
   showPackagesSheet.value = true;

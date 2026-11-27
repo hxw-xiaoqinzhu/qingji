@@ -59,11 +59,6 @@ const router = createRouter({
       meta: { showTabbar: true },
     },
     {
-      path: '/profile/settings',
-      name: 'StudioSettings',
-      component: () => import('@/views/StudioSettingsView.vue'),
-    },
-    {
       path: '/profile/packages',
       name: 'Packages',
       component: () => import('@/views/PackagesView.vue'),

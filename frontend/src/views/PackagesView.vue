@@ -23,7 +23,7 @@
       </button>
     </header>
 
-    <!-- Main Scrollable Minimalist Content -->
+    <!-- Main Scrollable Card-Style Content -->
     <div class="scroll-pane no-scrollbar px-4 pt-1 pb-24" @scroll.passive="onPaneScroll">
       <!-- Quiet Filter Bar + Lightweight Copy Action -->
       <div class="flex items-center justify-between mb-4">
@@ -51,11 +51,11 @@
         </button>
       </div>
 
-      <!-- 1:1 Zero-Flash Overlay Skeleton + Minimalist Grouped Cards -->
-      <div class="relative min-h-[340px]">
+      <!-- 1:1 Zero-Flash Overlay Skeleton + Individual Standalone Cards -->
+      <div class="relative min-h-[360px]">
         <Transition name="skeleton-dissolve">
           <div v-if="loading" class="absolute inset-0 z-10 space-y-3 pointer-events-none">
-            <div v-for="i in 4" :key="i" class="card-soft p-4 space-y-2">
+            <div v-for="i in 4" :key="i" class="card-soft p-4 space-y-2.5">
               <div class="flex items-center justify-between">
                 <div class="skeleton-box h-4 w-32 rounded-lg" />
                 <div class="skeleton-box h-5 w-16 rounded-lg" />
@@ -66,75 +66,83 @@
         </Transition>
 
         <div v-if="filteredPackages.length > 0" class="space-y-5">
-          <!-- Main Packages Section -->
-          <section v-if="visibleMains.length > 0" class="space-y-2.5">
+          <!-- Main Packages Section (Individual Cards) -->
+          <section v-if="visibleMains.length > 0" class="space-y-3">
             <div class="px-1 flex items-center justify-between">
-              <span class="text-[12px] font-semibold text-ink-secondary">主推套餐</span>
+              <span class="text-[12.5px] font-semibold text-ink-secondary">主推套餐</span>
               <span class="text-[11px] text-ink-muted tabular-nums">{{ visibleMains.length }} 项</span>
             </div>
-            <div class="card-soft divide-y divide-[#F3E8EC] overflow-hidden">
-              <div
-                v-for="pkg in visibleMains"
-                :key="pkg.id"
-                class="px-4 py-3.5 active:bg-[#FAF2F5]/60 transition-colors cursor-pointer"
-                @click="openEditSheet(pkg)"
-              >
-                <div class="flex items-center justify-between gap-3">
-                  <div class="flex items-center gap-2 min-w-0">
-                    <span class="text-[15px] font-semibold text-ink truncate">{{ pkg.name }}</span>
-                    <span
-                      v-if="pkg.defaultDurationMin > 0"
-                      class="text-[10.5px] text-ink-muted bg-[#FAF2F5] px-2 py-0.5 rounded-full shrink-0 tabular-nums"
-                    >
-                      约 {{ formatDuration(pkg.defaultDurationMin) }}
-                    </span>
-                  </div>
-                  <span class="text-[16px] font-semibold text-brand-deep tabular-nums shrink-0">
-                    ¥{{ pkg.price }}
+
+            <article
+              v-for="pkg in visibleMains"
+              :key="pkg.id"
+              class="card-soft p-4 pressable cursor-pointer"
+              @click="openEditSheet(pkg)"
+            >
+              <div class="flex items-center justify-between gap-3">
+                <div class="flex items-center gap-2 min-w-0">
+                  <h3 class="text-[15.5px] font-semibold text-ink truncate leading-none">{{ pkg.name }}</h3>
+                  <span
+                    v-if="pkg.defaultDurationMin > 0"
+                    class="inline-flex items-center justify-center h-[22px] px-2.5 rounded-full bg-[#FAF2F5] text-[11px] font-medium text-[#9B7280] shrink-0 tabular-nums leading-none"
+                  >
+                    约 {{ formatDuration(pkg.defaultDurationMin) }}
                   </span>
                 </div>
-                <p v-if="pkg.description" class="text-[12px] text-ink-muted mt-1 leading-relaxed line-clamp-2">
-                  {{ pkg.description }}
-                </p>
-                <div class="mt-2.5 flex items-center justify-between text-[11.5px]">
-                  <span class="text-[#B79BA4]">轻点编辑</span>
-                  <button
-                    type="button"
-                    class="inline-flex items-center gap-0.5 text-[#A46B7D] font-medium pressable"
-                    @click.stop="bookWithPackage(pkg)"
-                  >
-                    <span>用此套餐排单</span>
-                    <ChevronRight class="w-3.5 h-3.5" />
-                  </button>
-                </div>
+                <span class="text-[17px] font-semibold text-brand-deep tabular-nums shrink-0 leading-none">
+                  ¥{{ pkg.price }}
+                </span>
               </div>
-            </div>
+
+              <p v-if="pkg.description" class="text-[12.5px] text-ink-muted mt-2 leading-relaxed line-clamp-2">
+                {{ pkg.description }}
+              </p>
+
+              <div class="mt-3 pt-2.5 border-t border-[#F4E8EC] flex items-center justify-between text-[11.5px]">
+                <span class="text-[#B79BA4]">轻点卡片编辑</span>
+                <button
+                  type="button"
+                  class="inline-flex items-center gap-0.5 px-2.5 py-1 rounded-full bg-[#FAF0F3] text-[#A46B7D] font-medium pressable"
+                  @click.stop="bookWithPackage(pkg)"
+                >
+                  <span>用此套餐排单</span>
+                  <ChevronRight class="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </article>
           </section>
 
-          <!-- Extra Add-ons Section -->
-          <section v-if="visibleExtras.length > 0" class="space-y-2.5">
+          <!-- Extra Add-ons Section (Individual Cards) -->
+          <section v-if="visibleExtras.length > 0" class="space-y-3">
             <div class="px-1 flex items-center justify-between">
-              <span class="text-[12px] font-semibold text-ink-secondary">增项服务</span>
+              <span class="text-[12.5px] font-semibold text-ink-secondary">增项服务</span>
               <span class="text-[11px] text-ink-muted tabular-nums">{{ visibleExtras.length }} 项</span>
             </div>
-            <div class="card-soft divide-y divide-[#F3E8EC] overflow-hidden">
-              <div
-                v-for="pkg in visibleExtras"
-                :key="pkg.id"
-                class="px-4 py-3.5 active:bg-[#FAF2F5]/60 transition-colors cursor-pointer"
-                @click="openEditSheet(pkg)"
-              >
-                <div class="flex items-center justify-between gap-3">
-                  <span class="text-[15px] font-semibold text-ink truncate">{{ pkg.name }}</span>
-                  <span class="text-[16px] font-semibold text-brand-deep tabular-nums shrink-0">
-                    ¥{{ pkg.price }}
+
+            <article
+              v-for="pkg in visibleExtras"
+              :key="pkg.id"
+              class="card-soft p-4 pressable cursor-pointer"
+              @click="openEditSheet(pkg)"
+            >
+              <div class="flex items-center justify-between gap-3">
+                <div class="flex items-center gap-2 min-w-0">
+                  <h3 class="text-[15px] font-semibold text-ink truncate leading-none">{{ pkg.name }}</h3>
+                  <span
+                    v-if="pkg.defaultDurationMin > 0"
+                    class="inline-flex items-center justify-center h-[20px] px-2 rounded-full bg-[#FAF2F5] text-[10.5px] font-medium text-[#9B7280] shrink-0 tabular-nums leading-none"
+                  >
+                    约 {{ formatDuration(pkg.defaultDurationMin) }}
                   </span>
                 </div>
-                <p v-if="pkg.description" class="text-[12px] text-ink-muted mt-1 leading-relaxed line-clamp-2">
-                  {{ pkg.description }}
-                </p>
+                <span class="text-[16.5px] font-semibold text-brand-deep tabular-nums shrink-0 leading-none">
+                  ¥{{ pkg.price }}
+                </span>
               </div>
-            </div>
+              <p v-if="pkg.description" class="text-[12px] text-ink-muted mt-2 leading-relaxed line-clamp-2">
+                {{ pkg.description }}
+              </p>
+            </article>
           </section>
         </div>
 
