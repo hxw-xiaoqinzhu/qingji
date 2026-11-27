@@ -2,11 +2,11 @@
   <div class="inline-flex items-center gap-1.5 select-none">
     <!-- iOS 27 Liquid Glass Month Stepper with Vertical Odometer Rolling Digits -->
     <div class="ios27-month-track p-[2px] rounded-full inline-flex items-center">
-      <!-- Previous Month -->
+      <!-- Previous Month / Year -->
       <button
         type="button"
         class="ios27-month-btn"
-        aria-label="上个月"
+        :aria-label="yearOnly ? '上一年' : '上个月'"
         @click="step(-1)"
       >
         <svg viewBox="0 0 24 24" class="w-[16px] h-[16px]" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
@@ -14,8 +14,32 @@
         </svg>
       </button>
 
+      <!-- Year-Only Odometer (Same 20px bold size as Month) -->
+      <div
+        v-if="yearOnly"
+        class="px-2.5 min-w-[92px] flex items-end justify-center whitespace-nowrap tabular-nums"
+      >
+        <div class="inline-flex items-center text-[20px] font-bold text-[#3D3236] tracking-tight leading-none">
+          <span
+            v-for="(digit, idx) in yearDigits"
+            :key="'yo-' + idx"
+            class="digit-window h-[22px]"
+          >
+            <span
+              class="digit-strip"
+              :style="{ transform: `translate3d(0, -${digit * 10}%, 0)` }"
+            >
+              <span v-for="n in 10" :key="n" class="h-[22px] leading-[22px] flex items-center justify-center">
+                {{ n - 1 }}
+              </span>
+            </span>
+          </span>
+        </div>
+        <span class="text-[12px] font-semibold text-[#5E4D53] ml-0.5 mb-[2.5px] leading-none">年</span>
+      </div>
+
       <!-- Odometer Rolling Digits: Large Month + Small Year -->
-      <div class="px-2.5 min-w-[92px] flex items-end justify-center whitespace-nowrap tabular-nums">
+      <div v-else class="px-2.5 min-w-[92px] flex items-end justify-center whitespace-nowrap tabular-nums">
         <!-- Month Vertical Roller (Leading zero smoothly collapses for months 1-9) -->
         <div class="inline-flex items-center text-[20px] font-bold text-[#3D3236] tracking-tight leading-none">
           <span
@@ -56,11 +80,11 @@
         </div>
       </div>
 
-      <!-- Next Month -->
+      <!-- Next Month / Year -->
       <button
         type="button"
         class="ios27-month-btn"
-        aria-label="下个月"
+        :aria-label="yearOnly ? '下一年' : '下个月'"
         @click="step(1)"
       >
         <svg viewBox="0 0 24 24" class="w-[16px] h-[16px]" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
@@ -74,7 +98,7 @@
       v-if="showReset"
       type="button"
       class="ios27-icon-btn is-active text-[12px] font-bold spring-pop"
-      aria-label="回到当月"
+      :aria-label="yearOnly ? '回到今年' : '回到当月'"
       @click="emit('reset')"
     >
       今
@@ -90,6 +114,7 @@ const props = defineProps<{
   year: number;
   month: number;
   showReset?: boolean;
+  yearOnly?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -112,6 +137,10 @@ const yearDigits = computed(() =>
 );
 
 function step(delta: number) {
+  if (props.yearOnly) {
+    emit('change', { year: props.year + delta, month: props.month, delta });
+    return;
+  }
   const next = dayjs(`${props.year}-${String(props.month).padStart(2, '0')}-01`).add(delta, 'month');
   emit('change', { year: next.year(), month: next.month() + 1, delta });
 }

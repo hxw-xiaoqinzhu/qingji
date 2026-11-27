@@ -10,29 +10,32 @@ router.get('/overview', async (req: AuthRequest, res: Response) => {
   try {
     const year = Number(req.query.year) || dayjs().year();
     const month = Number(req.query.month) || dayjs().month() + 1;
-    const mode = req.query.mode === 'cash_date' ? 'cash_date' : 'service_date';
+    const rawMode = String(req.query.mode || 'service_date');
+    const mode = rawMode === 'all' ? 'all' : rawMode === 'cash_date' ? 'cash_date' : 'service_date';
 
     const targetMonth = dayjs(`${year}-${String(month).padStart(2, '0')}-01`);
-    const monthStartStr = targetMonth.format('YYYY-MM-DD');
-    const monthEndStr = targetMonth.endOf('month').format('YYYY-MM-DD');
-    const monthStartDate = targetMonth.startOf('month').toDate();
-    const monthEndDate = targetMonth.endOf('month').toDate();
+    const targetYearStart = dayjs(`${year}-01-01`);
 
-    const [user, monthOrders, monthPayments, monthExpenses] = await Promise.all([
+    const rangeStartStr = mode === 'all' ? `${year}-01-01` : targetMonth.format('YYYY-MM-DD');
+    const rangeEndStr = mode === 'all' ? `${year}-12-31` : targetMonth.endOf('month').format('YYYY-MM-DD');
+    const rangeStartDate = mode === 'all' ? targetYearStart.startOf('year').toDate() : targetMonth.startOf('month').toDate();
+    const rangeEndDate = mode === 'all' ? targetYearStart.endOf('year').toDate() : targetMonth.endOf('month').toDate();
+
+    const [user, periodOrders, periodPayments, periodExpenses] = await Promise.all([
       prisma.user.findUnique({ where: { id: req.user!.userId } }),
       prisma.order.findMany({
         where: {
           userId: req.user!.userId,
           deletedAt: null,
           status: { not: 'CANCELLED' },
-          serviceDate: { gte: monthStartStr, lte: monthEndStr },
+          serviceDate: { gte: rangeStartStr, lte: rangeEndStr },
         },
         orderBy: { serviceDate: 'desc' },
       }),
       prisma.paymentRecord.findMany({
         where: {
           userId: req.user!.userId,
-          paidAt: { gte: monthStartDate, lte: monthEndDate },
+          paidAt: { gte: rangeStartDate, lte: rangeEndDate },
           order: { deletedAt: null, status: { not: 'CANCELLED' } },
         },
         include: {
@@ -43,14 +46,14 @@ router.get('/overview', async (req: AuthRequest, res: Response) => {
       prisma.expense.findMany({
         where: {
           userId: req.user!.userId,
-          incurredAt: { gte: monthStartDate, lte: monthEndDate },
+          incurredAt: { gte: rangeStartDate, lte: rangeEndDate },
         },
         orderBy: { incurredAt: 'desc' },
       }),
     ]);
 
-    const expenseTotal = monthExpenses.reduce((s, e) => s + e.amount, 0);
-    const assistantAndCommission = monthOrders.reduce(
+    const expenseTotal = periodExpenses.reduce((s, e) => s + e.amount, 0);
+    const assistantAndCommission = periodOrders.reduce(
       (s, o) => s + (o.assistantFee || 0) + (o.channelCommission || 0),
       0
     );
@@ -59,77 +62,96 @@ router.get('/overview', async (req: AuthRequest, res: Response) => {
     let receivedAmount = 0;
     let pendingBalance = 0;
 
-    if (mode === 'service_date') {
-      totalRevenue = monthOrders.reduce((s, o) => s + o.totalAmount, 0);
-      receivedAmount = monthOrders.reduce((s, o) => s + o.depositPaid, 0);
-      pendingBalance = monthOrders.reduce((s, o) => s + o.balanceDue, 0);
-    } else {
-      receivedAmount = monthPayments.reduce((s, p) => s + p.amount, 0);
+    if (mode === 'cash_date') {
+      receivedAmount = periodPayments.reduce((s, p) => s + p.amount, 0);
       totalRevenue = receivedAmount;
-      pendingBalance = monthOrders.reduce((s, o) => s + o.balanceDue, 0);
+      pendingBalance = periodOrders.reduce((s, o) => s + o.balanceDue, 0);
+    } else {
+      totalRevenue = periodOrders.reduce((s, o) => s + o.totalAmount, 0);
+      receivedAmount = periodOrders.reduce((s, o) => s + o.depositPaid, 0);
+      pendingBalance = periodOrders.reduce((s, o) => s + o.balanceDue, 0);
     }
 
     const netProfit = Math.max(0, receivedAmount - expenseTotal - assistantAndCommission);
     const monthlyTarget = user?.monthlyTarget || 20000;
 
-    // 6-month trend
+    // Trend: 12 months of selected year when mode === 'all', otherwise 6-month rolling trend
     const trend: Array<{ month: string; label: string; revenue: number; received: number; count: number }> = [];
-    for (let i = 5; i >= 0; i--) {
-      const m = targetMonth.subtract(i, 'month');
-      const mStartStr = m.startOf('month').format('YYYY-MM-DD');
-      const mEndStr = m.endOf('month').format('YYYY-MM-DD');
-      const mStartDate = m.startOf('month').toDate();
-      const mEndDate = m.endOf('month').toDate();
+    if (mode === 'all') {
+      const monthBuckets = Array.from({ length: 12 }, (_, idx) => ({
+        month: `${year}-${String(idx + 1).padStart(2, '0')}`,
+        label: `${idx + 1}月`,
+        revenue: 0,
+        received: 0,
+        count: 0,
+      }));
+      for (const o of periodOrders) {
+        const mIdx = Number(o.serviceDate.slice(5, 7)) - 1;
+        if (mIdx >= 0 && mIdx < 12) {
+          monthBuckets[mIdx].revenue += o.totalAmount;
+          monthBuckets[mIdx].received += o.depositPaid;
+          monthBuckets[mIdx].count += 1;
+        }
+      }
+      trend.push(...monthBuckets);
+    } else {
+      for (let i = 5; i >= 0; i--) {
+        const m = targetMonth.subtract(i, 'month');
+        const mStartStr = m.startOf('month').format('YYYY-MM-DD');
+        const mEndStr = m.endOf('month').format('YYYY-MM-DD');
+        const mStartDate = m.startOf('month').toDate();
+        const mEndDate = m.endOf('month').toDate();
 
-      if (mode === 'service_date') {
-        const orders = await prisma.order.findMany({
-          where: {
-            userId: req.user!.userId,
-            deletedAt: null,
-            status: { not: 'CANCELLED' },
-            serviceDate: { gte: mStartStr, lte: mEndStr },
-          },
-          select: { totalAmount: true, depositPaid: true },
-        });
-        trend.push({
-          month: m.format('YYYY-MM'),
-          label: `${m.month() + 1}月`,
-          revenue: orders.reduce((s, o) => s + o.totalAmount, 0),
-          received: orders.reduce((s, o) => s + o.depositPaid, 0),
-          count: orders.length,
-        });
-      } else {
-        const payments = await prisma.paymentRecord.findMany({
-          where: {
-            userId: req.user!.userId,
-            paidAt: { gte: mStartDate, lte: mEndDate },
-            order: { deletedAt: null, status: { not: 'CANCELLED' } },
-          },
-          select: { amount: true },
-        });
-        const sum = payments.reduce((s, p) => s + p.amount, 0);
-        trend.push({
-          month: m.format('YYYY-MM'),
-          label: `${m.month() + 1}月`,
-          revenue: sum,
-          received: sum,
-          count: payments.length,
-        });
+        if (mode === 'service_date') {
+          const orders = await prisma.order.findMany({
+            where: {
+              userId: req.user!.userId,
+              deletedAt: null,
+              status: { not: 'CANCELLED' },
+              serviceDate: { gte: mStartStr, lte: mEndStr },
+            },
+            select: { totalAmount: true, depositPaid: true },
+          });
+          trend.push({
+            month: m.format('YYYY-MM'),
+            label: `${m.month() + 1}月`,
+            revenue: orders.reduce((s, o) => s + o.totalAmount, 0),
+            received: orders.reduce((s, o) => s + o.depositPaid, 0),
+            count: orders.length,
+          });
+        } else {
+          const payments = await prisma.paymentRecord.findMany({
+            where: {
+              userId: req.user!.userId,
+              paidAt: { gte: mStartDate, lte: mEndDate },
+              order: { deletedAt: null, status: { not: 'CANCELLED' } },
+            },
+            select: { amount: true },
+          });
+          const sum = payments.reduce((s, p) => s + p.amount, 0);
+          trend.push({
+            month: m.format('YYYY-MM'),
+            label: `${m.month() + 1}月`,
+            revenue: sum,
+            received: sum,
+            count: payments.length,
+          });
+        }
       }
     }
 
-    // Service type breakdown
+    // Service type breakdown (synced to full year when mode === 'all', or month otherwise)
     const typeMap = new Map<string, number>();
-    for (const o of monthOrders) {
+    for (const o of periodOrders) {
       typeMap.set(o.serviceType, (typeMap.get(o.serviceType) || 0) + o.totalAmount);
     }
     const breakdown = Array.from(typeMap.entries())
       .map(([name, value]) => ({ name, value }))
       .sort((a, b) => b.value - a.value);
 
-    // Unified ledger list (income + expenses)
+    // Unified ledger list (income + expenses, synced to full year when mode === 'all')
     const ledger = [
-      ...monthPayments.map((p) => ({
+      ...periodPayments.map((p) => ({
         id: `pay-${p.id}`,
         rawId: p.id,
         kind: 'INCOME' as const,
@@ -139,7 +161,7 @@ router.get('/overview', async (req: AuthRequest, res: Response) => {
         date: dayjs(p.paidAt).format('YYYY-MM-DD'),
         orderId: p.orderId,
       })),
-      ...monthExpenses.map((e) => ({
+      ...periodExpenses.map((e) => ({
         id: `exp-${e.id}`,
         rawId: e.id,
         kind: 'EXPENSE' as const,
@@ -164,7 +186,7 @@ router.get('/overview', async (req: AuthRequest, res: Response) => {
         expenseTotal,
         assistantAndCommission,
         netProfit,
-        orderCount: monthOrders.length,
+        orderCount: periodOrders.length,
       },
       trend,
       breakdown,
@@ -180,25 +202,27 @@ router.get('/export', async (req: AuthRequest, res: Response) => {
   try {
     const year = Number(req.query.year) || dayjs().year();
     const month = Number(req.query.month) || dayjs().month() + 1;
+    const isYearScope = req.query.mode === 'all';
     const targetMonth = dayjs(`${year}-${String(month).padStart(2, '0')}-01`);
-    const monthStartStr = targetMonth.format('YYYY-MM-DD');
-    const monthEndStr = targetMonth.endOf('month').format('YYYY-MM-DD');
-    const monthStartDate = targetMonth.startOf('month').toDate();
-    const monthEndDate = targetMonth.endOf('month').toDate();
+    const targetYear = dayjs(`${year}-01-01`);
+    const startStr = isYearScope ? `${year}-01-01` : targetMonth.format('YYYY-MM-DD');
+    const endStr = isYearScope ? `${year}-12-31` : targetMonth.endOf('month').format('YYYY-MM-DD');
+    const startDate = isYearScope ? targetYear.startOf('year').toDate() : targetMonth.startOf('month').toDate();
+    const endDate = isYearScope ? targetYear.endOf('year').toDate() : targetMonth.endOf('month').toDate();
 
     const [orders, expenses] = await Promise.all([
       prisma.order.findMany({
         where: {
           userId: req.user!.userId,
           deletedAt: null,
-          serviceDate: { gte: monthStartStr, lte: monthEndStr },
+          serviceDate: { gte: startStr, lte: endStr },
         },
         orderBy: { serviceDate: 'asc' },
       }),
       prisma.expense.findMany({
         where: {
           userId: req.user!.userId,
-          incurredAt: { gte: monthStartDate, lte: monthEndDate },
+          incurredAt: { gte: startDate, lte: endDate },
         },
         orderBy: { incurredAt: 'asc' },
       }),
@@ -226,8 +250,9 @@ router.get('/export', async (req: AuthRequest, res: Response) => {
     }
 
     const bom = '\uFEFF';
+    const suffix = isYearScope ? `${year}` : `${year}-${String(month).padStart(2, '0')}`;
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-    res.setHeader('Content-Disposition', `attachment; filename="makeup-ledger-${year}-${String(month).padStart(2, '0')}.csv"`);
+    res.setHeader('Content-Disposition', `attachment; filename="makeup-ledger-${suffix}.csv"`);
     res.send(bom + lines.join('\n'));
   } catch {
     res.status(500).json({ error: '导出 CSV 失败' });

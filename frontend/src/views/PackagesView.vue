@@ -128,15 +128,9 @@
                       </p>
                     </div>
 
-                    <div class="text-right shrink-0 tabular-nums">
+                    <div class="text-right shrink-0 tabular-nums pt-0.5">
                       <div class="text-[17px] font-semibold text-brand-deep leading-none">
                         ¥{{ formatMoneyNum(packageTotal(pkg)) }}
-                      </div>
-                      <div v-if="(pkg.addons?.length || 0) > 0" class="text-[10px] text-ink-muted mt-1">
-                        主妆 ¥{{ formatMoneyNum(pkg.price) }} + 增项 ¥{{ formatMoneyNum(addonsTotal(pkg)) }}
-                      </div>
-                      <div v-else class="text-[10px] text-ink-muted mt-1">
-                        主妆容价
                       </div>
                     </div>
                   </div>
@@ -275,10 +269,7 @@
                   </div>
 
                   <!-- Per-Package Total Summary Strip -->
-                  <div class="pt-2 border-t border-[#EFE1E7] flex items-center justify-between text-[12px] tabular-nums">
-                    <span class="text-ink-muted">
-                      主妆容 ¥{{ formatMoneyNum(pkg.price) }} + 增项 ¥{{ formatMoneyNum(addonsTotal(pkg)) }}
-                    </span>
+                  <div class="pt-2 border-t border-[#EFE1E7] flex items-center justify-end text-[12.5px] tabular-nums">
                     <span class="font-semibold text-brand-deep">
                       本套餐合计 ¥{{ formatMoneyNum(packageTotal(pkg)) }}
                     </span>
@@ -371,7 +362,7 @@
         <button
           type="button"
           :disabled="selectedPackages.length === 0"
-          class="btn-unified px-6 shrink-0 flex items-center justify-center gap-1.5 transition-all"
+          class="btn-unified px-6 shrink-0 inline-flex items-center justify-center gap-1.5 leading-none transition-all"
           :class="
             selectedPackages.length > 0
               ? 'btn-rose text-white'
@@ -379,8 +370,8 @@
           "
           @click="openQuotePoster"
         >
-          <Sparkles class="w-4 h-4" />
-          <span>确认生成报价</span>
+          <Sparkles class="w-[15px] h-[15px] shrink-0" />
+          <span class="leading-none">确认生成报价</span>
         </button>
       </div>
     </div>

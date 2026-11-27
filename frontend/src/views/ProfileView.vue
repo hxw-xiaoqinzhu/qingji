@@ -79,8 +79,8 @@
               <IconLipstick :size="19" />
             </span>
             <div class="text-left">
-              <div class="font-medium text-ink">报价套餐与增项库</div>
-              <div class="text-[11px] text-ink-muted">管理价目并一键生成报价海报</div>
+              <div class="font-medium text-ink">报价套餐</div>
+              <div class="text-[11px] text-ink-muted">管理套餐并生成报价海报</div>
             </div>
           </div>
           <ChevronRight class="w-4 h-4 text-ink-muted" />
@@ -92,8 +92,8 @@
               <IconVanityMirror :size="19" />
             </span>
             <div class="text-left">
-              <div class="font-medium text-ink">新娘客户肤质档案</div>
-              <div class="text-[11px] text-ink-muted">肤质禁忌、历史订单与一键回访</div>
+              <div class="font-medium text-ink">客户档案</div>
+              <div class="text-[11px] text-ink-muted">肤质禁忌与历史订单</div>
             </div>
           </div>
           <ChevronRight class="w-4 h-4 text-ink-muted" />
@@ -105,8 +105,8 @@
               <IconCosmeticCase :size="19" />
             </span>
             <div class="text-left">
-              <div class="font-medium text-ink">化妆箱出妆清单模板</div>
-              <div class="text-[11px] text-ink-muted">凌晨出门前逐项打钩防遗漏</div>
+              <div class="font-medium text-ink">化妆箱清单</div>
+              <div class="text-[11px] text-ink-muted">出门前逐项清点防遗漏</div>
             </div>
           </div>
           <ChevronRight class="w-4 h-4 text-ink-muted" />
@@ -118,8 +118,8 @@
               <IconLoveNote :size="19" />
             </span>
             <div class="text-left">
-              <div class="font-medium text-ink">新娘妆前须知贴士</div>
-              <div class="text-[11px] text-ink-muted">自动印制在《预约确认函》底部</div>
+              <div class="font-medium text-ink">妆前贴士</div>
+              <div class="text-[11px] text-ink-muted">自动附于预约确认函底部</div>
             </div>
           </div>
           <ChevronRight class="w-4 h-4 text-ink-muted" />
@@ -128,28 +128,15 @@
 
       <!-- Group 2: Share & Apple Calendar Sync -->
       <section class="card-soft p-2.5 stagger-item" style="--stagger: 2">
-        <div class="px-3 pt-1.5 pb-1 text-[11px] font-semibold text-ink-muted tracking-wider">分享与日历同步</div>
-        <button type="button" class="menu-row" @click="copyPublicSchedule">
-          <div class="flex items-center gap-3">
-            <span class="icon-squircle" style="background: #FAF0F3; color: #AD7485">
-              <IconSilkLink :size="19" />
-            </span>
-            <div class="text-left">
-              <div class="font-medium text-ink">复制对外只读档期链接</div>
-              <div class="text-[11px] text-ink-muted">严格脱敏，仅向新娘展示可约/已定</div>
-            </div>
-          </div>
-          <ChevronRight class="w-4 h-4 text-ink-muted" />
-        </button>
-
+        <div class="px-3 pt-1.5 pb-1 text-[11px] font-semibold text-ink-muted tracking-wider">分享与同步</div>
         <button type="button" class="menu-row" @click="previewPublicSchedule">
           <div class="flex items-center gap-3">
             <span class="icon-squircle" style="background: #FAF0F3; color: #AD7485">
               <IconPosterCard :size="19" />
             </span>
             <div class="text-left">
-              <div class="font-medium text-ink">预览新娘视角档期页</div>
-              <div class="text-[11px] text-ink-muted">查看客户打开链接时的真实效果</div>
+              <div class="font-medium text-ink">公开档期页</div>
+              <div class="text-[11px] text-ink-muted">预览并复制可约档期链接</div>
             </div>
           </div>
           <ChevronRight class="w-4 h-4 text-ink-muted" />
@@ -161,8 +148,8 @@
               <IconCalendarSync :size="19" />
             </span>
             <div class="text-left">
-              <div class="font-medium text-ink">复制苹果日历订阅 (.ics)</div>
-              <div class="text-[11px] text-ink-muted">添加至原生日历，锁屏实时提醒行程</div>
+              <div class="font-medium text-ink">苹果日历订阅</div>
+              <div class="text-[11px] text-ink-muted">同步至系统日历实时提醒</div>
             </div>
           </div>
           <ChevronRight class="w-4 h-4 text-ink-muted" />
@@ -171,13 +158,13 @@
 
       <!-- Group 3: Account & Security (Unified Pale Blush Squircles matching above groups) -->
       <section class="card-soft p-2.5 stagger-item" style="--stagger: 3">
-        <div class="px-3 pt-1.5 pb-1 text-[11px] font-semibold text-ink-muted tracking-wider">安全与多端同步</div>
+        <div class="px-3 pt-1.5 pb-1 text-[11px] font-semibold text-ink-muted tracking-wider">账号与安全</div>
         <button type="button" class="menu-row" @click="openPasswordSheet">
           <div class="flex items-center gap-3">
             <span class="icon-squircle" style="background: #FAF0F3; color: #AD7485">
               <KeyRound class="w-[18px] h-[18px]" />
             </span>
-            <span class="font-medium text-ink">修改登录密码</span>
+            <span class="font-medium text-ink">修改密码</span>
           </div>
           <ChevronRight class="w-4 h-4 text-ink-muted" />
         </button>
@@ -186,7 +173,7 @@
             <span class="icon-squircle" style="background: #FAF0F3; color: #AD7485">
               <Smartphone class="w-[18px] h-[18px]" />
             </span>
-            <span class="font-medium text-ink">多端已登录设备管理</span>
+            <span class="font-medium text-ink">登录设备</span>
           </div>
           <ChevronRight class="w-4 h-4 text-ink-muted" />
         </button>
@@ -195,7 +182,7 @@
             <span class="icon-squircle" style="background: #FAF0F3; color: #AD7485">
               <Trash2 class="w-[18px] h-[18px]" />
             </span>
-            <span class="font-medium text-ink">30 天订单回收站</span>
+            <span class="font-medium text-ink">订单回收站</span>
           </div>
           <ChevronRight class="w-4 h-4 text-ink-muted" />
         </button>
@@ -631,31 +618,27 @@
               class="rounded-[20px] overflow-hidden"
             >
               <article class="bg-white rounded-[20px] p-4 space-y-3">
-                <!-- Header: Monogram + Identity/Contact + Top-Right Balance Summary -->
+                <!-- Minimalist Header: Avatar + Name/Contact + Clean Balance Text -->
                 <div class="flex items-start justify-between gap-3">
                   <div class="flex items-center gap-3 min-w-0 flex-1">
                     <span
-                      class="w-11 h-11 rounded-[15px] bg-[#FAF0F3] text-[#AD7485] flex items-center justify-center text-[16px] font-semibold shrink-0"
+                      class="w-10 h-10 rounded-full bg-[#FAF0F3] text-[#AD7485] flex items-center justify-center text-[15px] font-semibold shrink-0"
                     >
                       {{ c.name.slice(0, 1) }}
                     </span>
                     <div class="min-w-0 flex-1">
                       <div class="flex items-center gap-1.5 min-w-0">
                         <span class="text-[15.5px] font-semibold text-ink truncate">{{ c.name }}</span>
-                        <span
-                          v-if="c.source"
-                          class="px-2 py-0.5 rounded-full bg-[#FAF2F5] text-[10px] text-[#9E7583] font-medium shrink-0"
-                        >
-                          {{ c.source }}
+                        <span v-if="c.source" class="text-[11px] text-ink-muted shrink-0">
+                          · {{ c.source }}
                         </span>
                       </div>
 
-                      <!-- Inline Contact Actions (Clean muted row, no bulky floating pills) -->
-                      <div v-if="c.phone || c.wechat" class="flex flex-wrap items-center gap-x-2.5 gap-y-0.5 mt-1 text-[11.5px] text-ink-muted tabular-nums">
+                      <div v-if="c.phone || c.wechat" class="flex flex-wrap items-center gap-x-2.5 gap-y-0.5 mt-0.5 text-[11.5px] text-ink-muted tabular-nums">
                         <a
                           v-if="c.phone"
                           :href="`tel:${c.phone}`"
-                          class="inline-flex items-center gap-1 hover:text-[#AD7485] active:opacity-70"
+                          class="inline-flex items-center gap-1 active:opacity-70"
                         >
                           <Phone class="w-3 h-3 text-[#C28D9D] shrink-0" />
                           <span>{{ c.phone }}</span>
@@ -663,91 +646,78 @@
                         <button
                           v-if="c.wechat"
                           type="button"
-                          class="inline-flex items-center gap-1 hover:text-[#AD7485] active:opacity-70"
+                          class="inline-flex items-center gap-1 active:opacity-70"
                           @click="copyText(c.wechat, '已复制微信号')"
                         >
                           <Copy class="w-3 h-3 text-[#C28D9D] shrink-0" />
                           <span class="truncate max-w-[120px]">{{ c.wechat }}</span>
                         </button>
                       </div>
-                      <div v-else class="text-[11.5px] text-ink-muted mt-1">
+                      <div v-else class="text-[11.5px] text-ink-muted mt-0.5">
                         左滑补充联系方式与肤质备注
                       </div>
                     </div>
                   </div>
 
-                  <!-- Top-Right Balance Badge + Compact Total Stats -->
-                  <div class="shrink-0 text-right tabular-nums flex flex-col items-end">
-                    <span
+                  <div class="shrink-0 text-right tabular-nums">
+                    <div
                       v-if="(c.pendingBalance || 0) > 0"
-                      class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-status-danger-bg text-status-danger-text text-[11px] font-semibold"
+                      class="text-[13px] font-semibold text-status-danger-text leading-tight"
                     >
                       待收 {{ ui.formatMoney(c.pendingBalance || 0) }}
-                    </span>
-                    <span
-                      v-else
-                      class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-[#FAF2F5] text-[#9B7280] text-[11px] font-medium"
-                    >
+                    </div>
+                    <div v-else class="text-[12px] font-medium text-[#9B7280] leading-tight">
                       已结清
-                    </span>
-                    <span class="text-[11px] text-ink-muted mt-1">
+                    </div>
+                    <div class="text-[11px] text-ink-muted mt-1">
                       {{ c.orderCount || 0 }}单 · {{ ui.formatMoney(c.totalSpent || 0) }}
-                    </span>
+                    </div>
                   </div>
                 </div>
 
-                <!-- Beauty Profile Tags (Single sleek borderless color block) -->
+                <!-- Minimalist Beauty Profile (Hairline only, zero heavy color boxes) -->
                 <div
                   v-if="c.skinType || c.allergyNote || c.hairNote"
-                  class="bg-[#FAF5F7] rounded-[14px] px-3.5 py-2.5 text-[12px] text-ink-secondary space-y-1.5"
+                  class="pt-2.5 border-t border-[#F4ECEF] text-[12px] text-ink-secondary space-y-1"
                 >
-                  <div v-if="c.skinType || c.hairNote" class="flex flex-wrap items-center gap-x-4 gap-y-1">
-                    <span v-if="c.skinType" class="inline-flex items-center gap-1">
-                      <span class="text-ink-muted">肤质</span>
-                      <span class="text-ink font-medium">{{ c.skinType }}</span>
-                    </span>
-                    <span v-if="c.hairNote" class="inline-flex items-center gap-1">
-                      <span class="text-ink-muted">发质</span>
-                      <span class="text-ink font-medium">{{ c.hairNote }}</span>
-                    </span>
+                  <div v-if="c.skinType || c.hairNote" class="flex flex-wrap items-center gap-x-4 gap-y-0.5">
+                    <span v-if="c.skinType"><span class="text-ink-muted">肤质：</span>{{ c.skinType }}</span>
+                    <span v-if="c.hairNote"><span class="text-ink-muted">发质：</span>{{ c.hairNote }}</span>
                   </div>
                   <div v-if="c.allergyNote" class="text-status-danger-text text-[11.5px] leading-relaxed">
-                    <span class="font-medium">禁忌 / 过敏：</span>{{ c.allergyNote }}
+                    禁忌 / 过敏：{{ c.allergyNote }}
                   </div>
                 </div>
 
-                <!-- Recent Orders Strip (Unified soft block, no nested card-in-card clutter) -->
+                <!-- Minimalist Recent Orders List (Clean hairline, no nested gray/pink block) -->
                 <div
                   v-if="c.orders && c.orders.length > 0"
-                  class="bg-[#FAF6F8] rounded-[14px] px-3.5 py-2.5"
+                  class="pt-2.5 border-t border-[#F4ECEF]"
                 >
-                  <div class="flex items-center justify-between text-[11px] text-ink-muted mb-1.5">
-                    <span>近期妆造行程</span>
+                  <div class="flex items-center justify-between text-[11px] text-ink-muted mb-1">
+                    <span>近期行程</span>
                     <button
                       v-if="c.orders.length > 1"
                       type="button"
                       class="text-[#AD7485] font-medium"
                       @click="toggleClientExpand(c.id)"
                     >
-                      {{ expandedClientIds.has(c.id) ? '收起' : `展开全部 ${c.orders.length} 单` }}
+                      {{ expandedClientIds.has(c.id) ? '收起' : `全部 ${c.orders.length} 单` }}
                     </button>
                   </div>
-                  <div class="divide-y divide-[#EFE3E8]/70">
+                  <div class="divide-y divide-[#F6EEF1]">
                     <button
                       v-for="o in (expandedClientIds.has(c.id) ? c.orders : c.orders.slice(0, 1))"
                       :key="o.id"
                       type="button"
-                      class="w-full text-left py-2 first:pt-0.5 last:pb-0.5 flex items-center justify-between gap-2.5 active:opacity-70 transition-opacity"
+                      class="w-full text-left py-1.5 flex items-center justify-between gap-2.5 active:opacity-70 transition-opacity"
                       @click="jumpToOrder(o.id)"
                     >
                       <div class="min-w-0 flex-1">
                         <div class="flex items-center gap-1.5">
                           <span class="text-[13px] font-medium text-ink truncate">{{ o.serviceType }}</span>
-                          <span
-                            class="px-1.5 py-0.5 rounded-md text-[10px] font-medium shrink-0"
-                            :class="[statusMeta(o.status, o.balanceDue).bgClass, statusMeta(o.status, o.balanceDue).textClass]"
-                          >
-                            {{ statusMeta(o.status, o.balanceDue).label }}
+                          <span class="text-[11px] text-ink-muted shrink-0">
+                            · {{ statusMeta(o.status, o.balanceDue).label }}
                           </span>
                         </div>
                         <div class="text-[11px] text-ink-muted mt-0.5 tabular-nums truncate">

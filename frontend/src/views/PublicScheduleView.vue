@@ -11,11 +11,11 @@
         <ChevronLeft class="w-[17px] h-[17px]" />
       </button>
       <div v-else class="w-[34px]" />
-      <h1 class="text-[17px] font-semibold text-ink">公开可约档期</h1>
+      <h1 class="text-[17px] font-semibold text-ink">公开档期页</h1>
       <div class="w-[34px]" />
     </header>
 
-    <div class="scroll-pane no-scrollbar px-4 pt-2 pb-safe-sheet" @scroll.passive="onPaneScroll">
+    <div class="scroll-pane no-scrollbar px-4 pt-2 pb-6" @scroll.passive="onPaneScroll">
       <div class="max-w-[440px] mx-auto">
         <div
           class="card-soft p-6 relative overflow-hidden stagger-item"
@@ -88,6 +88,20 @@
         </div>
       </div>
     </div>
+
+    <!-- Bottom Copy Public Schedule Link CTA -->
+    <div class="dock-glass-bar px-4 pt-2.5">
+      <div class="max-w-[440px] mx-auto">
+        <button
+          type="button"
+          class="btn-unified w-full btn-rose text-white inline-flex items-center justify-center gap-1.5 leading-none"
+          @click="copyScheduleLink"
+        >
+          <Copy class="w-[15px] h-[15px] shrink-0" />
+          <span class="leading-none">复制档期链接</span>
+        </button>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -96,7 +110,8 @@ import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import dayjs from 'dayjs';
 import axios from 'axios';
-import { ChevronLeft } from 'lucide-vue-next';
+import { showToast } from 'vant';
+import { ChevronLeft, Copy } from 'lucide-vue-next';
 import { isFirebaseMode } from '@/lib/firebase';
 import { API_BASE_URL } from '@/api/http';
 import { fetchFirebasePublicSchedule } from '@/api/firebaseBackend';
@@ -146,6 +161,16 @@ async function fetchPublicSchedule() {
 function onMonthStep({ year: y, month: m }: { year: number; month: number }) {
   year.value = y;
   month.value = m;
+}
+
+async function copyScheduleLink() {
+  const url = `${window.location.origin}/s/${route.params.shareToken}`;
+  try {
+    await navigator.clipboard.writeText(url);
+    showToast('已复制公开档期链接');
+  } catch {
+    showToast(url);
+  }
 }
 
 watch([year, month], fetchPublicSchedule);

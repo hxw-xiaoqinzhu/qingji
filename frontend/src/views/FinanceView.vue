@@ -2,11 +2,12 @@
   <div class="h-full flex flex-col overflow-hidden">
     <!-- Adaptive Top Header: Transparent at rest -> Smoothly fades to UI Pink on scroll -->
     <header class="nav-adaptive px-4 pb-2.5 flex items-center justify-between" :style="headerStyle">
-      <!-- iOS 27 Liquid Glass Left/Right Month Switcher (No Dropdown) -->
+      <!-- iOS 27 Liquid Glass Left/Right Month or Year Switcher -->
       <MonthGlassSwitcher
         :year="year"
         :month="month"
-        :show-reset="month !== dayjs().month() + 1 || year !== dayjs().year()"
+        :year-only="mode === 'all'"
+        :show-reset="mode === 'all' ? year !== dayjs().year() : (month !== dayjs().month() + 1 || year !== dayjs().year())"
         @change="onMonthStep"
         @reset="jumpToCurrentMonth"
       />
@@ -48,23 +49,31 @@
     <div class="scroll-pane no-scrollbar px-4 pt-2 pb-6" @scroll.passive="onPaneScroll">
       <!-- Shadowless Flat Mode Switch Capsule -->
       <div class="flex items-center justify-between mb-3">
-        <span class="text-[14px] font-semibold text-ink">营收核算口径</span>
+        <span class="text-[14px] font-semibold text-ink">账本统计</span>
         <div class="inline-flex bg-white/85 p-0.5 rounded-full text-[11px] font-medium">
           <button
             type="button"
-            class="px-3 py-1 rounded-full transition-colors"
-            :class="mode === 'service_date' ? 'bg-brand text-white' : 'text-ink-secondary'"
-            @click="mode = 'service_date'"
+            class="px-2.5 py-1 rounded-full transition-colors"
+            :class="mode === 'all' ? 'bg-brand text-white' : 'text-ink-secondary'"
+            @click="mode = 'all'"
           >
-            按服务日
+            全部
           </button>
           <button
             type="button"
-            class="px-3 py-1 rounded-full transition-colors"
+            class="px-2.5 py-1 rounded-full transition-colors"
+            :class="mode === 'service_date' ? 'bg-brand text-white' : 'text-ink-secondary'"
+            @click="mode = 'service_date'"
+          >
+            总营收
+          </button>
+          <button
+            type="button"
+            class="px-2.5 py-1 rounded-full transition-colors"
             :class="mode === 'cash_date' ? 'bg-brand text-white' : 'text-ink-secondary'"
             @click="mode = 'cash_date'"
           >
-            按收款日
+            实际收款
           </button>
         </div>
       </div>
@@ -128,7 +137,15 @@
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-1.5 text-[12px] text-ink-secondary">
                 <IconTabLedger :size="15" class="text-brand" />
-                <span>{{ mode === 'service_date' ? '本月妆造总营收' : '本月实际入账总额' }}</span>
+                <span>
+                  {{
+                    mode === 'all'
+                      ? `${year === dayjs().year() ? '今年' : `${year}年`}妆造总营收`
+                      : mode === 'service_date'
+                        ? '本月妆造总营收'
+                        : '本月实际收款总额'
+                  }}
+                </span>
               </div>
               <span class="px-2.5 py-0.5 rounded-full bg-[#FAF0F3] text-[11px] text-brand-deep font-medium tabular-nums">
                 共 {{ stats.summary.orderCount }} 单
@@ -172,28 +189,30 @@
           </div>
         </section>
 
-        <!-- 6-Month Rose Gradient Bar Chart (Shows CuteEmptyState when all 6 months are zero) -->
+        <!-- Trend Rose Gradient Bar Chart (Year 12-Month when 'all', otherwise 6-Month) -->
         <section class="card-soft p-5 stagger-item" style="--stagger: 1">
           <div class="flex items-center justify-between mb-2">
             <div>
-              <h2 class="text-[15px] font-semibold text-ink">近 6 月营收趋势</h2>
-              <p v-if="hasTrendData" class="text-[11px] text-ink-muted mt-0.5">轻触柱形查看当月明细数据</p>
+              <h2 class="text-[15px] font-semibold text-ink">
+                {{ mode === 'all' ? (year === dayjs().year() ? '今年营收趋势' : `${year}年营收趋势`) : '近 6 月营收趋势' }}
+              </h2>
+              <p v-if="hasTrendData" class="text-[11px] text-ink-muted mt-0.5">轻触柱形查看各月明细数据</p>
             </div>
             <span class="px-2.5 py-1 rounded-full bg-brand-soft text-brand-deep text-[11px] font-semibold tabular-nums">
-              本月 {{ stats.summary.orderCount }} 单
+              {{ mode === 'all' ? '全年' : '本月' }} {{ stats.summary.orderCount }} 单
             </span>
           </div>
           <div v-if="hasTrendData" ref="barChartRef" class="w-full h-44" />
           <CuteEmptyState
             v-else
             variant="finance"
-            title="近 6 月暂无营收趋势"
+            :title="mode === 'all' ? '该年暂无营收趋势' : '近 6 月暂无营收趋势'"
             description="记入妆造预约后，这里将自动生成月度营收柱状图"
             compact
           />
         </section>
 
-        <!-- Couture Donut Breakdown Chart (Shows CuteEmptyState when no orders this month) -->
+        <!-- Couture Donut Breakdown Chart (Synced to Year or Month) -->
         <section class="card-soft p-5 stagger-item" style="--stagger: 2">
           <h2 class="text-[15px] font-semibold text-ink mb-2">妆型收入结构</h2>
           <template v-if="stats.breakdown.length > 0">
@@ -226,17 +245,19 @@
           <CuteEmptyState
             v-else
             variant="finance"
-            title="本月暂无妆型收入"
+            :title="mode === 'all' ? '全年暂无妆型收入' : '本月暂无妆型收入'"
             description="记入妆造预约后，这里会自动展示各妆型占比"
             compact
           />
         </section>
 
-        <!-- Monthly Ledger List -->
+        <!-- Ledger List (Synced to Year or Month) -->
         <section class="card-soft p-5 stagger-item" style="--stagger: 3">
           <div class="flex items-center justify-between mb-3">
-            <h2 class="text-[15px] font-semibold text-ink">当月收支手账</h2>
-            <span class="text-[11px] text-ink-muted tabular-nums">本月支出 {{ ui.formatMoney(stats.summary.expenseTotal) }}</span>
+            <h2 class="text-[15px] font-semibold text-ink">{{ mode === 'all' ? '全年收支手账' : '当月收支手账' }}</h2>
+            <span class="text-[11px] text-ink-muted tabular-nums">
+              {{ mode === 'all' ? '全年支出' : '本月支出' }} {{ ui.formatMoney(stats.summary.expenseTotal) }}
+            </span>
           </div>
 
           <div v-if="stats.ledger.length > 0" class="space-y-2.5">
@@ -270,7 +291,7 @@
           <CuteEmptyState
             v-else
             variant="finance"
-            title="本月收支手账还是空的"
+            :title="mode === 'all' ? '全年收支手账还是空的' : '本月收支手账还是空的'"
             description="收款入账或点右上角「+」记录支出后会显示在这里"
             compact
           />
@@ -391,7 +412,7 @@ const { onPaneScroll, headerStyle } = useScrollHeader(44);
 const year = ref(dayjs().year());
 const month = ref(dayjs().month() + 1);
 
-const mode = ref<'service_date' | 'cash_date'>('service_date');
+const mode = ref<'all' | 'service_date' | 'cash_date'>('service_date');
 const stats = ref<StatsOverview | null>(null);
 const loading = ref(true);
 const hasTrendData = computed(() =>
@@ -473,8 +494,10 @@ function renderCharts() {
     }
     if (!barChart) barChart = echarts.init(barChartRef.value);
     const trend = stats.value.trend;
+    const isYearView = mode.value === 'all';
+    const currentMonthKey = dayjs().format('YYYY-MM');
     barChart.setOption({
-      grid: { left: 8, right: 8, top: 18, bottom: 24, containLabel: false },
+      grid: { left: 6, right: 6, top: 18, bottom: 24, containLabel: false },
       tooltip: {
         trigger: 'axis',
         axisPointer: { type: 'none' },
@@ -487,15 +510,16 @@ function renderCharts() {
         textStyle: { color: '#fff', fontSize: 12 },
         formatter: (params: any) => {
           const p = params[0];
-          return `${p.name}：${ui.privacyMode ? '¥****' : '¥' + Number(p.value).toLocaleString()}`;
+          const label = isYearView ? `${p.name}月` : p.name;
+          return `${label}：${ui.privacyMode ? '¥****' : '¥' + Number(p.value).toLocaleString()}`;
         },
       },
       xAxis: {
         type: 'category',
-        data: trend.map((t) => t.label),
+        data: trend.map((t) => (isYearView ? t.label.replace('月', '') : t.label)),
         axisLine: { show: false },
         axisTick: { show: false },
-        axisLabel: { color: '#AD96A0', fontSize: 11 },
+        axisLabel: { color: '#AD96A0', fontSize: isYearView ? 10 : 11, interval: 0 },
       },
       yAxis: {
         type: 'value',
@@ -504,12 +528,13 @@ function renderCharts() {
       series: [
         {
           type: 'bar',
-          barWidth: 22,
-          data: trend.map((t, idx) => ({
-            value: t.revenue,
-            itemStyle: {
-              color:
-                idx === trend.length - 1
+          barWidth: isYearView ? 12 : 22,
+          data: trend.map((t, idx) => {
+            const isHighlighted = isYearView ? t.month === currentMonthKey : idx === trend.length - 1;
+            return {
+              value: t.revenue,
+              itemStyle: {
+                color: isHighlighted
                   ? new echarts.graphic.LinearGradient(0, 0, 0, 1, [
                       { offset: 0, color: '#EAB6C4' },
                       { offset: 1, color: '#DB98AA' },
@@ -518,9 +543,10 @@ function renderCharts() {
                       { offset: 0, color: '#FAF0F3' },
                       { offset: 1, color: '#F3E1E7' },
                     ]),
-              borderRadius: [10, 10, 10, 10],
-            },
-          })),
+                borderRadius: isYearView ? [6, 6, 6, 6] : [10, 10, 10, 10],
+              },
+            };
+          }),
         },
       ],
     });
@@ -593,13 +619,14 @@ async function saveExpense() {
 async function exportCsv() {
   try {
     const res = await http.get('/stats/export', {
-      params: { year: year.value, month: month.value },
+      params: { year: year.value, month: month.value, mode: mode.value },
       responseType: 'blob',
     });
     const url = URL.createObjectURL(res.data);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `晴记账本-${year.value}-${String(month.value).padStart(2, '0')}.csv`;
+    const suffix = mode.value === 'all' ? `${year.value}全年` : `${year.value}-${String(month.value).padStart(2, '0')}`;
+    a.download = `晴记账本-${suffix}.csv`;
     a.click();
     URL.revokeObjectURL(url);
     showToast('账单已导出');
