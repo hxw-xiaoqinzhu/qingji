@@ -47,15 +47,16 @@
             <span v-for="w in ['一', '二', '三', '四', '五', '六', '日']" :key="w">{{ w }}</span>
           </div>
 
-          <div v-if="loading" class="grid grid-cols-7 gap-2">
-            <div v-for="i in 30" :key="i" class="skeleton-box h-12" />
-          </div>
+          <Transition name="skeleton-fade" mode="out-in">
+            <div v-if="loading" key="pub-skeleton" class="grid grid-cols-7 gap-2">
+              <div v-for="i in 35" :key="i" class="skeleton-box h-12 rounded-[14px]" />
+            </div>
 
-          <div v-else-if="errorMsg" class="py-10 text-center text-[14px] text-ink-secondary">
-            {{ errorMsg }}
-          </div>
+            <div v-else-if="errorMsg" key="pub-error" class="py-4">
+              <CuteEmptyState variant="calendar" :title="errorMsg" description="请联系化妆师获取最新档期链接" compact />
+            </div>
 
-          <div v-else class="grid grid-cols-7 gap-1.5">
+            <div v-else key="pub-grid" class="grid grid-cols-7 gap-1.5">
             <div v-for="n in leadingBlanks" :key="'b-' + n" class="h-12" />
             <div
               v-for="item in days"
@@ -72,7 +73,8 @@
                 {{ item.status === 'BUSY' ? '已定' : '可约' }}
               </span>
             </div>
-          </div>
+            </div>
+          </Transition>
 
           <div class="mt-6 pt-4 flex items-center justify-between text-[12px] text-ink-muted" style="border-top: 1px dashed #F2DCE4">
             <div class="flex items-center gap-3.5">
@@ -97,6 +99,7 @@ import { isFirebaseMode } from '@/lib/firebase';
 import { API_BASE_URL } from '@/api/http';
 import { fetchFirebasePublicSchedule } from '@/api/firebaseBackend';
 import { useScrollHeader } from '@/composables/useScrollHeader';
+import CuteEmptyState from '@/components/CuteEmptyState.vue';
 import MonthGlassSwitcher from '@/components/MonthGlassSwitcher.vue';
 
 const route = useRoute();

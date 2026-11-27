@@ -154,97 +154,128 @@
       </section>
     </div>
 
-    <!-- Sheet: Packages CRUD -->
-    <van-popup v-model:show="showPackagesSheet" position="bottom" teleport="body" round :style="{ maxHeight: '85dvh' }">
-      <div class="p-5 pb-safe-sheet space-y-4 overflow-y-auto">
-        <div class="sheet-grabber" />
-        <div class="flex items-center justify-between">
+    <!-- Sheet: Packages CRUD (Generous default height + skeleton + cute empty state) -->
+    <van-popup v-model:show="showPackagesSheet" position="bottom" teleport="body" round :style="{ minHeight: '56dvh', maxHeight: '85dvh' }">
+      <div class="p-5 pb-safe-sheet flex flex-col min-h-[56dvh] max-h-[85dvh]">
+        <div class="sheet-grabber shrink-0" />
+        <div class="flex items-center justify-between mb-4 shrink-0">
           <h3 class="text-[17px] font-semibold text-ink">报价套餐库</h3>
           <button type="button" class="icon-btn-white" @click="showPackagesSheet = false">
             <X class="w-4 h-4" />
           </button>
         </div>
-        <div class="space-y-2.5">
-          <div v-for="pkg in packages" :key="pkg.id" class="bg-canvas rounded-2xl p-3.5 flex items-center justify-between">
-            <div>
-              <div class="text-[14px] font-semibold text-ink">
-                {{ pkg.name }}
-                <span class="text-[11px] px-2 py-0.5 rounded-full bg-white text-brand-deep ml-1 font-medium">
-                  {{ pkg.category === 'MAIN' ? '主套餐' : '增项' }}
-                </span>
+        <div class="flex-1 overflow-y-auto no-scrollbar space-y-4">
+          <Transition name="skeleton-fade" mode="out-in">
+            <div v-if="loadingPackages" key="pkg-sk" class="space-y-2.5">
+              <div v-for="i in 3" :key="i" class="skeleton-box h-16 w-full rounded-2xl" />
+            </div>
+            <div v-else-if="packages.length > 0" key="pkg-list" class="space-y-2.5">
+              <div v-for="pkg in packages" :key="pkg.id" class="bg-canvas rounded-2xl p-3.5 flex items-center justify-between">
+                <div>
+                  <div class="text-[14px] font-semibold text-ink">
+                    {{ pkg.name }}
+                    <span class="text-[11px] px-2 py-0.5 rounded-full bg-white text-brand-deep ml-1 font-medium">
+                      {{ pkg.category === 'MAIN' ? '主套餐' : '增项' }}
+                    </span>
+                  </div>
+                  <div class="text-[13px] text-brand-deep font-semibold tabular-nums mt-0.5">¥{{ pkg.price }}</div>
+                </div>
+                <button type="button" class="icon-btn-white text-status-danger-text" @click="deletePackage(pkg.id)">
+                  <Trash2 class="w-4 h-4" />
+                </button>
               </div>
-              <div class="text-[13px] text-brand-deep font-semibold tabular-nums mt-0.5">¥{{ pkg.price }}</div>
             </div>
-            <button type="button" class="icon-btn-white text-status-danger-text" @click="deletePackage(pkg.id)">
-              <Trash2 class="w-4 h-4" />
-            </button>
-          </div>
-        </div>
+            <CuteEmptyState
+              v-else
+              key="pkg-empty"
+              variant="packages"
+              title="还没有保存的报价套餐"
+              description="在下方添加常用妆造套餐或增项，随时翻阅管理"
+              compact
+            />
+          </Transition>
 
-        <div class="bg-[#FAF2F5]/80 border border-[#EFE2E6] rounded-2xl p-3.5 space-y-2.5">
-          <div class="text-[12px] font-semibold text-brand-deep">新增套餐 / 增项</div>
-          <div class="grid grid-cols-2 gap-2.5">
-            <input v-model.trim="newPkg.name" type="text" placeholder="套餐名称" class="w-full input-silk !bg-white px-3.5 h-[40px]" />
-            <div class="input-affix-wrap !bg-white !h-[40px]">
-              <span class="input-affix-unit mr-1">¥</span>
-              <input v-model.number="newPkg.price" type="number" inputmode="decimal" placeholder="价格" class="tabular-nums font-medium" />
+          <div class="bg-[#FAF2F5]/80 border border-[#EFE2E6] rounded-2xl p-3.5 space-y-2.5">
+            <div class="text-[12px] font-semibold text-brand-deep">新增套餐 / 增项</div>
+            <div class="grid grid-cols-2 gap-2.5">
+              <input v-model.trim="newPkg.name" type="text" placeholder="套餐名称" class="w-full input-silk !bg-white px-3.5 h-[40px]" />
+              <div class="input-affix-wrap !bg-white !h-[40px]">
+                <span class="input-affix-unit mr-1">¥</span>
+                <input v-model.number="newPkg.price" type="number" inputmode="decimal" placeholder="价格" class="tabular-nums font-medium" />
+              </div>
             </div>
-          </div>
-          <div class="flex items-center justify-between">
-            <div class="flex gap-2">
-              <button
-                type="button"
-                class="px-3 h-8 rounded-full text-[12px] font-medium"
-                :class="newPkg.category === 'MAIN' ? 'bg-brand text-white' : 'bg-white text-ink-secondary'"
-                @click="newPkg.category = 'MAIN'"
-              >
-                主套餐
-              </button>
-              <button
-                type="button"
-                class="px-3 h-8 rounded-full text-[12px] font-medium"
-                :class="newPkg.category === 'EXTRA' ? 'bg-brand text-white' : 'bg-white text-ink-secondary'"
-                @click="newPkg.category = 'EXTRA'"
-              >
-                增项
+            <div class="flex items-center justify-between">
+              <div class="flex gap-2">
+                <button
+                  type="button"
+                  class="px-3 h-8 rounded-full text-[12px] font-medium"
+                  :class="newPkg.category === 'MAIN' ? 'bg-brand text-white' : 'bg-white text-ink-secondary'"
+                  @click="newPkg.category = 'MAIN'"
+                >
+                  主套餐
+                </button>
+                <button
+                  type="button"
+                  class="px-3 h-8 rounded-full text-[12px] font-medium"
+                  :class="newPkg.category === 'EXTRA' ? 'bg-brand text-white' : 'bg-white text-ink-secondary'"
+                  @click="newPkg.category = 'EXTRA'"
+                >
+                  增项
+                </button>
+              </div>
+              <button type="button" class="icon-btn-white" aria-label="添加套餐" @click="addPackage">
+                <IconPlusAction :size="18" />
               </button>
             </div>
-            <button type="button" class="icon-btn-white" aria-label="添加套餐" @click="addPackage">
-              <IconPlusAction :size="18" />
-            </button>
           </div>
         </div>
       </div>
     </van-popup>
 
-    <!-- Sheet: Clients -->
-    <van-popup v-model:show="showClientsSheet" position="bottom" teleport="body" round :style="{ maxHeight: '85dvh' }">
-      <div class="p-5 pb-safe-sheet space-y-3 overflow-y-auto">
-        <div class="sheet-grabber" />
-        <div class="flex items-center justify-between">
+    <!-- Sheet: Clients (Generous default height + skeleton + cute empty state) -->
+    <van-popup v-model:show="showClientsSheet" position="bottom" teleport="body" round :style="{ minHeight: '54dvh', maxHeight: '85dvh' }">
+      <div class="p-5 pb-safe-sheet flex flex-col min-h-[54dvh] max-h-[85dvh]">
+        <div class="sheet-grabber shrink-0" />
+        <div class="flex items-center justify-between mb-3 shrink-0">
           <h3 class="text-[17px] font-semibold text-ink">新娘客户档案 ({{ clients.length }})</h3>
           <button type="button" class="icon-btn-white" @click="showClientsSheet = false">
             <X class="w-4 h-4" />
           </button>
         </div>
-        <div v-for="c in clients" :key="c.id" class="bg-canvas rounded-2xl p-4">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2.5">
-              <span class="w-8 h-8 rounded-xl bg-brand-soft text-brand-deep flex items-center justify-center text-[13px] font-semibold">
-                {{ c.name.slice(0, 1) }}
-              </span>
-              <span class="text-[15px] font-semibold text-ink">{{ c.name }}</span>
+        <div class="flex-1 overflow-y-auto no-scrollbar">
+          <Transition name="skeleton-fade" mode="out-in">
+            <div v-if="loadingClients" key="cli-sk" class="space-y-3">
+              <div v-for="i in 3" :key="i" class="skeleton-box h-20 w-full rounded-2xl" />
             </div>
-            <span class="text-[12px] text-brand-deep font-semibold tabular-nums">
-              {{ c.orderCount }} 单 · {{ ui.formatMoney(c.totalSpent) }}
-            </span>
-          </div>
-          <div class="text-[12px] text-ink-secondary mt-2 tabular-nums">
-            {{ c.phone || '未留电话' }} {{ c.source ? `· 来自${c.source}` : '' }}
-          </div>
-          <div v-if="c.skinType || c.allergyNote" class="text-[11px] text-ink-muted mt-1 bg-white px-2.5 py-1.5 rounded-xl">
-            {{ c.skinType }} {{ c.allergyNote ? `｜禁忌：${c.allergyNote}` : '' }}
-          </div>
+            <div v-else-if="clients.length > 0" key="cli-list" class="space-y-3">
+              <div v-for="c in clients" :key="c.id" class="bg-canvas rounded-2xl p-4">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2.5">
+                    <span class="w-8 h-8 rounded-xl bg-brand-soft text-brand-deep flex items-center justify-center text-[13px] font-semibold">
+                      {{ c.name.slice(0, 1) }}
+                    </span>
+                    <span class="text-[15px] font-semibold text-ink">{{ c.name }}</span>
+                  </div>
+                  <span class="text-[12px] text-brand-deep font-semibold tabular-nums">
+                    {{ c.orderCount }} 单 · {{ ui.formatMoney(c.totalSpent) }}
+                  </span>
+                </div>
+                <div class="text-[12px] text-ink-secondary mt-2 tabular-nums">
+                  {{ c.phone || '未留电话' }} {{ c.source ? `· 来自${c.source}` : '' }}
+                </div>
+                <div v-if="c.skinType || c.allergyNote" class="text-[11px] text-ink-muted mt-1 bg-white px-2.5 py-1.5 rounded-xl">
+                  {{ c.skinType }} {{ c.allergyNote ? `｜禁忌：${c.allergyNote}` : '' }}
+                </div>
+              </div>
+            </div>
+            <div v-else key="cli-empty" class="h-full flex items-center justify-center py-6">
+              <CuteEmptyState
+                variant="clients"
+                title="还没有新娘客户档案"
+                description="完成第一笔排单后，将自动沉淀客户的肤质与历史记录"
+              />
+            </div>
+          </Transition>
         </div>
       </div>
     </van-popup>
@@ -285,79 +316,104 @@
       </div>
     </van-popup>
 
-    <!-- Sheet: Multi-device Sessions -->
-    <van-popup v-model:show="showSessionsSheet" position="bottom" teleport="body" round :style="{ maxHeight: '80dvh' }">
-      <div class="p-5 pb-safe-sheet space-y-3 overflow-y-auto">
-        <div class="sheet-grabber" />
-        <div class="flex items-center justify-between">
+    <!-- Sheet: Multi-device Sessions (Generous default height + skeleton + cute empty state) -->
+    <van-popup v-model:show="showSessionsSheet" position="bottom" teleport="body" round :style="{ minHeight: '50dvh', maxHeight: '80dvh' }">
+      <div class="p-5 pb-safe-sheet flex flex-col min-h-[50dvh] max-h-[80dvh]">
+        <div class="sheet-grabber shrink-0" />
+        <div class="flex items-center justify-between mb-1 shrink-0">
           <h3 class="text-[17px] font-semibold text-ink">多端在线设备管理</h3>
           <button type="button" class="icon-btn-white" @click="showSessionsSheet = false">
             <X class="w-4 h-4" />
           </button>
         </div>
-        <p class="text-[12px] text-ink-muted">移除后该设备需重新验证密码登录</p>
-        <div v-for="s in sessions" :key="s.id" class="bg-canvas rounded-2xl p-3.5 flex items-center justify-between">
-          <div>
-            <div class="text-[14px] font-medium text-ink flex items-center gap-2">
-              <span>{{ s.deviceInfo }}</span>
-              <span v-if="s.isCurrent" class="px-2 py-0.5 rounded-full bg-brand-soft text-brand-deep text-[10px] font-semibold">
-                本机在线
-              </span>
+        <p class="text-[12px] text-ink-muted mb-3 shrink-0">移除后该设备将自动退出并需重新登录</p>
+        <div class="flex-1 overflow-y-auto no-scrollbar">
+          <Transition name="skeleton-fade" mode="out-in">
+            <div v-if="loadingSessions" key="sess-sk" class="space-y-2.5">
+              <div v-for="i in 2" :key="i" class="skeleton-box h-16 w-full rounded-2xl" />
             </div>
-            <div class="text-[11px] text-ink-muted mt-0.5 tabular-nums">
-              IP: {{ s.ip }} · 活跃于 {{ dayjs(s.lastActiveAt).format('MM-DD HH:mm') }}
+            <div v-else-if="sessions.length > 0" key="sess-list" class="space-y-2.5">
+              <div v-for="s in sessions" :key="s.id" class="bg-canvas rounded-2xl p-3.5 flex items-center justify-between">
+                <div>
+                  <div class="text-[14px] font-medium text-ink flex items-center gap-2">
+                    <span>{{ s.deviceInfo }}</span>
+                    <span v-if="s.isCurrent" class="px-2 py-0.5 rounded-full bg-brand-soft text-brand-deep text-[10px] font-semibold">
+                      本机在线
+                    </span>
+                  </div>
+                  <div class="text-[11px] text-ink-muted mt-0.5 tabular-nums">
+                    IP: {{ s.ip }} · 活跃于 {{ dayjs(s.lastActiveAt).format('MM-DD HH:mm') }}
+                  </div>
+                </div>
+                <button
+                  v-if="!s.isCurrent"
+                  type="button"
+                  class="icon-btn-white text-status-danger-text"
+                  aria-label="移除设备"
+                  @click="kickSession(s.id)"
+                >
+                  <Trash2 class="w-4 h-4" />
+                </button>
+              </div>
             </div>
-          </div>
-          <button
-            v-if="!s.isCurrent"
-            type="button"
-            class="icon-btn-white text-status-danger-text"
-            aria-label="移除设备"
-            @click="kickSession(s.id)"
-          >
-            <Trash2 class="w-4 h-4" />
-          </button>
+            <div v-else key="sess-empty" class="h-full flex items-center justify-center py-6">
+              <CuteEmptyState variant="sessions" title="暂无在线设备记录" compact />
+            </div>
+          </Transition>
         </div>
       </div>
     </van-popup>
 
-    <!-- Sheet: Recycle Bin -->
-    <van-popup v-model:show="showRecycleSheet" position="bottom" teleport="body" round :style="{ maxHeight: '80dvh' }">
-      <div class="p-5 pb-safe-sheet space-y-3 overflow-y-auto">
-        <div class="sheet-grabber" />
-        <div class="flex items-center justify-between">
+    <!-- Sheet: Recycle Bin (Generous default height + skeleton + cute empty state) -->
+    <van-popup v-model:show="showRecycleSheet" position="bottom" teleport="body" round :style="{ minHeight: '54dvh', maxHeight: '82dvh' }">
+      <div class="p-5 pb-safe-sheet flex flex-col min-h-[54dvh] max-h-[82dvh]">
+        <div class="sheet-grabber shrink-0" />
+        <div class="flex items-center justify-between mb-3 shrink-0">
           <h3 class="text-[17px] font-semibold text-ink">30 天订单回收站</h3>
           <button type="button" class="icon-btn-white" @click="showRecycleSheet = false">
             <X class="w-4 h-4" />
           </button>
         </div>
-        <div v-if="deletedOrders.length" class="space-y-2.5">
-          <div v-for="o in deletedOrders" :key="o.id" class="bg-canvas rounded-2xl p-3.5 flex items-center justify-between">
-            <div>
-              <div class="text-[14px] font-medium text-ink">{{ o.clientName }} · {{ o.serviceType }}</div>
-              <div class="text-[11px] text-ink-muted tabular-nums">{{ o.serviceDate }} · ¥{{ o.totalAmount }}</div>
+        <div class="flex-1 overflow-y-auto no-scrollbar">
+          <Transition name="skeleton-fade" mode="out-in">
+            <div v-if="loadingRecycle" key="rec-sk" class="space-y-2.5">
+              <div v-for="i in 3" :key="i" class="skeleton-box h-16 w-full rounded-2xl" />
             </div>
-            <div class="flex gap-2">
-              <button
-                type="button"
-                class="icon-btn-white text-status-locked-text"
-                aria-label="恢复订单"
-                @click="restoreOrder(o.id)"
-              >
-                <RotateCcw class="w-4 h-4" />
-              </button>
-              <button
-                type="button"
-                class="icon-btn-white text-status-danger-text"
-                aria-label="彻底删除"
-                @click="permanentDelete(o.id)"
-              >
-                <Trash2 class="w-4 h-4" />
-              </button>
+            <div v-else-if="deletedOrders.length" key="rec-list" class="space-y-2.5">
+              <div v-for="o in deletedOrders" :key="o.id" class="bg-canvas rounded-2xl p-3.5 flex items-center justify-between">
+                <div>
+                  <div class="text-[14px] font-medium text-ink">{{ o.clientName }} · {{ o.serviceType }}</div>
+                  <div class="text-[11px] text-ink-muted tabular-nums">{{ o.serviceDate }} · ¥{{ o.totalAmount }}</div>
+                </div>
+                <div class="flex gap-2">
+                  <button
+                    type="button"
+                    class="icon-btn-white text-status-locked-text"
+                    aria-label="恢复订单"
+                    @click="restoreOrder(o.id)"
+                  >
+                    <RotateCcw class="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    class="icon-btn-white text-status-danger-text"
+                    aria-label="彻底删除"
+                    @click="permanentDelete(o.id)"
+                  >
+                    <Trash2 class="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
+            <div v-else key="rec-empty" class="h-full flex items-center justify-center py-6">
+              <CuteEmptyState
+                variant="recycle"
+                title="回收站干干净净"
+                description="误删的行程会在这里安静保留 30 天，随时可以一键恢复"
+              />
+            </div>
+          </Transition>
         </div>
-        <p v-else class="text-center text-[13px] text-ink-muted py-6">回收站干干净净</p>
       </div>
     </van-popup>
   </div>
@@ -387,6 +443,7 @@ import {
   IconTabStudio,
   IconVanityMirror,
 } from '@/components/icons/BeautyIcons';
+import CuteEmptyState from '@/components/CuteEmptyState.vue';
 import type { ClientItem, Order, PackageTemplate, UserSession } from '@/types';
 
 const router = useRouter();
@@ -395,10 +452,12 @@ const ui = useUiStore();
 const { onPaneScroll, headerStyle } = useScrollHeader(44);
 
 const showPackagesSheet = ref(false);
+const loadingPackages = ref(false);
 const packages = ref<PackageTemplate[]>([]);
 const newPkg = reactive({ name: '', price: 0, category: 'MAIN' as 'MAIN' | 'EXTRA' });
 
 const showClientsSheet = ref(false);
+const loadingClients = ref(false);
 const clients = ref<ClientItem[]>([]);
 
 const showChecklistSheet = ref(false);
@@ -408,15 +467,22 @@ const showNoticeSheet = ref(false);
 const noticeText = ref('');
 
 const showSessionsSheet = ref(false);
+const loadingSessions = ref(false);
 const sessions = ref<UserSession[]>([]);
 
 const showRecycleSheet = ref(false);
+const loadingRecycle = ref(false);
 const deletedOrders = ref<Order[]>([]);
 
 async function openPackages() {
   showPackagesSheet.value = true;
-  const { data } = await http.get('/packages');
-  packages.value = data.packages || [];
+  loadingPackages.value = true;
+  try {
+    const { data } = await http.get('/packages');
+    packages.value = data.packages || [];
+  } finally {
+    loadingPackages.value = false;
+  }
 }
 
 async function addPackage() {
@@ -436,8 +502,13 @@ async function deletePackage(id: string) {
 
 async function openClients() {
   showClientsSheet.value = true;
-  const { data } = await http.get('/clients');
-  clients.value = data.clients || [];
+  loadingClients.value = true;
+  try {
+    const { data } = await http.get('/clients');
+    clients.value = data.clients || [];
+  } finally {
+    loadingClients.value = false;
+  }
 }
 
 function openChecklistTpl() {
@@ -513,8 +584,13 @@ async function copyIcsLink() {
 
 async function openSessions() {
   showSessionsSheet.value = true;
-  const { data } = await http.get('/auth/sessions');
-  sessions.value = data.sessions || [];
+  loadingSessions.value = true;
+  try {
+    const { data } = await http.get('/auth/sessions');
+    sessions.value = data.sessions || [];
+  } finally {
+    loadingSessions.value = false;
+  }
 }
 
 async function kickSession(id: string) {
@@ -525,8 +601,13 @@ async function kickSession(id: string) {
 
 async function openRecycleBin() {
   showRecycleSheet.value = true;
-  const { data } = await http.get('/orders', { params: { deleted: 'true' } });
-  deletedOrders.value = data.orders || [];
+  loadingRecycle.value = true;
+  try {
+    const { data } = await http.get('/orders', { params: { deleted: 'true' } });
+    deletedOrders.value = data.orders || [];
+  } finally {
+    loadingRecycle.value = false;
+  }
 }
 
 async function restoreOrder(id: string) {

@@ -60,15 +60,33 @@
 
     <!-- Independently Scrollable Card Region -->
     <div class="scroll-pane no-scrollbar px-4 pt-3 pb-6" @scroll.passive="onPaneScroll">
-      <div v-if="loading && !orders.length" class="space-y-3">
-        <div v-for="i in 3" :key="i" class="card-soft p-4 space-y-2.5">
-          <div class="skeleton-box h-4 w-24" />
-          <div class="skeleton-box h-5 w-48" />
-          <div class="skeleton-box h-3.5 w-36" />
+      <Transition name="skeleton-fade" mode="out-in">
+        <div v-if="loading && !orders.length" key="orders-skeleton" class="space-y-4">
+          <div v-for="g in 2" :key="'og-' + g" class="space-y-2.5">
+            <div class="flex items-center justify-between px-1">
+              <div class="skeleton-box h-4 w-36 rounded-full" />
+              <div class="skeleton-box h-3.5 w-10 rounded-full" />
+            </div>
+            <div class="space-y-2.5 pl-3 border-l border-brand/15 ml-1">
+              <div v-for="i in 2" :key="'oc-' + g + '-' + i" class="card-soft p-4 space-y-3">
+                <div class="flex items-center justify-between">
+                  <div class="skeleton-box h-5 w-24 rounded-full" />
+                  <div class="skeleton-box h-5 w-14 rounded-full" />
+                </div>
+                <div class="flex items-center gap-3">
+                  <div class="skeleton-box w-10 h-10 rounded-2xl shrink-0" />
+                  <div class="flex-1 space-y-2">
+                    <div class="skeleton-box h-4 w-40" />
+                    <div class="skeleton-box h-3 w-28" />
+                  </div>
+                  <div class="skeleton-box h-6 w-16" />
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
 
-      <div v-else-if="groupedOrders.length > 0" class="space-y-5">
+        <div v-else-if="groupedOrders.length > 0" key="orders-list" class="space-y-5">
         <section
           v-for="(group, gIdx) in groupedOrders"
           :key="group.date"
@@ -175,16 +193,14 @@
         </section>
       </div>
 
-      <div v-else class="card-soft px-6 py-12 text-center mt-2">
-        <div
-          class="w-12 h-12 rounded-[18px] mx-auto flex items-center justify-center mb-3 text-brand"
-          style="background: linear-gradient(135deg, #FDEEF3 0%, #FDF4EB 100%)"
-        >
-          <IconTabItinerary :size="24" />
+        <div v-else key="orders-empty" class="card-soft mt-2">
+          <CuteEmptyState
+            variant="orders"
+            title="暂无匹配的妆造行程"
+            description="可切换筛选状态，或轻点底部中央按钮新建行程"
+          />
         </div>
-        <p class="text-[14px] font-semibold text-ink">暂无匹配的妆造行程</p>
-        <p class="text-[12px] text-ink-muted mt-1">可切换筛选状态，或轻点底部中央按钮新建行程</p>
-      </div>
+      </Transition>
     </div>
   </div>
 </template>
@@ -200,7 +216,8 @@ import http from '@/api/http';
 import { useUiStore } from '@/stores/ui';
 import { useScrollHeader } from '@/composables/useScrollHeader';
 import { getRelativeDayLabel, serviceCategoryVisual, statusMeta } from '@/utils/format';
-import { IconPearlPin, IconTabItinerary } from '@/components/icons/BeautyIcons';
+import { IconPearlPin } from '@/components/icons/BeautyIcons';
+import CuteEmptyState from '@/components/CuteEmptyState.vue';
 import type { Order } from '@/types';
 
 const route = useRoute();
@@ -212,7 +229,7 @@ const searchQuery = ref('');
 const activeStatus = ref<string>((route.query.status as string) || 'ALL');
 const orders = ref<Order[]>([]);
 const pendingBalanceCount = ref(0);
-const loading = ref(false);
+const loading = ref(true);
 
 const statusPills = [
   { label: '全部', value: 'ALL' },

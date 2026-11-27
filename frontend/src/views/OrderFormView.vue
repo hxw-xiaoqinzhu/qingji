@@ -15,7 +15,30 @@
     </header>
 
     <!-- Scrollable Form Body -->
-    <div class="scroll-pane no-scrollbar px-4 pt-2 pb-6 space-y-4" @scroll.passive="onPaneScroll">
+    <div class="scroll-pane no-scrollbar px-4 pt-2 pb-6" @scroll.passive="onPaneScroll">
+      <Transition name="skeleton-fade" mode="out-in">
+        <div v-if="loadingOrder" key="form-skeleton" class="space-y-4">
+          <div class="card-soft p-4 space-y-4">
+            <div class="skeleton-box h-4 w-28" />
+            <div class="grid grid-cols-2 gap-3">
+              <div class="skeleton-box h-[42px] w-full" />
+              <div class="skeleton-box h-[42px] w-full" />
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div class="skeleton-box h-[42px] w-full" />
+              <div class="skeleton-box h-[42px] w-full" />
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div class="skeleton-box h-[42px] w-full" />
+              <div class="skeleton-box h-[42px] w-full" />
+            </div>
+            <div class="skeleton-box h-[42px] w-full" />
+            <div class="skeleton-box h-[42px] w-full" />
+            <div class="skeleton-box h-16 w-full rounded-[18px]" />
+          </div>
+        </div>
+
+        <div v-else key="form-content" class="space-y-4">
       <!-- Smart WeChat Chat Snippet Parser -->
       <section
         v-if="!isEdit"
@@ -169,29 +192,13 @@
           </div>
         </div>
 
-        <!-- One-Tap Couture Package Selector -->
+        <!-- Manual Makeup Style Input (Package quick-pick removed, keeping manual input + smart WeChat parser) -->
         <div>
-          <label class="block text-[12px] text-ink-secondary mb-2 font-medium">妆型 / 点选报价套餐</label>
-          <div class="flex flex-wrap gap-2 mb-2.5">
-            <button
-              v-for="pkg in mainPackages"
-              :key="pkg.id"
-              type="button"
-              class="pressable px-3.5 py-1.5 rounded-full text-[12px] font-medium transition-all tabular-nums"
-              :class="
-                form.serviceType === pkg.name
-                  ? 'btn-rose text-white'
-                  : 'bg-brand-soft/75 text-ink-secondary border border-brand/10'
-              "
-              @click="selectPackage(pkg)"
-            >
-              {{ pkg.name }} · ¥{{ pkg.price }}
-            </button>
-          </div>
+          <label class="block text-[12px] text-ink-secondary mb-1.5 font-medium">妆型名称</label>
           <input
             v-model.trim="form.serviceType"
             type="text"
-            placeholder="或直接输入自定义妆型名称"
+            placeholder="请输入妆型名称，如：新娘全天跟妆"
             class="w-full input-silk px-3.5 h-[42px]"
           />
         </div>
@@ -397,6 +404,8 @@
           </div>
         </div>
       </section>
+        </div>
+      </Transition>
     </div>
 
     <!-- Docked Bottom Save Bar -->
@@ -431,6 +440,7 @@ const router = useRouter();
 const { onPaneScroll, headerStyle } = useScrollHeader(44);
 
 const isEdit = computed(() => Boolean(route.params.id));
+const loadingOrder = ref(Boolean(route.params.id));
 const showWechatParser = ref(false);
 const showAdvanced = ref(false);
 const wechatText = ref('');
@@ -466,7 +476,6 @@ function formatDisplayDate(d: string) {
   return dayjs(d).format('YYYY.MM.DD');
 }
 
-const mainPackages = computed(() => packages.value.filter((p) => p.category === 'MAIN'));
 const extraPackages = computed(() => packages.value.filter((p) => p.category === 'EXTRA'));
 
 const extraTotal = computed(() =>
@@ -514,14 +523,11 @@ onMounted(async () => {
       }
     } catch {
       showToast('加载订单失败');
+    } finally {
+      loadingOrder.value = false;
     }
   }
 });
-
-function selectPackage(pkg: PackageTemplate) {
-  form.serviceType = pkg.name;
-  form.basePrice = pkg.price;
-}
 
 function addExtraItem(name = '', unitPrice = 0) {
   form.extraItems.push({ name, unitPrice, quantity: 1, subtotal: unitPrice });

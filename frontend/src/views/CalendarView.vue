@@ -39,6 +39,43 @@
 
     <!-- Scrollable Body -->
     <div class="scroll-pane no-scrollbar px-4 pt-2 pb-8" @scroll.passive="onPaneScroll">
+      <Transition name="skeleton-fade" mode="out-in">
+        <!-- Full Calendar Shimmer Skeleton -->
+        <div v-if="initialLoading" key="cal-skeleton" class="space-y-3.5">
+          <div class="flex items-center gap-2">
+            <div class="skeleton-box h-7 w-28 rounded-full" />
+            <div class="skeleton-box h-7 w-32 rounded-full" />
+            <div class="skeleton-box h-7 w-24 rounded-full" />
+          </div>
+          <div class="card-soft p-4 space-y-3">
+            <div class="grid grid-cols-7 gap-2 px-1">
+              <div v-for="w in 7" :key="'sw-' + w" class="skeleton-box h-3 w-4 mx-auto rounded-full" />
+            </div>
+            <div class="grid grid-cols-7 gap-1.5">
+              <div v-for="d in 35" :key="'sd-' + d" class="skeleton-box h-[56px] rounded-[14px]" />
+            </div>
+          </div>
+          <div class="flex items-center justify-between pt-1 px-1">
+            <div class="skeleton-box h-4 w-36" />
+            <div class="skeleton-box h-5 w-16 rounded-full" />
+          </div>
+          <div class="card-soft p-4 space-y-3">
+            <div class="flex items-center justify-between">
+              <div class="skeleton-box h-5 w-28 rounded-full" />
+              <div class="skeleton-box h-5 w-16 rounded-full" />
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="skeleton-box w-10 h-10 rounded-2xl shrink-0" />
+              <div class="flex-1 space-y-2">
+                <div class="skeleton-box h-4 w-40" />
+                <div class="skeleton-box h-3 w-32" />
+              </div>
+              <div class="skeleton-box h-6 w-16" />
+            </div>
+          </div>
+        </div>
+
+        <div v-else key="cal-content">
       <!-- Monthly Quick Insight Pills -->
       <div class="flex items-center gap-2 overflow-x-auto no-scrollbar mb-3">
         <div class="shrink-0 whitespace-nowrap px-3 py-1.5 rounded-full bg-white/90 flex items-center gap-1.5 text-[11px]">
@@ -251,17 +288,17 @@
           </article>
         </template>
 
-        <div v-else class="card-soft px-6 py-8 text-center">
-          <div
-            class="w-11 h-11 rounded-[16px] mx-auto flex items-center justify-center mb-2.5 text-brand"
-            style="background: linear-gradient(135deg, #FDEEF3 0%, #FDF4EB 100%)"
-          >
-            <IconTabItinerary :size="22" />
-          </div>
-          <p class="text-[14px] font-semibold text-ink">当日档期留白可约</p>
-          <p class="text-[12px] text-ink-muted mt-1">轻点底部中央按钮，即可记录新娘试妆或跟妆行程</p>
+        <div v-else class="card-soft">
+          <CuteEmptyState
+            variant="calendar"
+            title="当日档期留白可约"
+            description="轻点底部中央按钮，即可记录新娘试妆或跟妆行程"
+            compact
+          />
         </div>
       </div>
+        </div>
+      </Transition>
     </div>
 
     <!-- Schedule Poster Modal -->
@@ -291,8 +328,8 @@ import {
   IconLashEyeOpen,
   IconPearlPin,
   IconPosterCard,
-  IconTabItinerary,
 } from '@/components/icons/BeautyIcons';
+import CuteEmptyState from '@/components/CuteEmptyState.vue';
 import MonthGlassSwitcher from '@/components/MonthGlassSwitcher.vue';
 import SchedulePosterModal from '@/components/SchedulePosterModal.vue';
 import type { Order } from '@/types';
@@ -354,6 +391,7 @@ const selectedDate = ref(todayStr);
 
 const ordersCache = reactive<Record<string, Order[]>>({});
 const showPoster = ref(false);
+const initialLoading = ref(true);
 
 const ymKey = (y: number, m: number) => `${y}-${String(m).padStart(2, '0')}`;
 
@@ -390,8 +428,12 @@ watch(
   { immediate: true }
 );
 
-onMounted(() => {
-  ensureThreeMonthsLoaded(currentYear.value, currentMonth.value);
+onMounted(async () => {
+  try {
+    await ensureThreeMonthsLoaded(currentYear.value, currentMonth.value);
+  } finally {
+    initialLoading.value = false;
+  }
 });
 
 function buildCellsForMonth(y: number, m: number): CalendarCell[] {

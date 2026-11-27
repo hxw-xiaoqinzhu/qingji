@@ -69,18 +69,36 @@
         </div>
       </div>
 
-      <div v-if="loading && !stats" class="space-y-4">
-        <div class="card-soft p-6 space-y-3">
-          <div class="skeleton-box h-4 w-24" />
-          <div class="skeleton-box h-10 w-44" />
-          <div class="skeleton-box h-2 w-full" />
+      <Transition name="skeleton-fade" mode="out-in" @after-enter="renderCharts">
+        <div v-if="loading && !stats" key="fin-skeleton" class="space-y-4">
+          <div class="card-velvet p-5 space-y-4">
+            <div class="flex items-center justify-between">
+              <div class="skeleton-box h-4 w-28" />
+              <div class="skeleton-box h-5 w-16 rounded-full" />
+            </div>
+            <div class="skeleton-box h-9 w-40" />
+            <div class="grid grid-cols-3 gap-2 pt-1">
+              <div class="skeleton-box h-12 rounded-2xl" />
+              <div class="skeleton-box h-12 rounded-2xl" />
+              <div class="skeleton-box h-12 rounded-2xl" />
+            </div>
+          </div>
+          <div class="card-soft p-5 space-y-3">
+            <div class="skeleton-box h-4 w-28" />
+            <div class="skeleton-box h-40 w-full rounded-2xl" />
+          </div>
+          <div class="card-soft p-5 space-y-3">
+            <div class="skeleton-box h-4 w-24" />
+            <div class="skeleton-box h-32 w-32 rounded-full mx-auto" />
+          </div>
+          <div class="card-soft p-5 space-y-2.5">
+            <div class="skeleton-box h-4 w-24" />
+            <div class="skeleton-box h-14 w-full rounded-2xl" />
+            <div class="skeleton-box h-14 w-full rounded-2xl" />
+          </div>
         </div>
-        <div class="card-soft p-5">
-          <div class="skeleton-box h-44 w-full" />
-        </div>
-      </div>
 
-      <div v-else-if="stats" class="space-y-4">
+        <div v-else-if="stats" key="fin-content" class="space-y-4">
         <!-- Pale Silk-Blush Revenue Overview Card (Airy pastel, zero heavy dark plum) -->
         <section class="card-velvet p-5 stagger-item">
           <div class="relative z-10">
@@ -145,34 +163,43 @@
           <div ref="barChartRef" class="w-full h-44" />
         </section>
 
-        <!-- Couture Donut Breakdown Chart (Full-width canvas so left-side slice tooltips auto-shift right without clipping) -->
-        <section v-if="stats.breakdown.length > 0" class="card-soft p-5 stagger-item" style="--stagger: 2">
+        <!-- Couture Donut Breakdown Chart (Shows CuteEmptyState when no orders this month) -->
+        <section class="card-soft p-5 stagger-item" style="--stagger: 2">
           <h2 class="text-[15px] font-semibold text-ink mb-2">妆型收入结构</h2>
-          <div class="relative w-full h-40 mb-2">
-            <div ref="pieChartRef" class="w-full h-full" />
-            <div class="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-              <span class="text-[10px] text-ink-muted">主打妆型</span>
-              <span class="text-[14px] font-semibold text-ink tabular-nums mt-0.5">
-                {{ stats.breakdown.length }} 类
-              </span>
-            </div>
-          </div>
-          <div class="space-y-2">
-            <div
-              v-for="(item, idx) in stats.breakdown"
-              :key="item.name"
-              class="flex items-center justify-between text-[13px] tabular-nums bg-canvas/80 px-3.5 py-2 rounded-2xl"
-            >
-              <div class="flex items-center gap-2 min-w-0 pr-2">
-                <span
-                  class="w-2.5 h-2.5 rounded-full shrink-0"
-                  :style="{ backgroundColor: pieColors[idx % pieColors.length] }"
-                />
-                <span class="text-ink font-medium">{{ item.name }}</span>
+          <template v-if="stats.breakdown.length > 0">
+            <div class="relative w-full h-40 mb-2">
+              <div ref="pieChartRef" class="w-full h-full" />
+              <div class="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+                <span class="text-[10px] text-ink-muted">主打妆型</span>
+                <span class="text-[14px] font-semibold text-ink tabular-nums mt-0.5">
+                  {{ stats.breakdown.length }} 类
+                </span>
               </div>
-              <span class="font-semibold text-brand-deep shrink-0">{{ ui.formatMoney(item.value) }}</span>
             </div>
-          </div>
+            <div class="space-y-2">
+              <div
+                v-for="(item, idx) in stats.breakdown"
+                :key="item.name"
+                class="flex items-center justify-between text-[13px] tabular-nums bg-canvas/80 px-3.5 py-2 rounded-2xl"
+              >
+                <div class="flex items-center gap-2 min-w-0 pr-2">
+                  <span
+                    class="w-2.5 h-2.5 rounded-full shrink-0"
+                    :style="{ backgroundColor: pieColors[idx % pieColors.length] }"
+                  />
+                  <span class="text-ink font-medium">{{ item.name }}</span>
+                </div>
+                <span class="font-semibold text-brand-deep shrink-0">{{ ui.formatMoney(item.value) }}</span>
+              </div>
+            </div>
+          </template>
+          <CuteEmptyState
+            v-else
+            variant="finance"
+            title="本月暂无妆型收入"
+            description="记入妆造预约后，这里会自动展示各妆型占比"
+            compact
+          />
         </section>
 
         <!-- Monthly Ledger List -->
@@ -210,11 +237,16 @@
               </span>
             </div>
           </div>
-          <p v-else class="text-center text-[13px] text-ink-muted py-6">
-            本月暂无流水，可点右上角「+」记录支出
-          </p>
+          <CuteEmptyState
+            v-else
+            variant="finance"
+            title="本月收支手账还是空的"
+            description="收款入账或点右上角「+」记录支出后会显示在这里"
+            compact
+          />
         </section>
-      </div>
+        </div>
+      </Transition>
     </div>
 
     <!-- Add Expense Bottom Sheet -->
@@ -316,6 +348,7 @@ import {
   IconTabCalendar,
   IconTabLedger,
 } from '@/components/icons/BeautyIcons';
+import CuteEmptyState from '@/components/CuteEmptyState.vue';
 import MonthGlassSwitcher from '@/components/MonthGlassSwitcher.vue';
 import type { StatsOverview } from '@/types';
 
@@ -372,12 +405,12 @@ async function fetchStats() {
     });
     stats.value = data;
     animateTo(data.summary.totalRevenue || 0);
-    await nextTick();
-    renderCharts();
   } catch {
     showToast('加载账本失败');
   } finally {
     loading.value = false;
+    await nextTick();
+    renderCharts();
   }
 }
 
@@ -401,6 +434,10 @@ function renderCharts() {
   if (!stats.value) return;
 
   if (barChartRef.value) {
+    if (barChart && barChart.getDom() !== barChartRef.value) {
+      barChart.dispose();
+      barChart = null;
+    }
     if (!barChart) barChart = echarts.init(barChartRef.value);
     const trend = stats.value.trend;
     barChart.setOption({
@@ -457,6 +494,10 @@ function renderCharts() {
   }
 
   if (pieChartRef.value && stats.value.breakdown.length > 0) {
+    if (pieChart && pieChart.getDom() !== pieChartRef.value) {
+      pieChart.dispose();
+      pieChart = null;
+    }
     if (!pieChart) pieChart = echarts.init(pieChartRef.value);
     pieChart.setOption({
       color: pieColors,
