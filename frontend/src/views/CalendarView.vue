@@ -39,37 +39,31 @@
 
     <!-- Scrollable Body -->
     <div class="scroll-pane no-scrollbar px-4 pt-2 pb-8" @scroll.passive="onPaneScroll">
-      <div class="relative">
-        <!-- 1:1 Pixel-Matched Overlay Skeleton (Dissolves smoothly on top with ZERO layout shift or blank flash) -->
-        <Transition name="skeleton-dissolve">
-          <div
-            v-if="initialLoading"
-            class="absolute inset-0 z-20 pointer-events-none"
-          >
-            <div class="flex items-center gap-2 mb-3">
-              <div class="skeleton-box h-[28px] w-[104px] rounded-full" />
-              <div class="skeleton-box h-[28px] w-[124px] rounded-full" />
-              <div class="skeleton-box h-[28px] w-[96px] rounded-full" />
-            </div>
-            <section class="card-soft px-2.5 pt-3.5 pb-2.5">
-              <div class="grid grid-cols-7 place-items-center mb-1.5 px-1 h-[16px]">
-                <div v-for="w in 7" :key="'sw-' + w" class="skeleton-box h-3 w-4 rounded-full" />
-              </div>
-              <div class="px-1 py-1 grid grid-cols-7 gap-y-1.5 gap-x-0">
-                <div v-for="d in 42" :key="'sd-' + d" class="h-[60px] flex items-center justify-center">
-                  <div class="skeleton-box flex-1 h-full mx-[2px] rounded-[15px]" />
-                </div>
-              </div>
-              <div class="px-1.5 pt-0.5 flex items-center gap-3.5 h-[18px]">
-                <div class="skeleton-box h-3 w-12 rounded-full" />
-                <div class="skeleton-box h-3 w-12 rounded-full" />
-                <div class="skeleton-box h-3 w-10 rounded-full" />
-              </div>
-            </section>
+      <!-- In-Flow 1:1 Height-Reserved Skeleton (Hides cleanly when loaded) -->
+      <div v-if="initialLoading">
+        <div class="flex items-center gap-2 mb-3">
+          <div class="skeleton-box h-[28px] w-[104px] rounded-full" />
+          <div class="skeleton-box h-[28px] w-[124px] rounded-full" />
+          <div class="skeleton-box h-[28px] w-[96px] rounded-full" />
+        </div>
+        <section class="card-soft px-2.5 pt-3.5 pb-2.5">
+          <div class="grid grid-cols-7 place-items-center mb-1.5 px-1 h-[16px]">
+            <div v-for="w in 7" :key="'sw-' + w" class="skeleton-box h-3 w-4 rounded-full" />
           </div>
-        </Transition>
+          <div class="px-1 py-1 grid grid-cols-7 gap-y-1.5 gap-x-0">
+            <div v-for="d in 42" :key="'sd-' + d" class="h-[60px] flex items-center justify-center">
+              <div class="skeleton-box flex-1 h-full mx-[2px] rounded-[15px]" />
+            </div>
+          </div>
+          <div class="px-1.5 pt-0.5 flex items-center gap-3.5 h-[18px]">
+            <div class="skeleton-box h-3 w-12 rounded-full" />
+            <div class="skeleton-box h-3 w-12 rounded-full" />
+            <div class="skeleton-box h-3 w-10 rounded-full" />
+          </div>
+        </section>
+      </div>
 
-        <div :class="initialLoading ? 'opacity-0' : 'opacity-100 transition-opacity duration-200'">
+      <div v-else>
       <!-- Monthly Quick Insight Pills -->
       <div class="flex items-center gap-2 overflow-x-auto no-scrollbar mb-3">
         <div class="shrink-0 whitespace-nowrap px-3 py-1.5 rounded-full bg-white/90 flex items-center gap-1.5 text-[11px]">
@@ -199,7 +193,6 @@
           </span>
         </div>
       </section>
-        </div>
       </div>
     </div>
 

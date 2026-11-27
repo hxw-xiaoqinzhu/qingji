@@ -5,6 +5,70 @@
       class="scroll-pane no-scrollbar px-4 pb-8 space-y-4"
       style="padding-top: calc(var(--safe-top) + 14px)"
     >
+      <!-- In-Flow 1:1 Height-Reserved Skeleton while user profile loads -->
+      <template v-if="!auth.user">
+        <section class="hero-studio-card space-y-4">
+          <div class="flex items-center gap-3.5">
+            <div class="skeleton-box w-[68px] h-[68px] rounded-full shrink-0" />
+            <div class="flex-1 space-y-2.5">
+              <div class="flex items-center justify-between gap-2">
+                <div class="skeleton-box h-5 w-28 rounded-lg" />
+                <div class="skeleton-box h-6 w-14 rounded-full" />
+              </div>
+              <div class="skeleton-box h-3.5 w-44 rounded-full" />
+            </div>
+          </div>
+          <div class="pt-3 border-t border-[#F1E1E7]/75 flex items-center justify-between">
+            <div class="skeleton-box h-3 w-36 rounded-full" />
+            <div class="skeleton-box h-3 w-24 rounded-full" />
+          </div>
+        </section>
+
+        <section class="card-soft p-2.5 space-y-1">
+          <div class="px-3 pt-1.5 pb-1"><div class="skeleton-box h-3 w-16 rounded-full" /></div>
+          <div v-for="i in 4" :key="'ps1-' + i" class="px-2.5 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="skeleton-box w-9 h-9 rounded-[13px] shrink-0" />
+              <div class="space-y-1.5">
+                <div class="skeleton-box h-3.5 w-20 rounded-lg" />
+                <div class="skeleton-box h-2.5 w-32 rounded-full" />
+              </div>
+            </div>
+            <div class="skeleton-box w-4 h-4 rounded-full" />
+          </div>
+        </section>
+
+        <section class="card-soft p-2.5 space-y-1">
+          <div class="px-3 pt-1.5 pb-1"><div class="skeleton-box h-3 w-16 rounded-full" /></div>
+          <div v-for="i in 2" :key="'ps2-' + i" class="px-2.5 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="skeleton-box w-9 h-9 rounded-[13px] shrink-0" />
+              <div class="space-y-1.5">
+                <div class="skeleton-box h-3.5 w-24 rounded-lg" />
+                <div class="skeleton-box h-2.5 w-32 rounded-full" />
+              </div>
+            </div>
+            <div class="skeleton-box w-4 h-4 rounded-full" />
+          </div>
+        </section>
+
+        <section class="card-soft p-2.5 space-y-1">
+          <div class="px-3 pt-1.5 pb-1"><div class="skeleton-box h-3 w-16 rounded-full" /></div>
+          <div v-for="i in 3" :key="'ps3-' + i" class="px-2.5 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="skeleton-box w-9 h-9 rounded-[13px] shrink-0" />
+              <div class="skeleton-box h-3.5 w-20 rounded-lg" />
+            </div>
+            <div class="skeleton-box w-4 h-4 rounded-full" />
+          </div>
+        </section>
+
+        <div class="pt-1 pb-2">
+          <div class="skeleton-box h-[46px] w-full rounded-full" />
+        </div>
+      </template>
+
+      <template v-else>
       <!-- Editorial Couture Studio Hero Card (Tap to customize avatar, nickname & playful quote) -->
       <section
         class="hero-studio-card relative overflow-hidden stagger-item pressable cursor-pointer"
@@ -198,6 +262,7 @@
           退出当前账号
         </button>
       </div>
+      </template>
     </div>
 
     <!-- Sheet: Custom Profile Card Editor (Borderless pure-white card + color blocks) -->

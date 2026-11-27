@@ -78,59 +78,58 @@
         </div>
       </div>
 
-      <div class="relative min-h-[560px]">
-        <!-- 1:1 Pixel-Matched Overlay Skeleton (Dissolves smoothly on top with zero blank flash) -->
-        <Transition name="skeleton-dissolve">
-          <div v-if="loading && !stats" class="absolute inset-0 z-20 space-y-4 pointer-events-none">
-            <div class="card-velvet p-5">
-              <div class="flex items-center justify-between h-[20px]">
-                <div class="skeleton-box h-3.5 w-28 rounded-full" />
-                <div class="skeleton-box h-5 w-16 rounded-full" />
-              </div>
-              <div class="mt-2.5 h-[34px] flex items-center">
-                <div class="skeleton-box h-8 w-40 rounded-xl" />
-              </div>
-              <div class="grid grid-cols-3 mt-5 py-3.5 px-2 rounded-2xl bg-[#FAF2F5]/85 h-[68px] items-center divide-x divide-[#EAD8DE]/70">
-                <div class="flex flex-col items-center justify-center space-y-1.5">
-                  <div class="skeleton-box h-2.5 w-10 rounded-full" />
-                  <div class="skeleton-box h-4 w-14 rounded-lg" />
-                </div>
-                <div class="flex flex-col items-center justify-center space-y-1.5">
-                  <div class="skeleton-box h-2.5 w-12 rounded-full" />
-                  <div class="skeleton-box h-4 w-14 rounded-lg" />
-                </div>
-                <div class="flex flex-col items-center justify-center space-y-1.5">
-                  <div class="skeleton-box h-2.5 w-10 rounded-full" />
-                  <div class="skeleton-box h-4 w-14 rounded-lg" />
-                </div>
-              </div>
+      <!-- In-Flow 1:1 Height-Reserved Skeleton (Hides cleanly when loaded) -->
+      <div v-if="loading" class="space-y-4">
+        <div class="card-velvet p-5">
+          <div class="flex items-center justify-between h-[20px]">
+            <div class="skeleton-box h-3.5 w-28 rounded-full" />
+            <div class="skeleton-box h-5 w-16 rounded-full" />
+          </div>
+          <div class="mt-2.5 h-[34px] flex items-center">
+            <div class="skeleton-box h-8 w-40 rounded-xl" />
+          </div>
+          <div class="grid grid-cols-3 mt-5 py-3.5 px-2 rounded-2xl bg-[#FAF2F5]/85 h-[68px] items-center divide-x divide-[#EAD8DE]/70">
+            <div class="flex flex-col items-center justify-center space-y-1.5">
+              <div class="skeleton-box h-2.5 w-10 rounded-full" />
+              <div class="skeleton-box h-4 w-14 rounded-lg" />
             </div>
-            <div class="card-soft p-5 space-y-2">
-              <div class="flex items-center justify-between h-[36px]">
-                <div class="space-y-1.5">
-                  <div class="skeleton-box h-4 w-28 rounded-lg" />
-                  <div class="skeleton-box h-2.5 w-36 rounded-full" />
-                </div>
-                <div class="skeleton-box h-6 w-16 rounded-full" />
-              </div>
-              <div class="skeleton-box h-44 w-full rounded-2xl" />
+            <div class="flex flex-col items-center justify-center space-y-1.5">
+              <div class="skeleton-box h-2.5 w-12 rounded-full" />
+              <div class="skeleton-box h-4 w-14 rounded-lg" />
             </div>
-            <div class="card-soft p-5 space-y-3">
-              <div class="skeleton-box h-4 w-24 rounded-lg" />
-              <div class="skeleton-box h-40 w-full rounded-2xl" />
-            </div>
-            <div class="card-soft p-5 space-y-2.5">
-              <div class="flex items-center justify-between">
-                <div class="skeleton-box h-4 w-24 rounded-lg" />
-                <div class="skeleton-box h-3 w-20 rounded-full" />
-              </div>
-              <div class="skeleton-box h-[58px] w-full rounded-2xl" />
-              <div class="skeleton-box h-[58px] w-full rounded-2xl" />
+            <div class="flex flex-col items-center justify-center space-y-1.5">
+              <div class="skeleton-box h-2.5 w-10 rounded-full" />
+              <div class="skeleton-box h-4 w-14 rounded-lg" />
             </div>
           </div>
-        </Transition>
+        </div>
+        <div class="card-soft p-5 space-y-2">
+          <div class="flex items-center justify-between h-[36px]">
+            <div class="space-y-1.5">
+              <div class="skeleton-box h-4 w-28 rounded-lg" />
+              <div class="skeleton-box h-2.5 w-36 rounded-full" />
+            </div>
+            <div class="skeleton-box h-6 w-16 rounded-full" />
+          </div>
+          <div class="skeleton-box h-44 w-full rounded-2xl" />
+        </div>
+        <div class="card-soft p-5 space-y-3">
+          <div class="skeleton-box h-4 w-24 rounded-lg" />
+          <div class="skeleton-box h-40 w-full rounded-2xl" />
+          <div class="skeleton-box h-10 w-full rounded-2xl" />
+          <div class="skeleton-box h-10 w-full rounded-2xl" />
+        </div>
+        <div class="card-soft p-5 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <div class="skeleton-box h-4 w-24 rounded-lg" />
+            <div class="skeleton-box h-3 w-20 rounded-full" />
+          </div>
+          <div class="skeleton-box h-[58px] w-full rounded-2xl" />
+          <div class="skeleton-box h-[58px] w-full rounded-2xl" />
+        </div>
+      </div>
 
-        <div v-if="stats" class="space-y-4">
+      <div v-else-if="stats" class="space-y-4">
         <!-- Pale Silk-Blush Revenue Overview Card (Airy pastel, zero heavy dark plum) -->
         <section class="card-velvet p-5 stagger-item">
           <div class="relative z-10">
@@ -296,7 +295,6 @@
             compact
           />
         </section>
-        </div>
       </div>
     </div>
 
