@@ -89,6 +89,20 @@ export interface BlockedDate {
   reason: string;
 }
 
+export interface CalendarReminder {
+  id: string;
+  type: 'TASK' | 'BIRTHDAY' | 'ANNIVERSARY';
+  title: string;
+  calendarType: 'SOLAR' | 'LUNAR';
+  solarDate: string; // YYYY-MM-DD
+  lunarMonth?: number | null;
+  lunarDay?: number | null;
+  repeatType: 'NONE' | 'YEARLY' | 'MONTHLY';
+  remindTime?: string | null;
+  note: string;
+  createdAt?: string;
+}
+
 export interface PackageAddon {
   id: string;
   name: string;

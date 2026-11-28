@@ -58,8 +58,18 @@
           <div class="px-1.5 pt-0.5 flex items-center gap-3.5 h-[18px]">
             <div class="skeleton-box h-3 w-12 rounded-full" />
             <div class="skeleton-box h-3 w-12 rounded-full" />
+            <div class="skeleton-box h-3 w-12 rounded-full" />
             <div class="skeleton-box h-3 w-10 rounded-full" />
           </div>
+        </section>
+        <!-- Almanac Card Skeleton -->
+        <section class="card-soft p-4 mt-3.5 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <div class="skeleton-box h-4 w-44 rounded-lg" />
+            <div class="skeleton-box h-6 w-16 rounded-full" />
+          </div>
+          <div class="skeleton-box h-4 w-full rounded-lg" />
+          <div class="skeleton-box h-4 w-4/5 rounded-lg" />
         </section>
       </div>
 
@@ -169,6 +179,12 @@
                     </span>
                   </div>
 
+                  <!-- Top-Right Warm Gold Dot when a Booked Day ALSO has a Personal Reminder -->
+                  <span
+                    v-if="cell.hasDualReminder && cell.inCurrentMonth"
+                    class="pointer-events-none absolute top-[5px] right-[5px] w-[7px] h-[7px] rounded-full bg-[#FFE29A] ring-[1.5px] ring-white/95"
+                  />
+
                   <!-- Floating Bottom Bar ONLY on Free Auspicious Days -->
                   <span
                     v-if="!cell.tagLabel && cell.isGoodWedding && cell.inCurrentMonth"
@@ -180,23 +196,77 @@
           </div>
         </div>
 
-        <!-- Minimal Legend -->
-        <div class="px-1.5 pt-0.5 flex items-center gap-3.5 text-[11px] text-ink-muted">
+        <!-- Minimal Legend (Clearly Distinguishing Booked Schedule vs Personal Reminder) -->
+        <div class="px-1.5 pt-0.5 flex items-center flex-wrap gap-x-3.5 gap-y-1 text-[11px] text-ink-muted">
           <span class="flex items-center gap-1.5">
             <i class="w-3 h-[2.5px] rounded-full bg-brand/40 inline-block" />好日子
           </span>
           <span class="flex items-center gap-1.5">
-            <i class="w-2.5 h-2.5 rounded-[4px] btn-rose inline-block" />有行程
+            <i class="w-2.5 h-2.5 rounded-[4px] btn-rose inline-block" />档期
+          </span>
+          <span class="flex items-center gap-1.5">
+            <i class="w-2.5 h-2.5 rounded-[4px] cal-reminder-tile inline-block" />提醒/生日
           </span>
           <span class="flex items-center gap-1.5">
             <i class="w-2.5 h-2.5 rounded-[4px] bg-[#F8EAEF] inline-block" />今日
           </span>
         </div>
       </section>
+
+      <!-- Selected Date Lunar Almanac Card (农历 + 宜 / 忌) -->
+      <section class="card-soft p-4 mt-3.5 space-y-2.5">
+        <div class="flex items-center justify-between gap-2">
+          <div class="min-w-0 flex items-center flex-wrap gap-1.5">
+            <span class="text-[14.5px] font-semibold text-ink tabular-nums">
+              {{ selectedAlmanac.solarText }} {{ selectedAlmanac.weekdayText }}
+            </span>
+            <span class="text-[12px] text-[#9A7481] font-medium">
+              {{ selectedAlmanac.lunarFullText }}
+            </span>
+            <span
+              v-if="selectedAlmanac.isAuspiciousWedding"
+              class="px-2 py-0.5 rounded-full bg-[#FAF0F3] text-[#B8637D] text-[10px] font-semibold"
+            >
+              宜嫁娶
+            </span>
+          </div>
+
+          <button
+            type="button"
+            class="shrink-0 px-2.5 h-[26px] rounded-full bg-[#FEF4E6] text-[#B56D28] text-[11px] font-semibold pressable"
+            @click="createReminderOnSelectedDate"
+          >
+            + 记提醒
+          </button>
+        </div>
+
+        <div class="pt-2 border-t border-[#F4EAEF] space-y-1.5 text-[12px]">
+          <div class="flex items-start gap-2">
+            <span
+              class="w-[18px] h-[18px] rounded-full bg-[#FAF0F3] text-[#B8637D] text-[10.5px] font-semibold flex items-center justify-center shrink-0 mt-0.5"
+            >
+              宜
+            </span>
+            <p class="flex-1 text-ink-secondary leading-relaxed">
+              {{ selectedAlmanac.yi.join(' · ') }}
+            </p>
+          </div>
+          <div class="flex items-start gap-2">
+            <span
+              class="w-[18px] h-[18px] rounded-full bg-[#F3EEF0] text-[#8E7B82] text-[10.5px] font-semibold flex items-center justify-center shrink-0 mt-0.5"
+            >
+              忌
+            </span>
+            <p class="flex-1 text-ink-muted leading-relaxed">
+              {{ selectedAlmanac.ji.join(' · ') }}
+            </p>
+          </div>
+        </div>
+      </section>
       </div>
     </div>
 
-    <!-- Day Schedule Popup (Generous default height, pinned bottom button, borderless pure-white cards) -->
+    <!-- Day Schedule & Reminders Popup (Generous default height, pinned bottom buttons, borderless pure-white cards) -->
     <van-popup
       v-model:show="showDayScheduleSheet"
       position="bottom"
@@ -208,88 +278,172 @@
         <div class="sheet-grabber shrink-0" />
         <div class="flex items-center justify-between mb-3.5 shrink-0">
           <div>
-            <h3 class="text-[17px] font-semibold text-ink tabular-nums">{{ selectedDateHeading }} · 行程安排</h3>
-            <p class="text-[11.5px] text-ink-muted mt-0.5">共 {{ selectedDayOrders.length }} 场预约 · 左滑可快速编辑或删除</p>
+            <h3 class="text-[17px] font-semibold text-ink tabular-nums">{{ selectedDateHeading }} · 当日安排</h3>
+            <p class="text-[11.5px] text-ink-muted mt-0.5">
+              <template v-if="selectedDayOrders.length > 0">{{ selectedDayOrders.length }} 场档期</template>
+              <template v-if="selectedDayOrders.length > 0 && selectedDayReminders.length > 0"> · </template>
+              <template v-if="selectedDayReminders.length > 0">{{ selectedDayReminders.length }} 条提醒</template>
+              · 左滑可编辑或删除
+            </p>
           </div>
           <button type="button" class="icon-btn-white" @click="showDayScheduleSheet = false">
             <X class="w-4 h-4" />
           </button>
         </div>
 
-        <div class="flex-1 overflow-y-auto no-scrollbar space-y-2.5 pb-1">
-          <van-swipe-cell
-            v-for="order in selectedDayOrders"
-            :key="'pop-' + order.id"
-            class="rounded-[20px] overflow-hidden"
-          >
-            <article
-              class="bg-white rounded-[20px] p-4 pl-5 relative overflow-hidden pressable cursor-pointer"
-              @click="openOrderDetailFromSheet(order.id)"
+        <div class="flex-1 overflow-y-auto no-scrollbar space-y-4 pb-1">
+          <!-- Orders Group -->
+          <div v-if="selectedDayOrders.length > 0" class="space-y-2.5">
+            <div v-if="selectedDayReminders.length > 0" class="text-[11.5px] font-semibold text-ink-muted px-0.5">
+              妆造档期
+            </div>
+            <van-swipe-cell
+              v-for="order in selectedDayOrders"
+              :key="'pop-' + order.id"
+              class="rounded-[20px] overflow-hidden"
             >
-              <span
-                class="absolute left-0 top-3 bottom-3 w-1 rounded-r-full"
-                :class="statusMeta(order.status, order.balanceDue).ribbonClass"
-              />
-              <div class="flex items-center justify-between">
-                <span class="px-2.5 py-0.5 rounded-full bg-brand-soft text-brand-deep text-[12px] font-semibold tabular-nums">
-                  {{ order.startTime }} - {{ order.endTime }}
-                </span>
+              <article
+                class="bg-white rounded-[20px] p-4 pl-5 relative overflow-hidden pressable cursor-pointer"
+                @click="openOrderDetailFromSheet(order.id)"
+              >
                 <span
-                  class="px-2.5 py-0.5 rounded-full text-[11px] font-medium"
-                  :class="[statusMeta(order.status, order.balanceDue).bgClass, statusMeta(order.status, order.balanceDue).textClass]"
-                >
-                  {{ statusMeta(order.status, order.balanceDue).label }}
-                </span>
-              </div>
-              <div class="flex items-center justify-between mt-3">
-                <div class="min-w-0 pr-3">
-                  <div class="text-[15px] font-semibold text-ink truncate">
-                    {{ order.clientName }}
-                    <span class="text-[13px] font-normal text-ink-secondary">· {{ order.serviceType }}</span>
-                  </div>
-                  <p class="text-[12px] text-ink-muted mt-1 truncate flex items-center gap-1">
-                    <IconPearlPin :size="13" class="text-brand shrink-0" />
-                    <span class="truncate">{{ order.location || '待确认地点' }}</span>
-                  </p>
+                  class="absolute left-0 top-3 bottom-3 w-1 rounded-r-full"
+                  :class="statusMeta(order.status, order.balanceDue).ribbonClass"
+                />
+                <div class="flex items-center justify-between">
+                  <span class="px-2.5 py-0.5 rounded-full bg-brand-soft text-brand-deep text-[12px] font-semibold tabular-nums">
+                    {{ order.startTime }} - {{ order.endTime }}
+                  </span>
+                  <span
+                    class="px-2.5 py-0.5 rounded-full text-[11px] font-medium"
+                    :class="[statusMeta(order.status, order.balanceDue).bgClass, statusMeta(order.status, order.balanceDue).textClass]"
+                  >
+                    {{ statusMeta(order.status, order.balanceDue).label }}
+                  </span>
                 </div>
-                <div class="text-right shrink-0 tabular-nums">
-                  <div class="text-[16px] font-semibold text-ink">
-                    <span class="text-[11px] font-normal mr-0.5">¥</span>{{ ui.formatMoney(order.totalAmount, '') }}
+                <div class="flex items-center justify-between mt-3">
+                  <div class="min-w-0 pr-3">
+                    <div class="text-[15px] font-semibold text-ink truncate">
+                      {{ order.clientName }}
+                      <span class="text-[13px] font-normal text-ink-secondary">· {{ order.serviceType }}</span>
+                    </div>
+                    <p class="text-[12px] text-ink-muted mt-1 truncate flex items-center gap-1">
+                      <IconPearlPin :size="13" class="text-brand shrink-0" />
+                      <span class="truncate">{{ order.location || '待确认地点' }}</span>
+                    </p>
                   </div>
-                  <div v-if="order.balanceDue > 0" class="text-[11px] text-status-danger-text mt-0.5">
-                    尾款 {{ ui.formatMoney(order.balanceDue) }}
+                  <div class="text-right shrink-0 tabular-nums">
+                    <div class="text-[16px] font-semibold text-ink">
+                      <span class="text-[11px] font-normal mr-0.5">¥</span>{{ ui.formatMoney(order.totalAmount, '') }}
+                    </div>
+                    <div v-if="order.balanceDue > 0" class="text-[11px] text-status-danger-text mt-0.5">
+                      尾款 {{ ui.formatMoney(order.balanceDue) }}
+                    </div>
                   </div>
                 </div>
-              </div>
-            </article>
-            <template #right>
-              <div class="flex h-full pl-2 gap-1.5">
-                <button
-                  type="button"
-                  class="h-full px-4 rounded-[18px] bg-brand-soft text-brand-deep text-[13px] font-medium"
-                  @click.stop="editOrderFromSheet(order.id)"
-                >
-                  编辑
-                </button>
-                <button
-                  type="button"
-                  class="h-full px-4 rounded-[18px] bg-status-danger-bg text-status-danger-text text-[13px] font-medium"
-                  @click.stop="deleteCalendarOrder(order)"
-                >
-                  删除
-                </button>
-              </div>
-            </template>
-          </van-swipe-cell>
+              </article>
+              <template #right>
+                <div class="flex h-full pl-2 gap-1.5">
+                  <button
+                    type="button"
+                    class="h-full px-4 rounded-[18px] bg-brand-soft text-brand-deep text-[13px] font-medium"
+                    @click.stop="editOrderFromSheet(order.id)"
+                  >
+                    编辑
+                  </button>
+                  <button
+                    type="button"
+                    class="h-full px-4 rounded-[18px] bg-status-danger-bg text-status-danger-text text-[13px] font-medium"
+                    @click.stop="deleteCalendarOrder(order)"
+                  >
+                    删除
+                  </button>
+                </div>
+              </template>
+            </van-swipe-cell>
+          </div>
+
+          <!-- Personal Reminders / Birthdays / Anniversaries Group -->
+          <div v-if="selectedDayReminders.length > 0" class="space-y-2.5">
+            <div v-if="selectedDayOrders.length > 0" class="text-[11.5px] font-semibold text-ink-muted px-0.5">
+              提醒与纪念日
+            </div>
+            <van-swipe-cell
+              v-for="rem in selectedDayReminders"
+              :key="'rem-' + rem.id"
+              class="rounded-[20px] overflow-hidden"
+            >
+              <article
+                class="bg-white rounded-[20px] p-4 pl-5 relative overflow-hidden pressable cursor-pointer"
+                @click="editReminderFromSheet(rem.id)"
+              >
+                <span class="absolute left-0 top-3 bottom-3 w-1 rounded-r-full bg-[#E8A75E]" />
+                <div class="flex items-center justify-between gap-2">
+                  <div class="flex items-center gap-1.5">
+                    <span
+                      class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold"
+                      :class="[reminderTypeMeta(rem.type).badgeBg, reminderTypeMeta(rem.type).badgeText]"
+                    >
+                      {{ reminderTypeMeta(rem.type).label }}
+                    </span>
+                    <span class="text-[11px] text-ink-muted">
+                      {{
+                        rem.calendarType === 'LUNAR'
+                          ? `农历 ${formatLunarMonthDay(rem.lunarMonth, rem.lunarDay)}`
+                          : '新历'
+                      }}
+                      · {{ repeatTypeLabel(rem.repeatType) }}
+                    </span>
+                  </div>
+                  <span v-if="rem.remindTime" class="text-[11.5px] font-medium text-[#B56D28] tabular-nums">
+                    {{ rem.remindTime }}
+                  </span>
+                </div>
+                <div class="text-[15px] font-semibold text-ink mt-2.5 leading-snug">
+                  {{ rem.title }}
+                </div>
+                <p v-if="rem.note" class="text-[12px] text-ink-muted mt-1 leading-relaxed">
+                  {{ rem.note }}
+                </p>
+              </article>
+              <template #right>
+                <div class="flex h-full pl-2 gap-1.5">
+                  <button
+                    type="button"
+                    class="h-full px-4 rounded-[18px] bg-[#FEF0DF] text-[#B56D28] text-[13px] font-medium"
+                    @click.stop="editReminderFromSheet(rem.id)"
+                  >
+                    编辑
+                  </button>
+                  <button
+                    type="button"
+                    class="h-full px-4 rounded-[18px] bg-status-danger-bg text-status-danger-text text-[13px] font-medium"
+                    @click.stop="deleteCalendarReminder(rem)"
+                  >
+                    删除
+                  </button>
+                </div>
+              </template>
+            </van-swipe-cell>
+          </div>
         </div>
 
-        <button
-          type="button"
-          class="btn-unified w-full btn-rose text-white mt-3.5 shrink-0"
-          @click="createOrderOnSelectedDate"
-        >
-          在这天新增一场预约
-        </button>
+        <div class="grid grid-cols-2 gap-2.5 mt-3.5 shrink-0">
+          <button
+            type="button"
+            class="btn-unified btn-glass text-[#B56D28] font-semibold"
+            @click="createReminderOnSelectedDate"
+          >
+            + 记提醒
+          </button>
+          <button
+            type="button"
+            class="btn-unified btn-rose text-white"
+            @click="createOrderOnSelectedDate"
+          >
+            + 排新单
+          </button>
+        </div>
       </div>
     </van-popup>
 
@@ -318,6 +472,13 @@ import { useAuthStore } from '@/stores/auth';
 import { useScrollHeader } from '@/composables/useScrollHeader';
 import { statusMeta } from '@/utils/format';
 import {
+  formatLunarMonthDay,
+  getDayAlmanac,
+  reminderOccursOnDate,
+  reminderTypeMeta,
+  repeatTypeLabel,
+} from '@/utils/lunarReminder';
+import {
   IconLashEyeClosed,
   IconLashEyeOpen,
   IconPearlPin,
@@ -325,7 +486,7 @@ import {
 } from '@/components/icons/BeautyIcons';
 import MonthGlassSwitcher from '@/components/MonthGlassSwitcher.vue';
 import SchedulePosterModal from '@/components/SchedulePosterModal.vue';
-import type { Order } from '@/types';
+import type { CalendarReminder, Order } from '@/types';
 
 const lunarCache = new Map<string, { lunarLabel: string; isGoodWedding: boolean }>();
 
@@ -370,6 +531,7 @@ interface CalendarCell {
   shapeClass: string;
   tileClass: string;
   tagTextClass: string;
+  hasDualReminder: boolean;
 }
 
 const router = useRouter();
@@ -383,9 +545,19 @@ const currentMonth = ref(dayjs().month() + 1);
 const selectedDate = ref(todayStr);
 
 const ordersCache = reactive<Record<string, Order[]>>({});
+const reminders = ref<CalendarReminder[]>([]);
 const showPoster = ref(false);
 const showDayScheduleSheet = ref(false);
 const initialLoading = ref(true);
+
+async function loadReminders() {
+  try {
+    const { data } = await http.get('/reminders');
+    reminders.value = data.reminders || [];
+  } catch {
+    // ignore
+  }
+}
 
 const ymKey = (y: number, m: number) => `${y}-${String(m).padStart(2, '0')}`;
 
@@ -424,7 +596,10 @@ watch(
 
 onMounted(async () => {
   try {
-    await ensureThreeMonthsLoaded(currentYear.value, currentMonth.value);
+    await Promise.all([
+      ensureThreeMonthsLoaded(currentYear.value, currentMonth.value),
+      loadReminders(),
+    ]);
   } finally {
     initialLoading.value = false;
   }
@@ -467,15 +642,25 @@ function buildCellsForMonth(y: number, m: number): CalendarCell[] {
       borderClass = 'border-y border-r border-l-0';
     }
 
+    const dayReminders = reminders.value.filter((r) => reminderOccursOnDate(r, dateStr));
+
     let tagLabel = '';
     let tileClass = '';
     let tagTextClass = '';
+    let hasDualReminder = false;
 
     if (dayOrders.length > 0) {
       tagLabel = dayOrders.length >= 2 ? `${dayOrders.length}场` : shortServiceTag(dayOrders[0].serviceType);
       tileClass = inMonth
         ? `btn-rose text-white`
         : `bg-[#E7B0BD]/40 ${borderClass} border-[#E7B0BD]/30 text-white/80`;
+      tagTextClass = inMonth ? 'text-white/95' : 'text-white/75';
+      hasDualReminder = dayReminders.length > 0;
+    } else if (dayReminders.length > 0) {
+      tagLabel = dayReminders.length >= 2 ? `${dayReminders.length}提醒` : reminderTypeMeta(dayReminders[0].type).shortTag;
+      tileClass = inMonth
+        ? `cal-reminder-tile text-white`
+        : `bg-[#EBB678]/40 ${borderClass} border-[#EBB678]/30 text-white/85`;
       tagTextClass = inMonth ? 'text-white/95' : 'text-white/75';
     }
 
@@ -492,6 +677,7 @@ function buildCellsForMonth(y: number, m: number): CalendarCell[] {
       shapeClass,
       tileClass,
       tagTextClass,
+      hasDualReminder,
     });
   }
   return cells;
@@ -532,6 +718,12 @@ const selectedDayOrders = computed(() =>
     return selectedDate.value >= o.serviceDate && selectedDate.value <= end;
   })
 );
+
+const selectedDayReminders = computed(() =>
+  reminders.value.filter((r) => reminderOccursOnDate(r, selectedDate.value))
+);
+
+const selectedAlmanac = computed(() => getDayAlmanac(selectedDate.value));
 
 const selectedDateHeading = computed(() => {
   const d = dayjs(selectedDate.value);
@@ -640,7 +832,8 @@ function selectDate(dateStr: string) {
     const end = o.endDate || o.serviceDate;
     return dateStr >= o.serviceDate && dateStr <= end;
   });
-  if (hasTasks) {
+  const hasReminders = reminders.value.some((r) => reminderOccursOnDate(r, dateStr));
+  if (hasTasks || hasReminders) {
     showDayScheduleSheet.value = true;
   }
 }
@@ -660,6 +853,34 @@ function createOrderOnSelectedDate() {
   router.push({ path: '/orders/new', query: { date: selectedDate.value } });
 }
 
+function createReminderOnSelectedDate() {
+  showDayScheduleSheet.value = false;
+  router.push({ path: '/orders/new', query: { date: selectedDate.value, tab: 'reminder' } });
+}
+
+function editReminderFromSheet(id: string) {
+  showDayScheduleSheet.value = false;
+  router.push({ path: '/orders/new', query: { date: selectedDate.value, tab: 'reminder', reminderId: id } });
+}
+
+async function deleteCalendarReminder(rem: CalendarReminder) {
+  try {
+    await showConfirmDialog({
+      title: '删除提醒事项',
+      message: `确认删除「${rem.title}」吗？`,
+      confirmButtonColor: '#C67A89',
+    });
+    await http.delete(`/reminders/${rem.id}`);
+    reminders.value = reminders.value.filter((r) => r.id !== rem.id);
+    if (selectedDayOrders.value.length === 0 && selectedDayReminders.value.length === 0) {
+      showDayScheduleSheet.value = false;
+    }
+    showToast('提醒已删除');
+  } catch {
+    // cancelled
+  }
+}
+
 async function deleteCalendarOrder(order: Order) {
   try {
     await showConfirmDialog({
@@ -670,7 +891,7 @@ async function deleteCalendarOrder(order: Order) {
     await http.delete(`/orders/${order.id}`);
     const key = ymKey(currentYear.value, currentMonth.value);
     ordersCache[key] = (ordersCache[key] || []).filter((o) => o.id !== order.id);
-    if (selectedDayOrders.value.length === 0) {
+    if (selectedDayOrders.value.length === 0 && selectedDayReminders.value.length === 0) {
       showDayScheduleSheet.value = false;
     }
     showToast('已移入 30 天回收站');
@@ -707,6 +928,10 @@ function onMonthStep({ year: y, month: m, delta }: { year: number; month: number
 </script>
 
 <style scoped>
+.cal-reminder-tile {
+  background: linear-gradient(155deg, #F3C385 0%, #E4A05A 100%);
+  box-shadow: 0 4px 12px -4px rgba(228, 160, 90, 0.42);
+}
 .cal-viewport {
   touch-action: pan-y;
 }

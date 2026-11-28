@@ -15,6 +15,7 @@ import packageRoutes from './routes/packages';
 import clientRoutes from './routes/clients';
 import publicRoutes from './routes/public';
 import uploadRoutes from './routes/upload';
+import reminderRoutes from './routes/reminders';
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3001;
@@ -56,6 +57,7 @@ app.use('/api/v1/packages', packageRoutes);
 app.use('/api/v1/clients', clientRoutes);
 app.use('/api/v1/public', publicRoutes);
 app.use('/api/v1/upload', uploadRoutes);
+app.use('/api/v1/reminders', reminderRoutes);
 
 // Unified Production Static SPA Hosting (serves compiled Vue frontend on same origin)
 const staticDir = process.env.STATIC_DIR || path.join(__dirname, '../../frontend/dist');

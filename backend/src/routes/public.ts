@@ -98,14 +98,20 @@ router.get('/calendar/:tokenWithExt', async (req: Request, res: Response) => {
       return;
     }
 
-    const orders = await prisma.order.findMany({
-      where: {
-        userId: user.id,
-        deletedAt: null,
-        status: { not: 'CANCELLED' },
-      },
-      orderBy: { serviceDate: 'asc' },
-    });
+    const [orders, reminders] = await Promise.all([
+      prisma.order.findMany({
+        where: {
+          userId: user.id,
+          deletedAt: null,
+          status: { not: 'CANCELLED' },
+        },
+        orderBy: { serviceDate: 'asc' },
+      }),
+      prisma.calendarReminder.findMany({
+        where: { userId: user.id },
+        orderBy: { solarDate: 'asc' },
+      }),
+    ]);
 
     const escapeIcs = (s: string) =>
       String(s || '')
@@ -139,6 +145,44 @@ router.get('/calendar/:tokenWithExt', async (req: Request, res: Response) => {
         `SUMMARY:${escapeIcs(`${o.clientName} · ${o.serviceType}`)}`,
         `LOCATION:${escapeIcs(o.location || '待定地点')}`,
         `DESCRIPTION:${escapeIcs(`状态: ${o.status}\\n备注: ${o.notes || '无'}`)}`,
+        'END:VEVENT'
+      );
+    }
+
+    // Include personal reminders / birthdays / anniversaries with native iOS VALARM alerts
+    const typeEmoji = (t: string) => (t === 'BIRTHDAY' ? '🎂 ' : t === 'ANNIVERSARY' ? '💝 ' : '🔔 ');
+    for (const r of reminders) {
+      const ymd = r.solarDate.replace(/-/g, '');
+      const dtStamp = dayjs(r.updatedAt).format('YYYYMMDDTHHmmss') + 'Z';
+      const timeStr = r.remindTime && /^\d{2}:\d{2}$/.test(r.remindTime) ? r.remindTime.replace(':', '') + '00' : '090000';
+      const dtStart = `${ymd}T${timeStr}`;
+      const endHour = String(Math.min(23, Number(timeStr.slice(0, 2)) + 1)).padStart(2, '0');
+      const dtEnd = `${ymd}T${endHour}${timeStr.slice(2)}`;
+      const lunarNote =
+        r.calendarType === 'LUNAR' && r.lunarMonth && r.lunarDay
+          ? `农历${r.lunarMonth}月${r.lunarDay}日`
+          : '新历';
+
+      lines.push(
+        'BEGIN:VEVENT',
+        `UID:rem-${r.id}@makeup-studio-h5`,
+        `DTSTAMP:${dtStamp}`,
+        `DTSTART;TZID=Asia/Shanghai:${dtStart}`,
+        `DTEND;TZID=Asia/Shanghai:${dtEnd}`,
+        `SUMMARY:${escapeIcs(`${typeEmoji(r.type)}${r.title}`)}`,
+        `DESCRIPTION:${escapeIcs(`${lunarNote}${r.note ? ` · ${r.note}` : ''}`)}`
+      );
+      if (r.calendarType === 'SOLAR' && r.repeatType === 'YEARLY') {
+        lines.push('RRULE:FREQ=YEARLY');
+      } else if (r.calendarType === 'SOLAR' && r.repeatType === 'MONTHLY') {
+        lines.push('RRULE:FREQ=MONTHLY');
+      }
+      lines.push(
+        'BEGIN:VALARM',
+        'TRIGGER:-PT15M',
+        'ACTION:DISPLAY',
+        `DESCRIPTION:${escapeIcs(r.title)}`,
+        'END:VALARM',
         'END:VEVENT'
       );
     }

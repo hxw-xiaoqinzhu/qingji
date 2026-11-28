@@ -10,13 +10,192 @@
       >
         <ChevronLeft class="w-[17px] h-[17px]" />
       </button>
-      <h1 class="text-[17px] font-semibold text-ink">{{ isEdit ? '编辑妆造行程' : '快速排单' }}</h1>
+      <h1 v-if="isEdit" class="text-[17px] font-semibold text-ink">编辑妆造行程</h1>
+      <h1 v-else-if="editingReminderId" class="text-[17px] font-semibold text-ink">编辑提醒事项</h1>
+      <div
+        v-else
+        class="inline-flex bg-white/85 p-0.5 rounded-full border border-white/95 text-[13px] font-medium"
+      >
+        <button
+          type="button"
+          class="px-4 h-[30px] rounded-full transition-colors"
+          :class="activeTab === 'order' ? 'bg-brand text-white' : 'text-ink-secondary'"
+          @click="activeTab = 'order'"
+        >
+          排单预约
+        </button>
+        <button
+          type="button"
+          class="px-4 h-[30px] rounded-full transition-colors"
+          :class="activeTab === 'reminder' ? 'bg-brand text-white' : 'text-ink-secondary'"
+          @click="activeTab = 'reminder'"
+        >
+          记提醒
+        </button>
+      </div>
       <div class="w-[34px]" />
     </header>
 
     <!-- Scrollable Form Body -->
     <div class="scroll-pane no-scrollbar px-4 pt-2 pb-6" @scroll.passive="onPaneScroll">
-      <div class="relative">
+      <!-- TAB 2: Personal Reminder / Birthday / Anniversary Form -->
+      <div v-if="activeTab === 'reminder'" class="space-y-4">
+        <section class="card-soft p-4 space-y-4">
+          <!-- Reminder Category -->
+          <div>
+            <label class="block text-[12px] text-ink-secondary mb-2 font-medium">提醒类型</label>
+            <div class="grid grid-cols-3 gap-2">
+              <button
+                v-for="t in reminderTypes"
+                :key="t.value"
+                type="button"
+                class="h-[38px] rounded-2xl text-[13px] font-medium transition-colors pressable"
+                :class="
+                  reminderForm.type === t.value
+                    ? 'bg-brand text-white'
+                    : 'bg-[#FAF2F5] text-ink-secondary'
+                "
+                @click="selectReminderType(t.value)"
+              >
+                {{ t.label }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Custom Manual Title -->
+          <div>
+            <label class="block text-[12px] text-ink-secondary mb-1.5 font-medium">事项标题 *</label>
+            <input
+              v-model.trim="reminderForm.title"
+              type="text"
+              maxlength="40"
+              :placeholder="reminderTitlePlaceholder"
+              class="w-full input-silk px-3.5 h-[44px]"
+            />
+          </div>
+
+          <!-- Calendar Type: Solar vs Lunar -->
+          <div>
+            <label class="block text-[12px] text-ink-secondary mb-2 font-medium">日期历法</label>
+            <div class="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                class="h-[38px] rounded-2xl text-[13px] font-medium transition-colors pressable"
+                :class="
+                  reminderForm.calendarType === 'SOLAR'
+                    ? 'bg-brand text-white'
+                    : 'bg-[#FAF2F5] text-ink-secondary'
+                "
+                @click="switchReminderCalendar('SOLAR')"
+              >
+                新历（公历）
+              </button>
+              <button
+                type="button"
+                class="h-[38px] rounded-2xl text-[13px] font-medium transition-colors pressable"
+                :class="
+                  reminderForm.calendarType === 'LUNAR'
+                    ? 'bg-brand text-white'
+                    : 'bg-[#FAF2F5] text-ink-secondary'
+                "
+                @click="switchReminderCalendar('LUNAR')"
+              >
+                农历（自动换算）
+              </button>
+            </div>
+          </div>
+
+          <!-- Solar Date Picker -->
+          <div v-if="reminderForm.calendarType === 'SOLAR'">
+            <label class="block text-[12px] text-ink-secondary mb-1.5 font-medium">选择新历日期 *</label>
+            <label class="relative flex items-center justify-between input-silk px-3.5 h-[44px] cursor-pointer">
+              <span class="text-[14px] font-medium text-ink tabular-nums">
+                {{ formatDisplayDate(reminderForm.solarDate) }}
+              </span>
+              <IconTabCalendar :size="16" class="text-brand shrink-0" />
+              <input
+                v-model="reminderForm.solarDate"
+                type="date"
+                class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              />
+            </label>
+            <p class="text-[11.5px] text-ink-muted mt-1.5 pl-0.5">
+              对应农历：{{ solarDateLunarPreview }}
+            </p>
+          </div>
+
+          <!-- Lunar Month & Day Picker -->
+          <div v-else>
+            <label class="block text-[12px] text-ink-secondary mb-1.5 font-medium">选择农历月日 *</label>
+            <div class="grid grid-cols-2 gap-2.5">
+              <select
+                v-model.number="reminderForm.lunarMonth"
+                class="w-full input-silk px-3.5 h-[44px] bg-[#FAF4F6] text-[14px] font-medium text-ink"
+              >
+                <option v-for="(mName, idx) in LUNAR_MONTH_NAMES" :key="mName" :value="idx + 1">
+                  {{ mName }}
+                </option>
+              </select>
+              <select
+                v-model.number="reminderForm.lunarDay"
+                class="w-full input-silk px-3.5 h-[44px] bg-[#FAF4F6] text-[14px] font-medium text-ink"
+              >
+                <option v-for="(dName, idx) in LUNAR_DAY_NAMES" :key="dName" :value="idx + 1">
+                  {{ dName }}
+                </option>
+              </select>
+            </div>
+            <p class="text-[11.5px] text-[#A46B7D] mt-1.5 pl-0.5 tabular-nums">
+              {{ dayjs().year() }} 年对应新历：{{ lunarDateSolarPreview }}（每年自动换算）
+            </p>
+          </div>
+
+          <!-- Repeat Frequency -->
+          <div>
+            <label class="block text-[12px] text-ink-secondary mb-2 font-medium">重复周期</label>
+            <div class="grid grid-cols-3 gap-2">
+              <button
+                v-for="r in repeatOptions"
+                :key="r.value"
+                type="button"
+                class="h-[36px] rounded-2xl text-[12.5px] font-medium transition-colors pressable"
+                :class="
+                  reminderForm.repeatType === r.value
+                    ? 'bg-brand text-white'
+                    : 'bg-[#FAF2F5] text-ink-secondary'
+                "
+                @click="reminderForm.repeatType = r.value"
+              >
+                {{ r.label }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Optional Remind Time -->
+          <div>
+            <label class="block text-[12px] text-ink-secondary mb-1.5 font-medium">提醒时间（选填）</label>
+            <input
+              v-model="reminderForm.remindTime"
+              type="time"
+              class="w-full input-silk px-3.5 h-[44px] tabular-nums"
+            />
+          </div>
+
+          <!-- Optional Note -->
+          <div>
+            <label class="block text-[12px] text-ink-secondary mb-1.5 font-medium">备注说明（选填）</label>
+            <textarea
+              v-model.trim="reminderForm.note"
+              rows="3"
+              placeholder="如：提前买礼物、订花、约闺蜜吃晚饭..."
+              class="w-full input-silk px-3.5 py-3 min-h-[82px] leading-relaxed"
+            />
+          </div>
+        </section>
+      </div>
+
+      <!-- TAB 1: Makeup Order Booking Form -->
+      <div v-else class="relative">
         <Transition name="skeleton-dissolve">
           <div v-if="loadingOrder" class="absolute inset-0 z-20 space-y-4 pointer-events-none">
             <div class="card-soft p-4 space-y-4">
@@ -447,6 +626,16 @@
     <!-- Docked Bottom Save Bar -->
     <div class="dock-glass-bar px-4 pt-2.5">
       <button
+        v-if="activeTab === 'reminder'"
+        type="button"
+        :disabled="savingReminder"
+        class="btn-unified w-full btn-rose text-white disabled:opacity-60"
+        @click="submitReminder"
+      >
+        {{ savingReminder ? '正在保存...' : editingReminderId ? '保存提醒修改' : '保存提醒事项' }}
+      </button>
+      <button
+        v-else
         type="button"
         :disabled="saving"
         class="btn-unified w-full btn-rose text-white disabled:opacity-60"
@@ -515,14 +704,125 @@ import { ChevronLeft, ChevronDown, X, ImagePlus } from 'lucide-vue-next';
 import http from '@/api/http';
 import { useScrollHeader } from '@/composables/useScrollHeader';
 import { parseWechatBookingText } from '@/utils/wechatParser';
+import {
+  LUNAR_DAY_NAMES,
+  LUNAR_MONTH_NAMES,
+  formatLunarMonthDay,
+  lunarToSolarDate,
+  solarToLunarMonthDay,
+} from '@/utils/lunarReminder';
 import { IconMagicWand, IconTabCalendar, IconTabItinerary } from '@/components/icons/BeautyIcons';
-import type { OrderExtraItem, PackageTemplate } from '@/types';
+import type { CalendarReminder, OrderExtraItem, PackageTemplate } from '@/types';
 
 const route = useRoute();
 const router = useRouter();
 const { onPaneScroll, headerStyle } = useScrollHeader(44);
 
 const isEdit = computed(() => Boolean(route.params.id));
+const editingReminderId = computed(() => (route.query.reminderId as string) || '');
+const activeTab = ref<'order' | 'reminder'>(
+  !isEdit.value && (route.query.tab === 'reminder' || Boolean(route.query.reminderId)) ? 'reminder' : 'order'
+);
+const savingReminder = ref(false);
+
+const initialDateStr = (route.query.date as string) || dayjs().format('YYYY-MM-DD');
+const initLunar = solarToLunarMonthDay(initialDateStr);
+
+const reminderTypes: Array<{ value: CalendarReminder['type']; label: string }> = [
+  { value: 'TASK', label: '日常事项' },
+  { value: 'BIRTHDAY', label: '生日' },
+  { value: 'ANNIVERSARY', label: '纪念日' },
+];
+
+const repeatOptions: Array<{ value: CalendarReminder['repeatType']; label: string }> = [
+  { value: 'NONE', label: '仅一次' },
+  { value: 'YEARLY', label: '每年重复' },
+  { value: 'MONTHLY', label: '每月重复' },
+];
+
+const reminderForm = reactive({
+  type: 'TASK' as CalendarReminder['type'],
+  title: '',
+  calendarType: 'SOLAR' as CalendarReminder['calendarType'],
+  solarDate: initialDateStr,
+  lunarMonth: initLunar.lunarMonth,
+  lunarDay: initLunar.lunarDay,
+  repeatType: 'NONE' as CalendarReminder['repeatType'],
+  remindTime: '09:00',
+  note: '',
+});
+
+const reminderTitlePlaceholder = computed(() => {
+  if (reminderForm.type === 'BIRTHDAY') return '如：闺蜜小美生日、妈妈生日...';
+  if (reminderForm.type === 'ANNIVERSARY') return '如：结婚纪念日、工作室周年...';
+  return '如：交工作室房租、买睫毛耗材...';
+});
+
+const solarDateLunarPreview = computed(() => {
+  const { lunarMonth, lunarDay } = solarToLunarMonthDay(reminderForm.solarDate || dayjs().format('YYYY-MM-DD'));
+  return formatLunarMonthDay(lunarMonth, lunarDay);
+});
+
+const lunarDateSolarPreview = computed(() => {
+  const solar = lunarToSolarDate(dayjs().year(), reminderForm.lunarMonth, reminderForm.lunarDay);
+  return dayjs(solar).format('YYYY年M月D日');
+});
+
+function selectReminderType(type: CalendarReminder['type']) {
+  reminderForm.type = type;
+  if (!editingReminderId.value) {
+    reminderForm.repeatType = type === 'BIRTHDAY' || type === 'ANNIVERSARY' ? 'YEARLY' : 'NONE';
+  }
+}
+
+function switchReminderCalendar(cal: CalendarReminder['calendarType']) {
+  if (reminderForm.calendarType === cal) return;
+  reminderForm.calendarType = cal;
+  if (cal === 'LUNAR') {
+    const l = solarToLunarMonthDay(reminderForm.solarDate || dayjs().format('YYYY-MM-DD'));
+    reminderForm.lunarMonth = l.lunarMonth;
+    reminderForm.lunarDay = l.lunarDay;
+  } else {
+    reminderForm.solarDate = lunarToSolarDate(dayjs().year(), reminderForm.lunarMonth, reminderForm.lunarDay);
+  }
+}
+
+async function submitReminder() {
+  if (!reminderForm.title.trim()) {
+    return showToast('请输入事项标题');
+  }
+  const computedSolarDate =
+    reminderForm.calendarType === 'LUNAR'
+      ? lunarToSolarDate(dayjs().year(), reminderForm.lunarMonth, reminderForm.lunarDay)
+      : reminderForm.solarDate;
+
+  savingReminder.value = true;
+  try {
+    const payload = {
+      type: reminderForm.type,
+      title: reminderForm.title.trim(),
+      calendarType: reminderForm.calendarType,
+      solarDate: computedSolarDate,
+      lunarMonth: reminderForm.calendarType === 'LUNAR' ? reminderForm.lunarMonth : null,
+      lunarDay: reminderForm.calendarType === 'LUNAR' ? reminderForm.lunarDay : null,
+      repeatType: reminderForm.repeatType,
+      remindTime: reminderForm.remindTime || null,
+      note: reminderForm.note.trim(),
+    };
+    if (editingReminderId.value) {
+      await http.put(`/reminders/${editingReminderId.value}`, payload);
+      showToast('提醒已更新');
+    } else {
+      await http.post('/reminders', payload);
+      showToast('提醒已保存');
+    }
+    router.replace('/calendar');
+  } catch (err: any) {
+    showToast(err?.response?.data?.error || '保存提醒失败');
+  } finally {
+    savingReminder.value = false;
+  }
+}
 const loadingOrder = ref(Boolean(route.params.id));
 const showWechatParser = ref(false);
 const showPackagePicker = ref(false);
@@ -602,6 +902,30 @@ onMounted(async () => {
     }
   } catch {
     // ignore
+  }
+
+  if (editingReminderId.value) {
+    try {
+      const { data } = await http.get(`/reminders/${editingReminderId.value}`);
+      const r = data.reminder as CalendarReminder;
+      reminderForm.type = r.type;
+      reminderForm.title = r.title;
+      reminderForm.calendarType = r.calendarType;
+      reminderForm.solarDate = r.solarDate;
+      if (r.lunarMonth && r.lunarDay) {
+        reminderForm.lunarMonth = r.lunarMonth;
+        reminderForm.lunarDay = r.lunarDay;
+      } else {
+        const l = solarToLunarMonthDay(r.solarDate);
+        reminderForm.lunarMonth = l.lunarMonth;
+        reminderForm.lunarDay = l.lunarDay;
+      }
+      reminderForm.repeatType = r.repeatType;
+      reminderForm.remindTime = r.remindTime || '09:00';
+      reminderForm.note = r.note || '';
+    } catch {
+      showToast('加载提醒失败');
+    }
   }
 
   if (isEdit.value) {

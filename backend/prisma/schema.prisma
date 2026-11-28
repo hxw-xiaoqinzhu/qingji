@@ -29,6 +29,7 @@ model User {
   expenses          Expense[]
   blockedDates      BlockedDate[]
   packages          PackageTemplate[]
+  reminders         CalendarReminder[]
 }
 
 model UserSession {
@@ -173,6 +174,25 @@ model PackageTemplate {
   description        String   @default("")
   addonsJson         String   @default("[]") // JSON string of {id, name, price}[]
   createdAt          DateTime @default(now())
+
+  @@index([userId])
+}
+
+model CalendarReminder {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type         String   @default("TASK") // TASK | BIRTHDAY | ANNIVERSARY
+  title        String
+  calendarType String   @default("SOLAR") // SOLAR | LUNAR
+  solarDate    String   // YYYY-MM-DD (reference solar date)
+  lunarMonth   Int?     // 1-12 when calendarType == LUNAR
+  lunarDay     Int?     // 1-30 when calendarType == LUNAR
+  repeatType   String   @default("NONE") // NONE | YEARLY | MONTHLY
+  remindTime   String?  // optional HH:mm
+  note         String   @default("")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   @@index([userId])
 }
