@@ -314,14 +314,14 @@
               <div class="flex h-full pl-2 gap-1.5">
                 <button
                   type="button"
-                  class="h-full px-4 rounded-[18px] bg-brand-soft text-brand-deep text-[13px] font-medium"
+                  class="h-full px-4 rounded-[18px] bg-white text-brand-deep text-[13px] font-medium"
                   @click.stop="openEditSheet(pkg)"
                 >
                   编辑
                 </button>
                 <button
                   type="button"
-                  class="h-full px-4 rounded-[18px] bg-status-danger-bg text-status-danger-text text-[13px] font-medium"
+                  class="h-full px-4 rounded-[18px] bg-white text-status-danger-text text-[13px] font-medium"
                   @click.stop="deletePackageCard(pkg)"
                 >
                   删除

@@ -179,21 +179,21 @@
                   <button
                     v-if="order.balanceDue > 0"
                     type="button"
-                    class="h-full px-4 rounded-[18px] bg-status-locked-bg text-status-locked-text text-[13px] font-medium"
+                    class="h-full px-4 rounded-[18px] bg-white text-status-locked-text text-[13px] font-medium"
                     @click.stop="quickSettle(order)"
                   >
                     结清尾款
                   </button>
                   <button
                     type="button"
-                    class="h-full px-4 rounded-[18px] bg-brand-soft text-brand-deep text-[13px] font-medium"
+                    class="h-full px-4 rounded-[18px] bg-white text-brand-deep text-[13px] font-medium"
                     @click.stop="router.push(`/orders/${order.id}/edit`)"
                   >
                     编辑
                   </button>
                   <button
                     type="button"
-                    class="h-full px-4 rounded-[18px] bg-status-danger-bg text-status-danger-text text-[13px] font-medium"
+                    class="h-full px-4 rounded-[18px] bg-white text-status-danger-text text-[13px] font-medium"
                     @click.stop="softDelete(order)"
                   >
                     删除
