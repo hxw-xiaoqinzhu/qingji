@@ -802,14 +802,14 @@
                 <div class="flex h-full pl-2 gap-1.5">
                   <button
                     type="button"
-                    class="h-full px-4 rounded-[18px] bg-white text-brand-deep text-[13px] font-medium"
+                    class="h-full px-4 rounded-[18px] bg-white text-[#5B9BD5] text-[13px] font-medium"
                     @click.stop="openEditClient(c)"
                   >
                     编辑
                   </button>
                   <button
                     type="button"
-                    class="h-full px-4 rounded-[18px] bg-white text-status-danger-text text-[13px] font-medium"
+                    class="h-full px-4 rounded-[18px] bg-white text-[#E5484D] text-[13px] font-semibold"
                     @click.stop="deleteClientArchive(c)"
                   >
                     删除
@@ -974,14 +974,14 @@
                 <div class="flex h-full pl-2 gap-1.5">
                   <button
                     type="button"
-                    class="h-full px-4 rounded-[16px] bg-white text-brand-deep text-[13px] font-medium"
+                    class="h-full px-4 rounded-[16px] bg-white text-[#5B9BD5] text-[13px] font-medium"
                     @click.stop="startEditChecklistItem(idx)"
                   >
                     编辑
                   </button>
                   <button
                     type="button"
-                    class="h-full px-4 rounded-[16px] bg-white text-status-danger-text text-[13px] font-medium"
+                    class="h-full px-4 rounded-[16px] bg-white text-[#E5484D] text-[13px] font-semibold"
                     @click.stop="removeChecklistItem(idx)"
                   >
                     删除
@@ -1087,14 +1087,14 @@
                 <div class="flex h-full pl-2 gap-1.5">
                   <button
                     type="button"
-                    class="h-full px-4 rounded-[16px] bg-white text-brand-deep text-[13px] font-medium"
+                    class="h-full px-4 rounded-[16px] bg-white text-[#5B9BD5] text-[13px] font-medium"
                     @click.stop="startEditNoticeItem(idx)"
                   >
                     编辑
                   </button>
                   <button
                     type="button"
-                    class="h-full px-4 rounded-[16px] bg-white text-status-danger-text text-[13px] font-medium"
+                    class="h-full px-4 rounded-[16px] bg-white text-[#E5484D] text-[13px] font-semibold"
                     @click.stop="removeNoticeItem(idx)"
                   >
                     删除
@@ -1265,14 +1265,14 @@
                   <div class="flex h-full pl-2 gap-1.5">
                     <button
                       type="button"
-                      class="h-full px-3.5 rounded-2xl bg-white text-brand-deep text-[12.5px] font-medium"
+                      class="h-full px-3.5 rounded-2xl bg-white text-[#5B9BD5] text-[12.5px] font-medium"
                       @click.stop="editDeletedOrder(o.id)"
                     >
                       编辑
                     </button>
                     <button
                       type="button"
-                      class="h-full px-3.5 rounded-2xl bg-white text-status-danger-text text-[12.5px] font-medium"
+                      class="h-full px-3.5 rounded-2xl bg-white text-[#E5484D] text-[12.5px] font-semibold"
                       @click.stop="permanentDelete(o.id)"
                     >
                       删除
@@ -1337,14 +1337,14 @@
                   <div class="flex h-full pl-2 gap-1.5">
                     <button
                       type="button"
-                      class="h-full px-3.5 rounded-2xl bg-white text-[#B56D28] text-[12.5px] font-medium"
+                      class="h-full px-3.5 rounded-2xl bg-white text-[#5B9BD5] text-[12.5px] font-medium"
                       @click.stop="editDeletedReminder(r)"
                     >
                       编辑
                     </button>
                     <button
                       type="button"
-                      class="h-full px-3.5 rounded-2xl bg-white text-status-danger-text text-[12.5px] font-medium"
+                      class="h-full px-3.5 rounded-2xl bg-white text-[#E5484D] text-[12.5px] font-semibold"
                       @click.stop="permanentDeleteReminder(r.id)"
                     >
                       删除

@@ -346,14 +346,14 @@
                 <div class="flex h-full pl-2 gap-1.5">
                   <button
                     type="button"
-                    class="h-full px-4 rounded-[18px] bg-white text-brand-deep text-[13px] font-medium"
+                    class="h-full px-4 rounded-[18px] bg-white text-[#5B9BD5] text-[13px] font-medium"
                     @click.stop="editOrderFromSheet(order.id)"
                   >
                     编辑
                   </button>
                   <button
                     type="button"
-                    class="h-full px-4 rounded-[18px] bg-white text-status-danger-text text-[13px] font-medium"
+                    class="h-full px-4 rounded-[18px] bg-white text-[#E5484D] text-[13px] font-semibold"
                     @click.stop="deleteCalendarOrder(order)"
                   >
                     删除
@@ -410,14 +410,14 @@
                 <div class="flex h-full pl-2 gap-1.5">
                   <button
                     type="button"
-                    class="h-full px-4 rounded-[18px] bg-white text-[#B56D28] text-[13px] font-medium"
+                    class="h-full px-4 rounded-[18px] bg-white text-[#5B9BD5] text-[13px] font-medium"
                     @click.stop="editReminderFromSheet(rem.id)"
                   >
                     编辑
                   </button>
                   <button
                     type="button"
-                    class="h-full px-4 rounded-[18px] bg-white text-status-danger-text text-[13px] font-medium"
+                    class="h-full px-4 rounded-[18px] bg-white text-[#E5484D] text-[13px] font-semibold"
                     @click.stop="deleteCalendarReminder(rem)"
                   >
                     删除
