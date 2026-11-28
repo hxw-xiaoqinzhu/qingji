@@ -513,7 +513,8 @@ function getCachedLunar(dateStr: string) {
 function shortServiceTag(serviceType: string): string {
   const s = serviceType || '';
   if (s.includes('全天')) return '全天';
-  if (s.includes('早妆') || s.includes('半天')) return '早妆';
+  if (s.includes('半天')) return '半天';
+  if (s.includes('早妆')) return '早妆';
   if (s.includes('领证') || s.includes('轻婚纱')) return '领证';
   if (s.includes('商业') || s.includes('广告') || s.includes('艺人')) return '商拍';
   if (s.includes('试妆')) return '试妆';
