@@ -33,11 +33,21 @@ router.get('/overview', async (req: AuthRequest, res: Response) => {
         orderBy: { serviceDate: 'desc' },
       }),
       prisma.paymentRecord.findMany({
-        where: {
-          userId: req.user!.userId,
-          paidAt: { gte: rangeStartDate, lte: rangeEndDate },
-          order: { deletedAt: null, status: { not: 'CANCELLED' } },
-        },
+        where:
+          mode === 'cash_date'
+            ? {
+                userId: req.user!.userId,
+                paidAt: { gte: rangeStartDate, lte: rangeEndDate },
+                order: { deletedAt: null, status: { not: 'CANCELLED' } },
+              }
+            : {
+                userId: req.user!.userId,
+                order: {
+                  deletedAt: null,
+                  status: { not: 'CANCELLED' },
+                  serviceDate: { gte: rangeStartStr, lte: rangeEndStr },
+                },
+              },
         include: {
           order: { select: { id: true, clientName: true, serviceType: true, serviceDate: true } },
         },
@@ -158,7 +168,7 @@ router.get('/overview', async (req: AuthRequest, res: Response) => {
         title: `${p.order.clientName} · ${p.type === 'DEPOSIT' ? '定金' : '尾款'}`,
         subtitle: `${p.order.serviceType} · ${p.channel}`,
         amount: p.amount,
-        date: dayjs(p.paidAt).format('YYYY-MM-DD'),
+        date: mode === 'cash_date' ? dayjs(p.paidAt).format('YYYY-MM-DD') : p.order.serviceDate,
         orderId: p.orderId,
       })),
       ...periodExpenses.map((e) => ({
