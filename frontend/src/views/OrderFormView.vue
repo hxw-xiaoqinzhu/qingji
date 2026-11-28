@@ -38,30 +38,9 @@
 
     <!-- Scrollable Form Body -->
     <div class="scroll-pane no-scrollbar px-4 pt-2 pb-6" @scroll.passive="onPaneScroll">
-      <!-- TAB 2: Personal Reminder / Birthday / Anniversary Form -->
+      <!-- TAB 2: Personal Reminder Form -->
       <div v-if="activeTab === 'reminder'" class="space-y-4">
         <section class="card-soft p-4 space-y-4">
-          <!-- Reminder Category -->
-          <div>
-            <label class="block text-[12px] text-ink-secondary mb-2 font-medium">提醒类型</label>
-            <div class="grid grid-cols-3 gap-2">
-              <button
-                v-for="t in reminderTypes"
-                :key="t.value"
-                type="button"
-                class="h-[38px] rounded-2xl text-[13px] font-medium transition-colors pressable"
-                :class="
-                  reminderForm.type === t.value
-                    ? 'bg-brand text-white'
-                    : 'bg-[#FAF2F5] text-ink-secondary'
-                "
-                @click="selectReminderType(t.value)"
-              >
-                {{ t.label }}
-              </button>
-            </div>
-          </div>
-
           <!-- Custom Manual Title -->
           <div>
             <label class="block text-[12px] text-ink-secondary mb-1.5 font-medium">事项标题 *</label>
@@ -69,7 +48,7 @@
               v-model.trim="reminderForm.title"
               type="text"
               maxlength="40"
-              :placeholder="reminderTitlePlaceholder"
+              placeholder="如：闺蜜生日、结婚纪念日、交房租..."
               class="w-full input-silk px-3.5 h-[44px]"
             />
           </div>
@@ -171,14 +150,23 @@
             </div>
           </div>
 
-          <!-- Optional Remind Time -->
+          <!-- Optional Remind Time (iOS-safe left-aligned & vertically centered) -->
           <div>
             <label class="block text-[12px] text-ink-secondary mb-1.5 font-medium">提醒时间（选填）</label>
-            <input
-              v-model="reminderForm.remindTime"
-              type="time"
-              class="w-full input-silk px-3.5 h-[44px] tabular-nums"
-            />
+            <label class="relative flex items-center justify-between input-silk px-3.5 h-[44px] cursor-pointer">
+              <span
+                class="text-[14px] font-medium tabular-nums leading-none"
+                :class="reminderForm.remindTime ? 'text-ink' : 'text-ink-muted'"
+              >
+                {{ reminderForm.remindTime || '选择提醒时间' }}
+              </span>
+              <Clock class="w-4 h-4 text-brand shrink-0" />
+              <input
+                v-model="reminderForm.remindTime"
+                type="time"
+                class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              />
+            </label>
           </div>
 
           <!-- Optional Note -->
@@ -700,7 +688,7 @@ import { useRoute, useRouter } from 'vue-router';
 import dayjs from 'dayjs';
 import Compressor from 'compressorjs';
 import { showConfirmDialog, showToast } from 'vant';
-import { ChevronLeft, ChevronDown, X, ImagePlus } from 'lucide-vue-next';
+import { ChevronLeft, ChevronDown, Clock, X, ImagePlus } from 'lucide-vue-next';
 import http from '@/api/http';
 import { useScrollHeader } from '@/composables/useScrollHeader';
 import { parseWechatBookingText } from '@/utils/wechatParser';

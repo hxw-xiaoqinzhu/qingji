@@ -205,7 +205,7 @@
             <i class="w-2.5 h-2.5 rounded-[4px] btn-rose inline-block" />档期
           </span>
           <span class="flex items-center gap-1.5">
-            <i class="w-2.5 h-2.5 rounded-[4px] cal-reminder-tile inline-block" />提醒/生日
+            <i class="w-2.5 h-2.5 rounded-[4px] cal-reminder-tile inline-block" />提醒
           </span>
           <span class="flex items-center gap-1.5">
             <i class="w-2.5 h-2.5 rounded-[4px] bg-[#F8EAEF] inline-block" />今日
@@ -866,8 +866,8 @@ function editReminderFromSheet(id: string) {
 async function deleteCalendarReminder(rem: CalendarReminder) {
   try {
     await showConfirmDialog({
-      title: '删除提醒事项',
-      message: `确认删除「${rem.title}」吗？`,
+      title: '移入回收站',
+      message: `确认删除「${rem.title}」吗？（可在回收站保留 30 天）`,
       confirmButtonColor: '#C67A89',
     });
     await http.delete(`/reminders/${rem.id}`);
@@ -875,7 +875,7 @@ async function deleteCalendarReminder(rem: CalendarReminder) {
     if (selectedDayOrders.value.length === 0 && selectedDayReminders.value.length === 0) {
       showDayScheduleSheet.value = false;
     }
-    showToast('提醒已删除');
+    showToast('已移入 30 天回收站');
   } catch {
     // cancelled
   }

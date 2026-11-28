@@ -191,6 +191,7 @@ model CalendarReminder {
   repeatType   String   @default("NONE") // NONE | YEARLY | MONTHLY
   remindTime   String?  // optional HH:mm
   note         String   @default("")
+  deletedAt    DateTime?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 

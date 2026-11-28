@@ -100,6 +100,7 @@ export interface CalendarReminder {
   repeatType: 'NONE' | 'YEARLY' | 'MONTHLY';
   remindTime?: string | null;
   note: string;
+  deletedAt?: string | null;
   createdAt?: string;
 }
 

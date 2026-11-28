@@ -11,14 +11,32 @@ const VALID_REPEAT = new Set(['NONE', 'YEARLY', 'MONTHLY']);
 
 router.get('/', async (req: AuthRequest, res: Response) => {
   try {
+    const showDeleted = req.query.deleted === 'true';
     const reminders = await prisma.calendarReminder.findMany({
-      where: { userId: req.user!.userId },
-      orderBy: [{ createdAt: 'desc' }],
+      where: {
+        userId: req.user!.userId,
+        deletedAt: showDeleted ? { not: null } : null,
+      },
+      orderBy: showDeleted ? [{ deletedAt: 'desc' }] : [{ createdAt: 'desc' }],
     });
     res.json({ reminders });
   } catch (err) {
     console.error('List reminders error:', err);
     res.status(500).json({ error: '加载提醒事项失败' });
+  }
+});
+
+router.delete('/trash/empty', async (req: AuthRequest, res: Response) => {
+  try {
+    await prisma.calendarReminder.deleteMany({
+      where: {
+        userId: req.user!.userId,
+        deletedAt: { not: null },
+      },
+    });
+    res.json({ success: true });
+  } catch {
+    res.status(500).json({ error: '清空提醒回收站失败' });
   }
 });
 
@@ -116,10 +134,30 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
   }
 });
 
+router.post('/:id/restore', async (req: AuthRequest, res: Response) => {
+  try {
+    await prisma.calendarReminder.updateMany({
+      where: { id: String(req.params.id), userId: req.user!.userId },
+      data: { deletedAt: null },
+    });
+    res.json({ success: true });
+  } catch {
+    res.status(500).json({ error: '恢复提醒失败' });
+  }
+});
+
 router.delete('/:id', async (req: AuthRequest, res: Response) => {
-  await prisma.calendarReminder.deleteMany({
-    where: { id: String(req.params.id), userId: req.user!.userId },
-  });
+  const permanent = req.query.permanent === 'true';
+  if (permanent) {
+    await prisma.calendarReminder.deleteMany({
+      where: { id: String(req.params.id), userId: req.user!.userId },
+    });
+  } else {
+    await prisma.calendarReminder.updateMany({
+      where: { id: String(req.params.id), userId: req.user!.userId, deletedAt: null },
+      data: { deletedAt: new Date() },
+    });
+  }
   res.json({ success: true });
 });
 

@@ -246,7 +246,7 @@
             <span class="icon-squircle" style="background: #FAF0F3; color: #AD7485">
               <Trash2 class="w-[18px] h-[18px]" />
             </span>
-            <span class="font-medium text-ink">订单回收站</span>
+            <span class="font-medium text-ink">回收站</span>
           </div>
           <ChevronRight class="w-4 h-4 text-ink-muted" />
         </button>
@@ -1169,71 +1169,198 @@
       </div>
     </van-popup>
 
-    <!-- Sheet: Recycle Bin (Pure-white borderless cards + One-Tap Empty Trash) -->
+    <!-- Sheet: Recycle Bin (Orders + Reminders Tabs, Pure-White Cards with Restore / Edit / Permanent Delete) -->
     <van-popup
       v-model:show="showRecycleSheet"
       position="bottom"
       teleport="body"
       round
-      :style="{ minHeight: 'calc(var(--app-height, 100vh) * 0.54)', maxHeight: 'calc(var(--app-height, 100vh) * 0.82)', backgroundColor: '#FDF8FA' }"
+      :style="{ minHeight: 'calc(var(--app-height, 100vh) * 0.58)', maxHeight: 'calc(var(--app-height, 100vh) * 0.84)', backgroundColor: '#FDF8FA' }"
     >
-      <div class="p-5 pb-safe-sheet flex flex-col" style="min-height: calc(var(--app-height, 100vh) * 0.54); max-height: calc(var(--app-height, 100vh) * 0.82)">
+      <div class="p-5 pb-safe-sheet flex flex-col" style="min-height: calc(var(--app-height, 100vh) * 0.58); max-height: calc(var(--app-height, 100vh) * 0.84)">
         <div class="sheet-grabber shrink-0" />
         <div class="flex items-center justify-between mb-3 shrink-0">
-          <h3 class="text-[17px] font-semibold text-ink">30 天订单回收站</h3>
+          <h3 class="text-[17px] font-semibold text-ink">回收站</h3>
           <div class="flex items-center gap-2">
             <button
-              v-if="deletedOrders.length > 0"
+              v-if="recycleTab === 'orders' ? deletedOrders.length > 0 : deletedReminders.length > 0"
               type="button"
               class="px-3 h-8 rounded-full bg-status-danger-bg text-status-danger-text text-[12px] font-medium pressable"
               @click="emptyRecycleBin"
             >
-              清空回收站
+              清空{{ recycleTab === 'orders' ? '订单' : '提醒' }}
             </button>
             <button type="button" class="icon-btn-white" @click="showRecycleSheet = false">
               <X class="w-4 h-4" />
             </button>
           </div>
         </div>
-        <div class="flex-1 overflow-y-auto no-scrollbar relative">
-          <Transition name="skeleton-dissolve">
-            <div v-if="loadingRecycle" class="absolute inset-0 z-10 bg-[#FDF8FA] space-y-2.5 pointer-events-none">
-              <div v-for="i in 3" :key="i" class="skeleton-box h-[66px] w-full rounded-2xl" />
-            </div>
-          </Transition>
-          <div v-if="deletedOrders.length" class="space-y-2.5">
-            <div v-for="o in deletedOrders" :key="o.id" class="bg-white rounded-2xl p-3.5 flex items-center justify-between">
-              <div>
-                <div class="text-[14px] font-medium text-ink">{{ o.clientName }} · {{ o.serviceType }}</div>
-                <div class="text-[11px] text-ink-muted tabular-nums">{{ o.serviceDate }} · ¥{{ o.totalAmount }}</div>
-              </div>
-              <div class="flex gap-2">
-                <button
-                  type="button"
-                  class="icon-btn-white text-status-locked-text"
-                  aria-label="恢复订单"
-                  @click="restoreOrder(o.id)"
-                >
-                  <RotateCcw class="w-4 h-4" />
-                </button>
-                <button
-                  type="button"
-                  class="icon-btn-white text-status-danger-text"
-                  aria-label="彻底删除"
-                  @click="permanentDelete(o.id)"
-                >
-                  <Trash2 class="w-4 h-4" />
-                </button>
-              </div>
-            </div>
+
+        <!-- Orders | Reminders Tab Switcher -->
+        <div class="inline-flex self-start bg-white p-0.5 rounded-full text-[12px] font-medium mb-3.5 shrink-0">
+          <button
+            type="button"
+            class="px-4 h-[30px] rounded-full transition-colors tabular-nums"
+            :class="recycleTab === 'orders' ? 'bg-brand text-white' : 'text-ink-secondary'"
+            @click="recycleTab = 'orders'"
+          >
+            订单<template v-if="deletedOrders.length > 0"> ({{ deletedOrders.length }})</template>
+          </button>
+          <button
+            type="button"
+            class="px-4 h-[30px] rounded-full transition-colors tabular-nums"
+            :class="recycleTab === 'reminders' ? 'bg-brand text-white' : 'text-ink-secondary'"
+            @click="recycleTab = 'reminders'"
+          >
+            提醒<template v-if="deletedReminders.length > 0"> ({{ deletedReminders.length }})</template>
+          </button>
+        </div>
+
+        <div class="flex-1 overflow-y-auto no-scrollbar">
+          <div v-if="loadingRecycle" class="space-y-2.5">
+            <div v-for="i in 3" :key="i" class="skeleton-box h-[68px] w-full rounded-2xl" />
           </div>
-          <div v-else-if="!loadingRecycle" class="h-full flex items-center justify-center py-6">
-            <CuteEmptyState
-              variant="recycle"
-              title="回收站干干净净"
-              description="误删的行程会在这里安静保留 30 天，随时可以一键恢复"
-            />
-          </div>
+
+          <!-- Deleted Orders Tab -->
+          <template v-else-if="recycleTab === 'orders'">
+            <div v-if="deletedOrders.length > 0" class="space-y-2.5 pb-1">
+              <van-swipe-cell
+                v-for="o in deletedOrders"
+                :key="o.id"
+                class="rounded-2xl overflow-hidden"
+              >
+                <div class="bg-white rounded-2xl p-3.5 flex items-center justify-between gap-2.5">
+                  <div class="min-w-0 flex-1">
+                    <div class="text-[14px] font-medium text-ink truncate">{{ o.clientName }} · {{ o.serviceType }}</div>
+                    <div class="text-[11px] text-ink-muted mt-0.5 tabular-nums">{{ o.serviceDate }} · ¥{{ o.totalAmount }}</div>
+                  </div>
+                  <div class="flex items-center gap-1.5 shrink-0">
+                    <button
+                      type="button"
+                      class="w-8 h-8 rounded-full bg-[#FAF0F3] text-[#AD7485] flex items-center justify-center pressable"
+                      aria-label="恢复订单"
+                      @click="restoreOrder(o.id)"
+                    >
+                      <RotateCcw class="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      class="w-8 h-8 rounded-full bg-[#FAF4F6] text-ink-secondary flex items-center justify-center pressable"
+                      aria-label="编辑订单"
+                      @click="editDeletedOrder(o.id)"
+                    >
+                      <Pencil class="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      class="w-8 h-8 rounded-full bg-status-danger-bg text-status-danger-text flex items-center justify-center pressable"
+                      aria-label="彻底删除"
+                      @click="permanentDelete(o.id)"
+                    >
+                      <Trash2 class="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+                <template #right>
+                  <div class="flex h-full pl-2 gap-1.5">
+                    <button
+                      type="button"
+                      class="h-full px-3.5 rounded-2xl bg-brand-soft text-brand-deep text-[12.5px] font-medium"
+                      @click.stop="editDeletedOrder(o.id)"
+                    >
+                      编辑
+                    </button>
+                    <button
+                      type="button"
+                      class="h-full px-3.5 rounded-2xl bg-status-danger-bg text-status-danger-text text-[12.5px] font-medium"
+                      @click.stop="permanentDelete(o.id)"
+                    >
+                      删除
+                    </button>
+                  </div>
+                </template>
+              </van-swipe-cell>
+            </div>
+            <div v-else class="h-full flex items-center justify-center py-6">
+              <CuteEmptyState
+                variant="recycle"
+                title="订单回收站干干净净"
+                description="误删的行程会在这里保留 30 天，随时可恢复或编辑"
+              />
+            </div>
+          </template>
+
+          <!-- Deleted Reminders Tab -->
+          <template v-else>
+            <div v-if="deletedReminders.length > 0" class="space-y-2.5 pb-1">
+              <van-swipe-cell
+                v-for="r in deletedReminders"
+                :key="r.id"
+                class="rounded-2xl overflow-hidden"
+              >
+                <div class="bg-white rounded-2xl p-3.5 flex items-center justify-between gap-2.5">
+                  <div class="min-w-0 flex-1">
+                    <div class="text-[14px] font-medium text-ink truncate">{{ r.title }}</div>
+                    <div class="text-[11px] text-ink-muted mt-0.5 tabular-nums">
+                      {{ r.calendarType === 'LUNAR' ? `农历 ${formatLunarMonthDay(r.lunarMonth, r.lunarDay)}` : r.solarDate }}
+                      <template v-if="r.remindTime"> · {{ r.remindTime }}</template>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-1.5 shrink-0">
+                    <button
+                      type="button"
+                      class="w-8 h-8 rounded-full bg-[#FEF4E6] text-[#B56D28] flex items-center justify-center pressable"
+                      aria-label="恢复提醒"
+                      @click="restoreReminder(r.id)"
+                    >
+                      <RotateCcw class="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      class="w-8 h-8 rounded-full bg-[#FAF4F6] text-ink-secondary flex items-center justify-center pressable"
+                      aria-label="编辑提醒"
+                      @click="editDeletedReminder(r)"
+                    >
+                      <Pencil class="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      class="w-8 h-8 rounded-full bg-status-danger-bg text-status-danger-text flex items-center justify-center pressable"
+                      aria-label="彻底删除"
+                      @click="permanentDeleteReminder(r.id)"
+                    >
+                      <Trash2 class="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+                <template #right>
+                  <div class="flex h-full pl-2 gap-1.5">
+                    <button
+                      type="button"
+                      class="h-full px-3.5 rounded-2xl bg-[#FEF0DF] text-[#B56D28] text-[12.5px] font-medium"
+                      @click.stop="editDeletedReminder(r)"
+                    >
+                      编辑
+                    </button>
+                    <button
+                      type="button"
+                      class="h-full px-3.5 rounded-2xl bg-status-danger-bg text-status-danger-text text-[12.5px] font-medium"
+                      @click.stop="permanentDeleteReminder(r.id)"
+                    >
+                      删除
+                    </button>
+                  </div>
+                </template>
+              </van-swipe-cell>
+            </div>
+            <div v-else class="h-full flex items-center justify-center py-6">
+              <CuteEmptyState
+                variant="recycle"
+                title="提醒回收站干干净净"
+                description="误删的日程提醒会在这里保留 30 天，随时可恢复或编辑"
+              />
+            </div>
+          </template>
         </div>
       </div>
     </van-popup>
@@ -1311,6 +1438,7 @@ import { buildAllOrdersIcs } from '@/api/firebaseBackend';
 import { useAuthStore } from '@/stores/auth';
 import { useUiStore } from '@/stores/ui';
 import { statusMeta } from '@/utils/format';
+import { formatLunarMonthDay } from '@/utils/lunarReminder';
 import {
   IconCalendarSync,
   IconCosmeticCase,
@@ -1323,7 +1451,7 @@ import {
 import CuteEmptyState from '@/components/CuteEmptyState.vue';
 import PriceListPosterModal from '@/components/PriceListPosterModal.vue';
 import StudioAvatar from '@/components/StudioAvatar.vue';
-import type { ClientItem, Order, PackageTemplate, UserSession } from '@/types';
+import type { CalendarReminder, ClientItem, Order, PackageTemplate, UserSession } from '@/types';
 
 const router = useRouter();
 const auth = useAuthStore();
@@ -1624,8 +1752,10 @@ const loadingSessions = ref(false);
 const sessions = ref<UserSession[]>([]);
 
 const showRecycleSheet = ref(false);
+const recycleTab = ref<'orders' | 'reminders'>('orders');
 const loadingRecycle = ref(false);
 const deletedOrders = ref<Order[]>([]);
+const deletedReminders = ref<CalendarReminder[]>([]);
 
 // Password Sheet & Logout
 const showPasswordSheet = ref(false);
@@ -1855,7 +1985,20 @@ async function copyIcsLink() {
   }
   const base = API_BASE_URL.startsWith('http') ? API_BASE_URL : `${window.location.origin}${API_BASE_URL}`;
   const url = `${base}/public/calendar/${auth.user?.shareToken}.ics`;
-  await copyText(url, '已复制 iPhone 日历订阅链接');
+  const isIos = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+  if (isIos) {
+    // Copy HTTPS URL as silent fallback (e.g. inside WeChat), then invoke native iOS Calendar Subscribe modal via webcal://
+    navigator.clipboard?.writeText(url).catch(() => {});
+    showToast('正在唤起苹果日历订阅（链接已同步复制）');
+    const webcalUrl = url.replace(/^https?:\/\//i, 'webcal://');
+    setTimeout(() => {
+      window.location.href = webcalUrl;
+    }, 180);
+    return;
+  }
+
+  await copyText(url, '已复制苹果日历订阅链接');
 }
 
 async function openSessions() {
@@ -1880,8 +2023,12 @@ async function openRecycleBin() {
   showRecycleSheet.value = true;
   loadingRecycle.value = true;
   try {
-    const { data } = await http.get('/orders', { params: { deleted: 'true' } });
-    deletedOrders.value = data.orders || [];
+    const [ordersRes, remRes] = await Promise.all([
+      http.get('/orders', { params: { deleted: 'true' } }),
+      http.get('/reminders', { params: { deleted: 'true' } }),
+    ]);
+    deletedOrders.value = ordersRes.data.orders || [];
+    deletedReminders.value = remRes.data.reminders || [];
   } finally {
     loadingRecycle.value = false;
   }
@@ -1893,23 +2040,61 @@ async function restoreOrder(id: string) {
   showToast('行程已恢复');
 }
 
+async function editDeletedOrder(id: string) {
+  await http.post(`/orders/${id}/restore`);
+  deletedOrders.value = deletedOrders.value.filter((o) => o.id !== id);
+  showRecycleSheet.value = false;
+  router.push(`/orders/${id}/edit`);
+}
+
 async function permanentDelete(id: string) {
   await http.delete(`/orders/${id}?permanent=true`);
   deletedOrders.value = deletedOrders.value.filter((o) => o.id !== id);
   showToast('已彻底删除');
 }
 
+async function restoreReminder(id: string) {
+  await http.post(`/reminders/${id}/restore`);
+  deletedReminders.value = deletedReminders.value.filter((r) => r.id !== id);
+  showToast('提醒已恢复');
+}
+
+async function editDeletedReminder(rem: CalendarReminder) {
+  await http.post(`/reminders/${rem.id}/restore`);
+  deletedReminders.value = deletedReminders.value.filter((r) => r.id !== rem.id);
+  showRecycleSheet.value = false;
+  router.push({ path: '/orders/new', query: { date: rem.solarDate, tab: 'reminder', reminderId: rem.id } });
+}
+
+async function permanentDeleteReminder(id: string) {
+  await http.delete(`/reminders/${id}?permanent=true`);
+  deletedReminders.value = deletedReminders.value.filter((r) => r.id !== id);
+  showToast('提醒已彻底删除');
+}
+
 async function emptyRecycleBin() {
   try {
-    await showConfirmDialog({
-      title: '清空回收站',
-      message: `将永久删除这 ${deletedOrders.value.length} 条行程，并自动清理无关联订单的客户档案，无法恢复。`,
-      confirmButtonText: '确认清空',
-      confirmButtonColor: '#C67A89',
-    });
-    await http.delete('/orders/trash/empty');
-    deletedOrders.value = [];
-    showToast('回收站已清空');
+    if (recycleTab.value === 'orders') {
+      await showConfirmDialog({
+        title: '清空订单回收站',
+        message: `将永久删除这 ${deletedOrders.value.length} 条行程，并自动清理无关联订单的客户档案，无法恢复。`,
+        confirmButtonText: '确认清空',
+        confirmButtonColor: '#C67A89',
+      });
+      await http.delete('/orders/trash/empty');
+      deletedOrders.value = [];
+      showToast('订单回收站已清空');
+    } else {
+      await showConfirmDialog({
+        title: '清空提醒回收站',
+        message: `将永久删除这 ${deletedReminders.value.length} 条提醒事项，无法恢复。`,
+        confirmButtonText: '确认清空',
+        confirmButtonColor: '#C67A89',
+      });
+      await http.delete('/reminders/trash/empty');
+      deletedReminders.value = [];
+      showToast('提醒回收站已清空');
+    }
   } catch {
     // cancelled
   }

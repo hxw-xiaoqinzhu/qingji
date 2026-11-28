@@ -108,7 +108,7 @@ router.get('/calendar/:tokenWithExt', async (req: Request, res: Response) => {
         orderBy: { serviceDate: 'asc' },
       }),
       prisma.calendarReminder.findMany({
-        where: { userId: user.id },
+        where: { userId: user.id, deletedAt: null },
         orderBy: { solarDate: 'asc' },
       }),
     ]);
