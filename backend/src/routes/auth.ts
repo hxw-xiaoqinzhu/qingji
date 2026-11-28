@@ -59,14 +59,11 @@ async function createSessionTokens(userId: string, req: Request) {
   const deviceInfo = (req.headers['x-device-name'] as string) || parseDeviceInfo(req.headers['user-agent']);
   const ip = (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() || req.socket.remoteAddress || '127.0.0.1';
 
-  // Clean up expired sessions and replace older duplicate sessions on the same device for this user
+  // Only clean up expired sessions so the same account can stay logged in on multiple devices simultaneously (even same Wi-Fi/iPhone)
   await prisma.userSession.deleteMany({
     where: {
       userId,
-      OR: [
-        { expiresAt: { lte: new Date() } },
-        { deviceInfo, ip },
-      ],
+      expiresAt: { lte: new Date() },
     },
   });
 
@@ -370,20 +367,12 @@ router.get('/sessions', requireAuth, async (req: AuthRequest, res: Response) => 
     },
   });
 
-  // Sort current session first and deduplicate older stale entries from the same device
+  // Sort current session first; keep all active multi-device sessions visible (never collapse two devices on the same Wi-Fi)
   const sorted = sessions
     .map((s) => ({ ...s, isCurrent: s.id === req.user!.sessionId }))
     .sort((a, b) => (a.isCurrent === b.isCurrent ? 0 : a.isCurrent ? -1 : 1));
 
-  const seenDevices = new Set<string>();
-  const deduped = sorted.filter((s) => {
-    const key = `${s.deviceInfo}|${s.ip}`;
-    if (seenDevices.has(key)) return false;
-    seenDevices.add(key);
-    return true;
-  });
-
-  res.json({ sessions: deduped });
+  res.json({ sessions: sorted });
 });
 
 router.delete('/sessions/:id', requireAuth, async (req: AuthRequest, res: Response) => {
