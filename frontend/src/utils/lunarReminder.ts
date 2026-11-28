@@ -153,10 +153,10 @@ export function getDayAlmanac(dateStr: string): DayAlmanacInfo {
   const absMonth = Math.abs(rawMonth);
   const monthPrefix = rawMonth < 0 ? '闰' : '';
   const baseMonthName = LUNAR_MONTH_NAMES[absMonth - 1] || `${absMonth}月`;
-  const monthName =
-    absMonth === 1 || absMonth === 11 || absMonth === 12
-      ? `${baseMonthName}(${absMonth}月)`
-      : baseMonthName;
+  const chineseMonthAlias: Record<number, string> = { 1: '一月', 11: '十一月', 12: '十二月' };
+  const monthName = chineseMonthAlias[absMonth]
+    ? `${baseMonthName}(${chineseMonthAlias[absMonth]})`
+    : baseMonthName;
   const dayName = LUNAR_DAY_NAMES[lunar.getDay() - 1] || `${lunar.getDay()}日`;
 
   return {
