@@ -150,8 +150,13 @@ export function getDayAlmanac(dateStr: string): DayAlmanacInfo {
   ].slice(0, 6);
 
   const rawMonth = lunar.getMonth();
+  const absMonth = Math.abs(rawMonth);
   const monthPrefix = rawMonth < 0 ? '闰' : '';
-  const monthName = LUNAR_MONTH_NAMES[Math.abs(rawMonth) - 1] || `${Math.abs(rawMonth)}月`;
+  const baseMonthName = LUNAR_MONTH_NAMES[absMonth - 1] || `${absMonth}月`;
+  const monthName =
+    absMonth === 1 || absMonth === 11 || absMonth === 12
+      ? `${baseMonthName}(${absMonth}月)`
+      : baseMonthName;
   const dayName = LUNAR_DAY_NAMES[lunar.getDay() - 1] || `${lunar.getDay()}日`;
 
   return {
