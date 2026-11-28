@@ -193,7 +193,15 @@
           <div class="flex items-center justify-between mb-2">
             <div>
               <h2 class="text-[15px] font-semibold text-ink">
-                {{ mode === 'all' ? (year === dayjs().year() ? '今年营收趋势' : `${year}年营收趋势`) : '近 6 月营收趋势' }}
+                {{
+                  mode === 'all'
+                    ? year === dayjs().year()
+                      ? '今年营收趋势'
+                      : `${year}年营收趋势`
+                    : mode === 'cash_date'
+                      ? '近 6 月实收趋势'
+                      : '近 6 月营收趋势'
+                }}
               </h2>
               <p v-if="hasTrendData" class="text-[11px] text-ink-muted mt-0.5">轻触柱形查看各月明细数据</p>
             </div>
@@ -211,9 +219,11 @@
           />
         </section>
 
-        <!-- Couture Donut Breakdown Chart (Synced to Year or Month) -->
+        <!-- Couture Donut Breakdown Chart (Synced to Year or Month & Mode) -->
         <section class="card-soft p-5 stagger-item" style="--stagger: 2">
-          <h2 class="text-[15px] font-semibold text-ink mb-2">妆型收入结构</h2>
+          <h2 class="text-[15px] font-semibold text-ink mb-2">
+            {{ mode === 'cash_date' ? '妆型实收结构' : '妆型收入结构' }}
+          </h2>
           <template v-if="stats.breakdown.length > 0">
             <div class="relative w-full h-40 mb-2">
               <div ref="pieChartRef" class="w-full h-full" />
@@ -244,8 +254,8 @@
           <CuteEmptyState
             v-else
             variant="finance"
-            :title="mode === 'all' ? '全年暂无妆型收入' : '本月暂无妆型收入'"
-            description="记入妆造预约后，这里会自动展示各妆型占比"
+            :title="mode === 'all' ? '全年暂无妆型收入' : mode === 'cash_date' ? '本月暂无实收款项' : '本月暂无妆型收入'"
+            description="记入妆造预约与收款后，这里会自动展示各妆型占比"
             compact
           />
         </section>

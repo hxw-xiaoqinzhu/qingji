@@ -29,7 +29,11 @@ router.post('/', async (req: AuthRequest, res: Response) => {
         orderId: orderId || null,
         category,
         amount: numAmount,
-        incurredAt: incurredAt ? dayjs(incurredAt).toDate() : new Date(),
+        incurredAt: incurredAt
+          ? /^\d{4}-\d{2}-\d{2}$/.test(String(incurredAt))
+            ? dayjs(`${incurredAt}T12:00:00`).toDate()
+            : dayjs(incurredAt).toDate()
+          : new Date(),
         note,
       },
     });

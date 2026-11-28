@@ -21,6 +21,7 @@ router.get('/overview', async (req: AuthRequest, res: Response) => {
     const rangeStartDate = mode === 'all' ? targetYearStart.startOf('year').toDate() : targetMonth.startOf('month').toDate();
     const rangeEndDate = mode === 'all' ? targetYearStart.endOf('year').toDate() : targetMonth.endOf('month').toDate();
 
+    // All 3 tabs align strictly to the selected month/year's scheduled orders (serviceDate) + expenses
     const [user, periodOrders, periodPayments, periodExpenses] = await Promise.all([
       prisma.user.findUnique({ where: { id: req.user!.userId } }),
       prisma.order.findMany({
@@ -33,21 +34,14 @@ router.get('/overview', async (req: AuthRequest, res: Response) => {
         orderBy: { serviceDate: 'desc' },
       }),
       prisma.paymentRecord.findMany({
-        where:
-          mode === 'cash_date'
-            ? {
-                userId: req.user!.userId,
-                paidAt: { gte: rangeStartDate, lte: rangeEndDate },
-                order: { deletedAt: null, status: { not: 'CANCELLED' } },
-              }
-            : {
-                userId: req.user!.userId,
-                order: {
-                  deletedAt: null,
-                  status: { not: 'CANCELLED' },
-                  serviceDate: { gte: rangeStartStr, lte: rangeEndStr },
-                },
-              },
+        where: {
+          userId: req.user!.userId,
+          order: {
+            deletedAt: null,
+            status: { not: 'CANCELLED' },
+            serviceDate: { gte: rangeStartStr, lte: rangeEndStr },
+          },
+        },
         include: {
           order: { select: { id: true, clientName: true, serviceType: true, serviceDate: true } },
         },
@@ -68,24 +62,23 @@ router.get('/overview', async (req: AuthRequest, res: Response) => {
       0
     );
 
-    let totalRevenue = 0;
-    let receivedAmount = 0;
-    let pendingBalance = 0;
+    // Objective order totals for the selected month or year
+    const grossOrderRevenue = periodOrders.reduce((s, o) => s + (o.totalAmount || 0), 0);
+    const receivedAmount = periodOrders.reduce((s, o) => s + (o.depositPaid || 0), 0);
+    const pendingBalance = periodOrders.reduce((s, o) => s + (o.balanceDue || 0), 0);
 
-    if (mode === 'cash_date') {
-      receivedAmount = periodPayments.reduce((s, p) => s + p.amount, 0);
-      totalRevenue = receivedAmount;
-      pendingBalance = periodOrders.reduce((s, o) => s + o.balanceDue, 0);
-    } else {
-      totalRevenue = periodOrders.reduce((s, o) => s + o.totalAmount, 0);
-      receivedAmount = periodOrders.reduce((s, o) => s + o.depositPaid, 0);
-      pendingBalance = periodOrders.reduce((s, o) => s + o.balanceDue, 0);
-    }
+    // Primary headline metric:
+    // - 'all' (全年全部) & 'service_date' (月总营收): Gross contract revenue (sum of totalAmount)
+    // - 'cash_date' (月实际收款): Actual received amount (sum of depositPaid)
+    const totalRevenue = mode === 'cash_date' ? receivedAmount : grossOrderRevenue;
 
     const netProfit = Math.max(0, receivedAmount - expenseTotal - assistantAndCommission);
     const monthlyTarget = user?.monthlyTarget || 20000;
 
-    // Trend: 12 months of selected year when mode === 'all', otherwise 6-month rolling trend
+    // Trend:
+    // - 'all': 12 months of selected year (gross revenue & received)
+    // - 'service_date': 6-month rolling gross revenue
+    // - 'cash_date': 6-month rolling actual received amount
     const trend: Array<{ month: string; label: string; revenue: number; received: number; count: number }> = [];
     if (mode === 'all') {
       const monthBuckets = Array.from({ length: 12 }, (_, idx) => ({
@@ -98,79 +91,89 @@ router.get('/overview', async (req: AuthRequest, res: Response) => {
       for (const o of periodOrders) {
         const mIdx = Number(o.serviceDate.slice(5, 7)) - 1;
         if (mIdx >= 0 && mIdx < 12) {
-          monthBuckets[mIdx].revenue += o.totalAmount;
-          monthBuckets[mIdx].received += o.depositPaid;
+          monthBuckets[mIdx].revenue += o.totalAmount || 0;
+          monthBuckets[mIdx].received += o.depositPaid || 0;
           monthBuckets[mIdx].count += 1;
         }
       }
       trend.push(...monthBuckets);
     } else {
+      const sixStartStr = targetMonth.subtract(5, 'month').startOf('month').format('YYYY-MM-DD');
+      const sixEndStr = targetMonth.endOf('month').format('YYYY-MM-DD');
+      const sixOrders = await prisma.order.findMany({
+        where: {
+          userId: req.user!.userId,
+          deletedAt: null,
+          status: { not: 'CANCELLED' },
+          serviceDate: { gte: sixStartStr, lte: sixEndStr },
+        },
+        select: { serviceDate: true, totalAmount: true, depositPaid: true },
+      });
+
       for (let i = 5; i >= 0; i--) {
         const m = targetMonth.subtract(i, 'month');
-        const mStartStr = m.startOf('month').format('YYYY-MM-DD');
-        const mEndStr = m.endOf('month').format('YYYY-MM-DD');
-        const mStartDate = m.startOf('month').toDate();
-        const mEndDate = m.endOf('month').toDate();
-
-        if (mode === 'service_date') {
-          const orders = await prisma.order.findMany({
-            where: {
-              userId: req.user!.userId,
-              deletedAt: null,
-              status: { not: 'CANCELLED' },
-              serviceDate: { gte: mStartStr, lte: mEndStr },
-            },
-            select: { totalAmount: true, depositPaid: true },
-          });
-          trend.push({
-            month: m.format('YYYY-MM'),
-            label: `${m.month() + 1}月`,
-            revenue: orders.reduce((s, o) => s + o.totalAmount, 0),
-            received: orders.reduce((s, o) => s + o.depositPaid, 0),
-            count: orders.length,
-          });
-        } else {
-          const payments = await prisma.paymentRecord.findMany({
-            where: {
-              userId: req.user!.userId,
-              paidAt: { gte: mStartDate, lte: mEndDate },
-              order: { deletedAt: null, status: { not: 'CANCELLED' } },
-            },
-            select: { amount: true },
-          });
-          const sum = payments.reduce((s, p) => s + p.amount, 0);
-          trend.push({
-            month: m.format('YYYY-MM'),
-            label: `${m.month() + 1}月`,
-            revenue: sum,
-            received: sum,
-            count: payments.length,
-          });
-        }
+        const ym = m.format('YYYY-MM');
+        const mOrders = sixOrders.filter((o) => o.serviceDate.startsWith(ym));
+        const mGross = mOrders.reduce((s, o) => s + (o.totalAmount || 0), 0);
+        const mReceived = mOrders.reduce((s, o) => s + (o.depositPaid || 0), 0);
+        trend.push({
+          month: ym,
+          label: `${m.month() + 1}月`,
+          revenue: mode === 'cash_date' ? mReceived : mGross,
+          received: mReceived,
+          count: mOrders.length,
+        });
       }
     }
 
-    // Service type breakdown (synced to full year when mode === 'all', or month otherwise)
+    // Service type breakdown (uses depositPaid in 'cash_date' mode, totalAmount otherwise)
     const typeMap = new Map<string, number>();
     for (const o of periodOrders) {
-      typeMap.set(o.serviceType, (typeMap.get(o.serviceType) || 0) + o.totalAmount);
+      const val = mode === 'cash_date' ? o.depositPaid || 0 : o.totalAmount || 0;
+      if (val > 0) {
+        typeMap.set(o.serviceType, (typeMap.get(o.serviceType) || 0) + val);
+      }
     }
     const breakdown = Array.from(typeMap.entries())
       .map(([name, value]) => ({ name, value }))
       .sort((a, b) => b.value - a.value);
 
-    // Unified ledger list (income + expenses, synced to full year when mode === 'all')
+    // Self-healing income ledger: combine PaymentRecords + any legacy unrecorded depositPaid delta
+    const paidSumByOrder = new Map<string, number>();
+    for (const p of periodPayments) {
+      paidSumByOrder.set(p.orderId, (paidSumByOrder.get(p.orderId) || 0) + p.amount);
+    }
+
+    const incomeLedger = periodPayments.map((p) => ({
+      id: `pay-${p.id}`,
+      rawId: p.id,
+      kind: 'INCOME' as const,
+      title: `${p.order.clientName} · ${p.type === 'DEPOSIT' ? '定金' : '尾款'}`,
+      subtitle: `${p.order.serviceType} · ${p.channel}`,
+      amount: p.amount,
+      date: p.order.serviceDate,
+      orderId: p.orderId,
+    }));
+
+    for (const o of periodOrders) {
+      const recorded = paidSumByOrder.get(o.id) || 0;
+      const missing = (o.depositPaid || 0) - recorded;
+      if (missing > 0.009) {
+        incomeLedger.push({
+          id: `pay-sync-${o.id}`,
+          rawId: o.id,
+          kind: 'INCOME' as const,
+          title: `${o.clientName} · ${o.balanceDue === 0 ? '全款/尾款' : '定金'}`,
+          subtitle: `${o.serviceType} · 已入账`,
+          amount: Number(missing.toFixed(2)),
+          date: o.serviceDate,
+          orderId: o.id,
+        });
+      }
+    }
+
     const ledger = [
-      ...periodPayments.map((p) => ({
-        id: `pay-${p.id}`,
-        rawId: p.id,
-        kind: 'INCOME' as const,
-        title: `${p.order.clientName} · ${p.type === 'DEPOSIT' ? '定金' : '尾款'}`,
-        subtitle: `${p.order.serviceType} · ${p.channel}`,
-        amount: p.amount,
-        date: mode === 'cash_date' ? dayjs(p.paidAt).format('YYYY-MM-DD') : p.order.serviceDate,
-        orderId: p.orderId,
-      })),
+      ...incomeLedger,
       ...periodExpenses.map((e) => ({
         id: `exp-${e.id}`,
         rawId: e.id,

@@ -480,6 +480,45 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
         if (totalAmount > 0 && balanceDue === 0) updateData.status = 'SETTLED';
         else if (depositPaid > 0 && existing.status === 'RESERVED') updateData.status = 'LOCKED';
       }
+
+      // Keep PaymentRecord strictly in sync when depositPaid is modified via order edit
+      if (body.depositPaid !== undefined) {
+        const existingPayments = await prisma.paymentRecord.findMany({
+          where: { orderId: existing.id },
+          orderBy: { paidAt: 'asc' },
+        });
+        const currentPaidSum = existingPayments.reduce((s, p) => s + p.amount, 0);
+        const diff = depositPaid - currentPaidSum;
+
+        if (depositPaid <= 0 && existingPayments.length > 0) {
+          await prisma.paymentRecord.deleteMany({ where: { orderId: existing.id } });
+        } else if (diff > 0.009) {
+          await prisma.paymentRecord.create({
+            data: {
+              userId: req.user!.userId,
+              orderId: existing.id,
+              type: balanceDue === 0 ? 'BALANCE' : 'DEPOSIT',
+              amount: Number(diff.toFixed(2)),
+              channel: body.paymentChannel || 'WECHAT',
+              note: currentPaidSum === 0 ? '锁档定金' : '编辑补充收款',
+            },
+          });
+        } else if (diff < -0.009) {
+          await prisma.paymentRecord.deleteMany({ where: { orderId: existing.id } });
+          if (depositPaid > 0) {
+            await prisma.paymentRecord.create({
+              data: {
+                userId: req.user!.userId,
+                orderId: existing.id,
+                type: balanceDue === 0 ? 'BALANCE' : 'DEPOSIT',
+                amount: Number(depositPaid.toFixed(2)),
+                channel: body.paymentChannel || 'WECHAT',
+                note: '编辑调整已收款',
+              },
+            });
+          }
+        }
+      }
     }
 
     const updated = await prisma.order.update({

@@ -873,84 +873,114 @@ export async function firebaseRequest(
   if (method === 'GET' && pathOnly === '/stats/overview') {
     const year = Number(params.year) || dayjs().year();
     const month = Number(params.month) || dayjs().month() + 1;
-    const mode: 'service_date' | 'cash_date' = params.mode === 'cash_date' ? 'cash_date' : 'service_date';
+    const rawMode = String(params.mode || 'service_date');
+    const mode: 'all' | 'service_date' | 'cash_date' =
+      rawMode === 'all' ? 'all' : rawMode === 'cash_date' ? 'cash_date' : 'service_date';
 
     const targetMonth = dayjs(`${year}-${String(month).padStart(2, '0')}-01`);
     const ymPrefix = targetMonth.format('YYYY-MM');
+    const rangePrefix = mode === 'all' ? `${year}-` : ymPrefix;
 
     const [allOrders, allExpenses] = await Promise.all([fetchAllOrders(uid), fetchAllExpenses(uid)]);
     const validOrders = allOrders.filter((o) => !o.deletedAt && o.status !== 'CANCELLED');
-    const monthOrders = validOrders.filter((o) => o.serviceDate.startsWith(ymPrefix));
-    const monthExpenses = allExpenses.filter((e) => dayjs(e.incurredAt).format('YYYY-MM') === ymPrefix);
+    const periodOrders = validOrders.filter((o) => o.serviceDate.startsWith(rangePrefix));
+    const periodExpenses = allExpenses.filter((e) =>
+      dayjs(e.incurredAt).format('YYYY-MM-DD').startsWith(rangePrefix)
+    );
 
-    const allPayments = validOrders.flatMap((o) =>
+    const periodPayments = periodOrders.flatMap((o) =>
       (o.payments || []).map((p) => ({ ...p, order: o }))
     );
-    const monthPayments = allPayments.filter((p) => dayjs(p.paidAt).format('YYYY-MM') === ymPrefix);
 
-    const expenseTotal = monthExpenses.reduce((s, e) => s + Number(e.amount || 0), 0);
-    const assistantAndCommission = monthOrders.reduce(
+    const expenseTotal = periodExpenses.reduce((s, e) => s + Number(e.amount || 0), 0);
+    const assistantAndCommission = periodOrders.reduce(
       (s, o) => s + Number(o.assistantFee || 0) + Number(o.channelCommission || 0),
       0
     );
 
-    const totalRevenue =
-      mode === 'service_date'
-        ? monthOrders.reduce((s, o) => s + Number(o.totalAmount || 0), 0)
-        : monthPayments.reduce((s, p) => s + Number(p.amount || 0), 0);
-    const receivedAmount =
-      mode === 'service_date'
-        ? monthOrders.reduce((s, o) => s + Number(o.depositPaid || 0), 0)
-        : monthPayments.reduce((s, p) => s + Number(p.amount || 0), 0);
-    const pendingBalance = monthOrders.reduce((s, o) => s + Number(o.balanceDue || 0), 0);
+    const grossOrderRevenue = periodOrders.reduce((s, o) => s + Number(o.totalAmount || 0), 0);
+    const receivedAmount = periodOrders.reduce((s, o) => s + Number(o.depositPaid || 0), 0);
+    const totalRevenue = mode === 'cash_date' ? receivedAmount : grossOrderRevenue;
+    const pendingBalance = periodOrders.reduce((s, o) => s + Number(o.balanceDue || 0), 0);
     const netProfit = Math.max(0, receivedAmount - expenseTotal - assistantAndCommission);
 
     const trend = [];
-    for (let i = 5; i >= 0; i--) {
-      const m = targetMonth.subtract(i, 'month');
-      const mPrefix = m.format('YYYY-MM');
-      if (mode === 'service_date') {
-        const mOrds = validOrders.filter((o) => o.serviceDate.startsWith(mPrefix));
+    if (mode === 'all') {
+      for (let idx = 0; idx < 12; idx++) {
+        const mPrefix = `${year}-${String(idx + 1).padStart(2, '0')}`;
+        const mOrds = periodOrders.filter((o) => o.serviceDate.startsWith(mPrefix));
         trend.push({
           month: mPrefix,
-          label: `${m.month() + 1}月`,
+          label: `${idx + 1}月`,
           revenue: mOrds.reduce((s, o) => s + Number(o.totalAmount || 0), 0),
           received: mOrds.reduce((s, o) => s + Number(o.depositPaid || 0), 0),
           count: mOrds.length,
         });
-      } else {
-        const mPays = allPayments.filter((p) => dayjs(p.paidAt).format('YYYY-MM') === mPrefix);
-        const sum = mPays.reduce((s, p) => s + Number(p.amount || 0), 0);
+      }
+    } else {
+      for (let i = 5; i >= 0; i--) {
+        const m = targetMonth.subtract(i, 'month');
+        const mPrefix = m.format('YYYY-MM');
+        const mOrds = validOrders.filter((o) => o.serviceDate.startsWith(mPrefix));
+        const mGross = mOrds.reduce((s, o) => s + Number(o.totalAmount || 0), 0);
+        const mReceived = mOrds.reduce((s, o) => s + Number(o.depositPaid || 0), 0);
         trend.push({
           month: mPrefix,
           label: `${m.month() + 1}月`,
-          revenue: sum,
-          received: sum,
-          count: mPays.length,
+          revenue: mode === 'cash_date' ? mReceived : mGross,
+          received: mReceived,
+          count: mOrds.length,
         });
       }
     }
 
     const typeMap = new Map<string, number>();
-    for (const o of monthOrders) {
-      typeMap.set(o.serviceType, (typeMap.get(o.serviceType) || 0) + Number(o.totalAmount || 0));
+    for (const o of periodOrders) {
+      const val = mode === 'cash_date' ? Number(o.depositPaid || 0) : Number(o.totalAmount || 0);
+      if (val > 0) {
+        typeMap.set(o.serviceType, (typeMap.get(o.serviceType) || 0) + val);
+      }
     }
     const breakdown = Array.from(typeMap.entries())
       .map(([name, value]) => ({ name, value }))
       .sort((a, b) => b.value - a.value);
 
+    const paidSumByOrder = new Map<string, number>();
+    for (const p of periodPayments) {
+      paidSumByOrder.set(p.order.id, (paidSumByOrder.get(p.order.id) || 0) + Number(p.amount || 0));
+    }
+
+    const incomeLedger = periodPayments.map((p) => ({
+      id: `pay-${p.id}`,
+      rawId: p.id,
+      kind: 'INCOME' as const,
+      title: `${p.order.clientName} · ${p.type === 'DEPOSIT' ? '定金' : '尾款'}`,
+      subtitle: `${p.order.serviceType} · ${p.channel}`,
+      amount: p.amount,
+      date: p.order.serviceDate,
+      orderId: p.order.id,
+    }));
+
+    for (const o of periodOrders) {
+      const recorded = paidSumByOrder.get(o.id) || 0;
+      const missing = Number(o.depositPaid || 0) - recorded;
+      if (missing > 0.009) {
+        incomeLedger.push({
+          id: `pay-sync-${o.id}`,
+          rawId: o.id,
+          kind: 'INCOME' as const,
+          title: `${o.clientName} · ${o.balanceDue === 0 ? '全款/尾款' : '定金'}`,
+          subtitle: `${o.serviceType} · 已入账`,
+          amount: Number(missing.toFixed(2)),
+          date: o.serviceDate,
+          orderId: o.id,
+        });
+      }
+    }
+
     const ledger = [
-      ...monthPayments.map((p) => ({
-        id: `pay-${p.id}`,
-        rawId: p.id,
-        kind: 'INCOME' as const,
-        title: `${p.order.clientName} · ${p.type === 'DEPOSIT' ? '定金' : '尾款'}`,
-        subtitle: `${p.order.serviceType} · ${p.channel}`,
-        amount: p.amount,
-        date: dayjs(p.paidAt).format('YYYY-MM-DD'),
-        orderId: p.order.id,
-      })),
-      ...monthExpenses.map((e) => ({
+      ...incomeLedger,
+      ...periodExpenses.map((e) => ({
         id: `exp-${e.id}`,
         rawId: e.id,
         kind: 'EXPENSE' as const,
@@ -976,7 +1006,7 @@ export async function firebaseRequest(
           expenseTotal,
           assistantAndCommission,
           netProfit,
-          orderCount: monthOrders.length,
+          orderCount: periodOrders.length,
         },
         trend,
         breakdown,
