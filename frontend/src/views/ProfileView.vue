@@ -1180,7 +1180,10 @@
       <div class="p-5 pb-safe-sheet flex flex-col" style="min-height: calc(var(--app-height, 100vh) * 0.58); max-height: calc(var(--app-height, 100vh) * 0.84)">
         <div class="sheet-grabber shrink-0" />
         <div class="flex items-center justify-between mb-3 shrink-0">
-          <h3 class="text-[17px] font-semibold text-ink">回收站</h3>
+          <div>
+            <h3 class="text-[17px] font-semibold text-ink">回收站</h3>
+            <p class="text-[11.5px] text-ink-muted mt-0.5">保留 30 天 · 左滑卡片可恢复、编辑或彻底删除</p>
+          </div>
           <div class="flex items-center gap-2">
             <button
               v-if="recycleTab === 'orders' ? deletedOrders.length > 0 : deletedReminders.length > 0"
@@ -1229,40 +1232,24 @@
                 :key="o.id"
                 class="rounded-2xl overflow-hidden"
               >
-                <div class="bg-white rounded-2xl p-3.5 flex items-center justify-between gap-2.5">
+                <div class="bg-white rounded-2xl px-4 py-3.5 flex items-center justify-between gap-3">
                   <div class="min-w-0 flex-1">
-                    <div class="text-[14px] font-medium text-ink truncate">{{ o.clientName }} · {{ o.serviceType }}</div>
-                    <div class="text-[11px] text-ink-muted mt-0.5 tabular-nums">{{ o.serviceDate }} · ¥{{ o.totalAmount }}</div>
+                    <div class="text-[14.5px] font-medium text-ink truncate">{{ o.clientName }} · {{ o.serviceType }}</div>
+                    <div class="text-[11.5px] text-ink-muted mt-0.5 tabular-nums">{{ o.serviceDate }}</div>
                   </div>
-                  <div class="flex items-center gap-1.5 shrink-0">
-                    <button
-                      type="button"
-                      class="w-8 h-8 rounded-full bg-[#FAF0F3] text-[#AD7485] flex items-center justify-center pressable"
-                      aria-label="恢复订单"
-                      @click="restoreOrder(o.id)"
-                    >
-                      <RotateCcw class="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      type="button"
-                      class="w-8 h-8 rounded-full bg-[#FAF4F6] text-ink-secondary flex items-center justify-center pressable"
-                      aria-label="编辑订单"
-                      @click="editDeletedOrder(o.id)"
-                    >
-                      <Pencil class="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      type="button"
-                      class="w-8 h-8 rounded-full bg-status-danger-bg text-status-danger-text flex items-center justify-center pressable"
-                      aria-label="彻底删除"
-                      @click="permanentDelete(o.id)"
-                    >
-                      <Trash2 class="w-3.5 h-3.5" />
-                    </button>
+                  <div class="text-[15px] font-semibold text-ink tabular-nums shrink-0">
+                    ¥{{ o.totalAmount }}
                   </div>
                 </div>
                 <template #right>
                   <div class="flex h-full pl-2 gap-1.5">
+                    <button
+                      type="button"
+                      class="h-full px-3.5 rounded-2xl bg-white text-[#3E9B76] text-[12.5px] font-medium"
+                      @click.stop="restoreOrder(o.id)"
+                    >
+                      恢复
+                    </button>
                     <button
                       type="button"
                       class="h-full px-3.5 rounded-2xl bg-white text-[#5B9BD5] text-[12.5px] font-medium"
@@ -1285,7 +1272,7 @@
               <CuteEmptyState
                 variant="recycle"
                 title="订单回收站干干净净"
-                description="误删的行程会在这里保留 30 天，随时可恢复或编辑"
+                description="误删的行程会在这里保留 30 天，左滑即可恢复或编辑"
               />
             </div>
           </template>
@@ -1298,43 +1285,26 @@
                 :key="r.id"
                 class="rounded-2xl overflow-hidden"
               >
-                <div class="bg-white rounded-2xl p-3.5 flex items-center justify-between gap-2.5">
+                <div class="bg-white rounded-2xl px-4 py-3.5 flex items-center justify-between gap-3">
                   <div class="min-w-0 flex-1">
-                    <div class="text-[14px] font-medium text-ink truncate">{{ r.title }}</div>
-                    <div class="text-[11px] text-ink-muted mt-0.5 tabular-nums">
+                    <div class="text-[14.5px] font-medium text-ink truncate">{{ r.title }}</div>
+                    <div class="text-[11.5px] text-ink-muted mt-0.5 tabular-nums">
                       {{ r.calendarType === 'LUNAR' ? `农历 ${formatLunarMonthDay(r.lunarMonth, r.lunarDay)}` : r.solarDate }}
-                      <template v-if="r.remindTime"> · {{ r.remindTime }}</template>
                     </div>
                   </div>
-                  <div class="flex items-center gap-1.5 shrink-0">
-                    <button
-                      type="button"
-                      class="w-8 h-8 rounded-full bg-[#FEF4E6] text-[#B56D28] flex items-center justify-center pressable"
-                      aria-label="恢复提醒"
-                      @click="restoreReminder(r.id)"
-                    >
-                      <RotateCcw class="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      type="button"
-                      class="w-8 h-8 rounded-full bg-[#FAF4F6] text-ink-secondary flex items-center justify-center pressable"
-                      aria-label="编辑提醒"
-                      @click="editDeletedReminder(r)"
-                    >
-                      <Pencil class="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      type="button"
-                      class="w-8 h-8 rounded-full bg-status-danger-bg text-status-danger-text flex items-center justify-center pressable"
-                      aria-label="彻底删除"
-                      @click="permanentDeleteReminder(r.id)"
-                    >
-                      <Trash2 class="w-3.5 h-3.5" />
-                    </button>
+                  <div v-if="r.remindTime" class="text-[12.5px] font-medium text-[#B56D28] tabular-nums shrink-0">
+                    {{ r.remindTime }}
                   </div>
                 </div>
                 <template #right>
                   <div class="flex h-full pl-2 gap-1.5">
+                    <button
+                      type="button"
+                      class="h-full px-3.5 rounded-2xl bg-white text-[#3E9B76] text-[12.5px] font-medium"
+                      @click.stop="restoreReminder(r.id)"
+                    >
+                      恢复
+                    </button>
                     <button
                       type="button"
                       class="h-full px-3.5 rounded-2xl bg-white text-[#5B9BD5] text-[12.5px] font-medium"
@@ -1357,7 +1327,7 @@
               <CuteEmptyState
                 variant="recycle"
                 title="提醒回收站干干净净"
-                description="误删的日程提醒会在这里保留 30 天，随时可恢复或编辑"
+                description="误删的日程提醒会在这里保留 30 天，左滑即可恢复或编辑"
               />
             </div>
           </template>
